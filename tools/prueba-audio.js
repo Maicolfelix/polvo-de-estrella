@@ -166,3 +166,52 @@ export async function correrVolumen() {
   } finally { proto.createMediaElementSource = of; }
   return L.join('\n');
 }
+
+// Letra sincronizada: comprobación técnica del seguimiento (no valida la exactitud auditiva de los tiempos).
+export async function correrLetra(n = '01') {
+  const P = window.__pde, A = P.A, s = A.elementos.song, L = [];
+  const ok = (cond, txt) => L.push((cond ? 'OK   ' : 'FALLA') + ' ' + txt);
+  const { TIEMPOS } = await import('/js/tiempos.js'), T = TIEMPOS[n].lineas;
+  const activa = () => { const e = document.querySelector('#letra .linea.activa'); return e ? +e.dataset.i : -1; };
+  const conTiempo = T.map((x, i) => x ? i : -1).filter(i => i >= 0);
+  const i0 = conTiempo[0], iMed = conTiempo[Math.floor(conTiempo.length / 2)], iFin = conTiempo.at(-1);
+  const ir = async t => { s.currentTime = t; await w(500); };
+  const i = +n - 1;
+  scrollTo(0, innerHeight * P.escena.uDePuerta(i)); await w(2500);
+  toque(document.querySelectorAll('.puerta')[i]); await modo('habitacion'); await w(800);
+  ok(document.querySelectorAll('#letra .linea').length === T.length, `líneas en pantalla = líneas del original (${T.length})`);
+  // introducción: ninguna línea futura resaltada
+  if (T[i0][0] > 1) { await ir(Math.max(0, T[i0][0] - 1)); ok(activa() === -1, `antes de la primera línea (${T[i0][0]} s): nada resaltado`); }
+  await ir(T[i0][0] + .05); ok(activa() === i0, `inicio: línea ${i0 + 1} activa`);
+  await ir((T[iMed][0] + T[iMed][1]) / 2); ok(activa() === iMed, `búsqueda al medio: línea ${iMed + 1} activa`);
+  // pausa congela
+  toque($('#play')); await w(300); const congelada = activa(); await w(1500);
+  ok(s.paused && activa() === congelada, 'pausa: la línea activa queda congelada');
+  toque($('#play')); await w(600);
+  ok(!s.paused && activa() >= iMed, 'reanudar: sigue desde la posición real');
+  // búsqueda hacia atrás
+  await ir(T[i0][0] + .05); ok(activa() === i0, 'búsqueda hacia atrás: actualiza al instante');
+  // silencio no detiene el avance
+  toque($('#mudo')); await w(300); const t1 = s.currentTime; await w(1200);
+  ok(s.currentTime > t1 + .8, 'silenciar no detiene el avance de la canción ni de la letra');
+  toque($('#mudo')); await w(300);
+  // seguimiento: centrado, manual, «Seguir canción» (en pausa, para medir posiciones sin que avance)
+  toque($('#play')); await w(200);
+  await ir((T[iFin][0] + T[iFin][1]) / 2); await w(1500);
+  const r = document.querySelector('#letra .linea.activa')?.getBoundingClientRect(), rp = $('.reproductor').getBoundingClientRect();
+  ok(activa() === iFin && r && r.bottom < rp.top, `final: línea ${iFin + 1} activa y visible por encima del reproductor (activa ${activa() + 1}, t ${s.currentTime.toFixed(2)}, pausa ${s.paused}, línea ${r && Math.round(r.top)}–${r && Math.round(r.bottom)}, reproductor ${Math.round(rp.top)})`);
+  $('#habScroll').dispatchEvent(new WheelEvent('wheel', { deltaY: -400, bubbles: true })); $('#habScroll').scrollTop -= 400; await w(300);
+  ok(!$('#seguir').hidden, 'desplazar a mano: aparece «Seguir canción»');
+  await ir(T[iMed][0] + .05); const fuera = document.querySelector('#letra .linea.activa').getBoundingClientRect();
+  toque($('#seguir')); await w(1500);
+  const dentro = document.querySelector('#letra .linea.activa').getBoundingClientRect(), hs = $('#habScroll').getBoundingClientRect();
+  ok($('#seguir').hidden && dentro.top > hs.top && dentro.bottom < rp.top, `«Seguir canción» recupera el seguimiento en la posición actual (oculto ${$('#seguir').hidden}, línea ${Math.round(dentro.top)}–${Math.round(dentro.bottom)}, área ${Math.round(hs.top)}–${Math.round(rp.top)})`);
+  // cambiar de canción limpia el estado
+  toque($('#play')); await w(300);
+  toque($('#siguiente')); await w(1500);
+  const n2 = String(+n % 9 + 1).padStart(2, '0');
+  ok($('#hab-titulo').textContent && activa() <= 0 && $('#seguir').hidden, `cambiar a ${n2}: estado anterior eliminado`);
+  toque($('#volver')); await modo('nave'); await w(500);
+  ok(sonando(A).join() === 'inst', 'volver: se cancela el seguimiento y suena solo la instrumental');
+  return L.join('\n');
+}

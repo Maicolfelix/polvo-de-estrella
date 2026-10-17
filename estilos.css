@@ -109,7 +109,7 @@ h1{margin:0;font:300 italic clamp(3rem,6.4vw,5.6rem)/.95 var(--serif);letter-spa
   background:linear-gradient(90deg,transparent,rgba(4,3,4,.66) 16%,rgba(4,3,4,.66) 84%,transparent)}
 .hab-num{margin:0 0 1rem;font:500 .7rem/1.5 var(--sans);letter-spacing:.28em;color:var(--oro)}
 .hab-titulo{margin:0 0 2.6rem;font:500 clamp(1.45rem,3.6vw,2.2rem)/1.18 var(--sans);letter-spacing:.05em;outline:none;text-wrap:balance}
-.letra{margin:0;white-space:pre-wrap;font:400 clamp(1.06rem,.96rem + .42vw,1.3rem)/1.82 var(--sans);color:#f3ede4;text-shadow:0 1px 14px rgba(0,0,0,.85);overflow-wrap:break-word}
+.letra{margin:0;white-space:normal;font:400 clamp(1.06rem,.96rem + .42vw,1.3rem)/1.82 var(--sans);color:#f3ede4;text-shadow:0 1px 14px rgba(0,0,0,.85);overflow-wrap:break-word}
 .hab-nota{margin:3rem 0 0;font-size:.68rem;letter-spacing:.2em;color:var(--hueso-3)}
 .letra,.hab-titulo{transition:opacity .45s}
 .cambiando .letra,.cambiando .hab-titulo{opacity:0}
@@ -148,3 +148,17 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 /* ---------- movimiento reducido ---------- */
 .rm .llegada-portada::after,.rm .desliza::after{animation:none}
 .rm #habitacion{transition-duration:.4s}
+
+/* ---------- letra sincronizada ---------- */
+.linea{display:block;white-space:pre-wrap;position:relative;transition:opacity .35s,color .35s}
+.letra.sincronizada .linea{opacity:.52}
+.letra.sincronizada .linea.activa{opacity:1;color:#fff}
+.linea.activa::before{content:"";position:absolute;left:-16px;top:.42em;bottom:.42em;width:2px;border-radius:2px;background:var(--luz)}
+.linea.vacia{min-height:1.82em}
+.letra.sincronizada~.hab-nota{margin-bottom:38vh}   /* la última línea puede subir sobre el reproductor */
+.btn-seguir{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom));z-index:3;background:rgba(6,4,5,.88);border-color:var(--oro)}
+.btn-seguir[hidden]{display:none}
+.rm .linea{transition:none}
+@media (max-width:760px){ .btn-seguir{bottom:calc(170px + env(safe-area-inset-bottom))} }
+/* la letra se desvanece bajo los botones superiores en vez de chocar con ellos */
+.hab-scroll{-webkit-mask-image:linear-gradient(transparent 0,transparent 64px,#000 128px);mask-image:linear-gradient(transparent 0,transparent 64px,#000 128px)}

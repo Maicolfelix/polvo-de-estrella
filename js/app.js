@@ -2,6 +2,8 @@ import { CANCIONES } from './datos.js';
 import * as A from './audio.js';
 import { crearEscena } from './escena.js';
 import { crearAtmosfera } from './habitaciones.js';
+import { lineasPresentacion } from './letras.js';
+import { TIEMPOS } from './tiempos.js';
 
 const $ = s => document.querySelector(s);
 const cl = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -159,7 +161,7 @@ function pintarHabitacion(i, fundido) {
     hab.style.setProperty('--luz', c.luz);
     $('#habNum').textContent = c.n;
     $('#hab-titulo').textContent = c.titulo;
-    $('#letra').textContent = c.letra;           // texto original, sin tocar
+    pintarLetra(c.n);                            // presentación fiel (js/letras.js) + tiempos si existen
     $('#habScroll').scrollTop = 0;
     $('#seek').value = 0; pintarRango($('#seek'));
     $('#tiempo').textContent = '0:00';
@@ -206,6 +208,63 @@ function volver() {
   capa.inert = llegada.inert = false;
   setTimeout(() => { hab.hidden = true; modo = 'nave'; botones[i].focus({ preventScroll: true }); }, RM ? 420 : 1150);
 }
+
+/* ---------- letra sincronizada ---------- */
+// El único reloj es el del reproductor (song.currentTime): pausar congela, buscar actualiza al instante.
+const SILENCIO = 1.2;   // tras el final de una línea, segundos que sigue marcada antes de apagarse
+const habScroll = $('#habScroll'), btnSeguir = $('#seguir');
+const sync = { lineas: [], tiempos: null, activa: -1, seguir: true, propio: 0 };
+function pintarLetra(n) {
+  const cont = $('#letra'), t = TIEMPOS[n] || null;
+  cont.replaceChildren(...lineasPresentacion(n).map((txt, i) => {
+    const el = document.createElement('span');
+    el.className = txt.trim() ? 'linea' : 'linea vacia';
+    el.textContent = txt;
+    el.dataset.i = i;
+    return el;
+  }));
+  Object.assign(sync, { lineas: [...cont.children], tiempos: t, activa: -1, seguir: true });
+  cont.classList.toggle('sincronizada', !!t);
+  btnSeguir.hidden = true;
+  $('#habNota').textContent = t ? 'Letra sincronizada automáticamente · pendiente de revisión a oído' : 'Letra sin sincronizar';
+}
+function lineaActiva(tm) {
+  const L = sync.tiempos?.lineas; if (!L) return -1;
+  let k = -1;
+  for (let i = 0; i < L.length; i++) if (L[i] && L[i][0] <= tm) k = i;   // nunca una línea futura
+  return k >= 0 && tm <= L[k][1] + SILENCIO ? k : -1;
+}
+function centrar(el) {
+  const r = el.getBoundingClientRect(), c = habScroll.getBoundingClientRect();
+  const y = habScroll.scrollTop + r.top - c.top - c.height * .36;
+  sync.propio = performance.now();
+  habScroll.scrollTo({ top: Math.max(0, y), behavior: RM ? 'auto' : 'smooth' });
+}
+function actualizarLetra() {
+  if (!sync.tiempos) return;
+  const k = lineaActiva(song.currentTime);
+  if (k === sync.activa) return;
+  sync.lineas[sync.activa]?.classList.remove('activa');
+  sync.activa = k;
+  if (k < 0) return;
+  sync.lineas[k].classList.add('activa');
+  if (sync.seguir) centrar(sync.lineas[k]);
+}
+// desplazamiento manual: suspende el seguimiento hasta pulsar «Seguir canción»
+function manual() {
+  if (!sync.tiempos || !sync.seguir) return;
+  sync.seguir = false; btnSeguir.hidden = false;
+}
+habScroll.addEventListener('wheel', manual, { passive: true });
+habScroll.addEventListener('touchmove', manual, { passive: true });
+habScroll.addEventListener('keydown', e => { if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) manual(); });
+habScroll.addEventListener('pointerdown', e => { if (e.target === habScroll) manual(); });   // barra de desplazamiento
+btnSeguir.addEventListener('click', () => {
+  sync.seguir = true; btnSeguir.hidden = true;
+  const k = lineaActiva(song.currentTime);
+  if (k >= 0) centrar(sync.lineas[k]); else habScroll.scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' });
+  $('#play').focus({ preventScroll: true });
+});
 
 /* ---------- reproductor ---------- */
 function pintarRango(r) { r.style.setProperty('--v', (r.value - r.min) / (r.max - r.min) * 100 + '%'); }
@@ -343,7 +402,7 @@ function tick(now) {
     escena.render();
     colocarPuertas();
   }
-  if (modo !== 'nave') atmos.dibujar(dt, progreso(), RM);
+  if (modo !== 'nave') { atmos.dibujar(dt, progreso(), RM); actualizarLetra(); }
 
   // interfaz según el recorrido
   const a = cl(u / .55);
