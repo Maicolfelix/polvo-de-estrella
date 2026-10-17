@@ -108,23 +108,33 @@ export async function activar() {
     if (!quiere) song.play().catch(() => {});       // el evento 'play' la detiene al instante
   }
   activo = true;
-  rampa(master, mudo ? 0 : 1, .3);
+  fundir(master, mudo ? 0 : 1, FUNDIDO.silencio);
   return ctx;
 }
 export const contexto = () => ctx;
 // estado de la mezcla (para verificación)
 export const niveles = () => ctx && ({
-  master: +master.gain.value.toFixed(3), inst: +instG.gain.value.toFixed(3), pre: +preG.gain.value.toFixed(3),
+  master: master.gain.value, cancion: volG.gain.value,   // sin redondeo: el silencio debe ser 0 exacto
+  inst: +instG.gain.value.toFixed(3), pre: +preG.gain.value.toFixed(3),
   song: +songG.gain.value.toFixed(3), viento: +vientoG.gain.value.toFixed(3),
   sonando: { inst: !inst.paused, pre: !pre.paused, song: !song.paused },
   fuentes: { pre: pre.src.split('/').pop(), song: song.src.split('/').pop() },
 });
 // el volumen del reproductor es el de la canción (100 % = nivel base, sin amplificar); el silencio general manda
+// Fundido lineal con final exacto: termina en `v` (0 incluido) a los `seg` segundos. Cada llamada cancela
+// la anterior desde el valor actual, así que silenciar/reactivar rápido no deja nada programado.
+function fundir(g, v, seg) {
+  const t = ctx.currentTime;
+  g.gain.cancelScheduledValues(t);
+  g.gain.setValueAtTime(g.gain.value, t);
+  g.gain.linearRampToValueAtTime(v, t + seg);
+}
+export const FUNDIDO = { volumen: .1, silencio: .25 };
 export function setVolumen(v) {
   volCancion = Math.min(1, Math.max(0, v));
-  if (volG) { const t = ctx.currentTime; volG.gain.cancelScheduledValues(t); volG.gain.setValueAtTime(volG.gain.value, t); volG.gain.setTargetAtTime(volCancion, t, .03); } // ~100 ms: sin clics
+  if (volG) fundir(volG, volCancion, FUNDIDO.volumen);
 }
-export function setMudo(m) { mudo = m; if (ctx) rampa(master, m ? 0 : 1, .25); }
+export function setMudo(m) { mudo = m; if (ctx) fundir(master, m ? 0 : 1, FUNDIDO.silencio); }
 export const estaMudo = () => mudo || !activo;
 
 const fuentePre = i => `audio/${CANCIONES[i].n}-pre.m4a`;
