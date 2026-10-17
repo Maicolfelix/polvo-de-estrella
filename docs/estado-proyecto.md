@@ -48,3 +48,24 @@ Registro breve de continuidad: decisiones y resultados verificables. Contexto de
 **No validado.** Calidad sonora a oído (nada se ha escuchado) y teléfono físico. Para comparar: abrir una canción, «Tu sonido», ajustar y alternar «Comparar con original».
 
 **Siguiente paso.** Escucha del artista en su teléfono; si aprueba, fusionar `fix/pausa-movil` y `feat/tu-sonido` en `main`.
+
+## 2026-10-17 · Cierre de validación técnica de «Tu sonido» (rama `feat/tu-sonido`)
+
+**TODOLOLO y copias web.** Comparado con el WAV fuente (`tools/nivel.py`):
+- WAV 05: pico −1,14 dBFS, true peak −1,1 dBTP, ninguna muestra en el tope. El master está limpio.
+- Copia web 05 (aac 160k): +1,47 dBFS, true peak +2,1 dBTP; 2 muestras aisladas > 0 dBFS (racha máx. 1) en 0:59,1. Sobreimpulso del códec en un transitorio, no recorte del master; el navegador las recorta al sacarlas.
+- Revisión completa del álbum: también 02 (+0,93, en el arranque 0:00,01), 03 (+0,87), 07 (+0,46) y el fragmento 07-pre (+0,73). Los WAV de todas: −1,13 a −1,55 dBFS.
+- Bajar 1,5 dB a 160k no lo resolvía (+0,68). Recodificadas solo esas copias con `aac_mf` (Media Foundation) a 256k, sin cambio de nivel: picos −0,97 a −1,05 dBFS, 0 muestras > 0, desfase 0 muestras respecto al WAV (correlación cruzada), duración igual, residuo frente al WAV −44 a −46 dB (antes −34). Verificado también con el decodificador del navegador. `tools/codificar.sh` y `tools/preescuchas.sh` documentan la excepción. WAV originales intactos.
+
+**Procesamiento — qué se verificó (render offline en Chromium, `tools/prueba-audio.js`).**
+- Prueba nula: EQ 0 y espacio 0 frente a la señal directa, alineadas al mismo instante: diferencia máxima 0 en las 9 canciones completas (≈63 M muestras por canal). Válido para el motor de Chromium; Safari/Firefox no medidos.
+- 14 combinaciones intermedias y mixtas × 9 canciones completas: 0 muestras saturadas; peor pico −1,33 dBFS (03, medios +3).
+- 200 cambios aleatorios de parámetros en 10 s (05 y 02): sin saturación ni NaN; salto máximo entre muestras inferior al de la señal sin cambios (indicador indirecto de chasquidos; no detecta clics menores que los transitorios naturales).
+- Regresión: `correr()` 22/22 (pausa, cambios, salida) y `correrPanel()` 25/25 (incluye pausa con espacio alto y cambio de canción con ajustes).
+
+**Pendiente — requiere escucha y teléfono del artista.**
+- Validar en teléfono físico: pausa/reanudar, siguiente + pausa, espacio alto, comparar, bloqueo de pantalla (lista en la respuesta del encargo).
+- Escuchar: transparencia y carácter del EQ/espacio, ausencia de clics al mover controles, nivel de la instrumental, y que las copias 02/03/05/07 a 256k suenen igual que las demás.
+- Inicios provisionales de preescucha, sin revisar a oído.
+
+**Siguiente paso.** Resultado de la prueba en el teléfono; con aprobación, fusionar en `main`.

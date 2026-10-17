@@ -117,7 +117,8 @@ export async function correrPanel() {
   const C = { fuentes: 0, filtros: 0 }, proto = AudioContext.prototype;
   const of = proto.createMediaElementSource, ob = proto.createBiquadFilter;
   proto.createMediaElementSource = function (...a) { C.fuentes++; return of.apply(this, a); };
-  proto.createBiquadFilter = function (...a) { C.filtros++; return ob.apply(this, a); };
+  // solo cuenta dentro de la habitación: el trueno de la nave crea su propio filtro efímero, ajeno al panel
+  proto.createBiquadFilter = function (...a) { if (P.estado().modo === 'habitacion') C.filtros++; return ob.apply(this, a); };
   const mover = (id, v) => { const r = $(id); r.value = v; r.dispatchEvent(new Event('input', { bubbles: true })); };
   const panelAbierto = () => !$('#tuSonido').hidden;
   try {
@@ -189,4 +190,63 @@ export async function correrPanel() {
     proto.createMediaElementSource = of; proto.createBiquadFilter = ob;
   }
   return L.join('\n');
+}
+
+// ---------- Verificación técnica de la cadena «Tu sonido» (render offline; no es una escucha) ----------
+import { cadenaCancion, PREFS_INICIALES as I } from '/js/audio.js';
+const SR = 44100;
+const decodificar = async n => new OfflineAudioContext(2, SR, SR).decodeAudioData(await (await fetch(`/audio/${n}.m4a`)).arrayBuffer());
+async function render(buf, p, { desde = 0, seg = buf.duration, cambios = null, directo = false } = {}) {
+  const len = Math.floor(SR * Math.min(seg, buf.duration - desde)), o = new OfflineAudioContext(2, len, SR), s = o.createBufferSource();
+  s.buffer = buf;
+  if (directo) s.connect(o.destination);
+  else { const c = cadenaCancion(o, s, o.destination); c.aplicar(p, false, .001); if (cambios) for (const [t, q] of cambios) o.suspend(t).then(() => { c.aplicar(q, false, .04); o.resume(); }); }
+  s.start(0, desde);
+  return o.startRendering();
+}
+const canales = r => [r.getChannelData(0), r.getChannelData(1)];
+function medidas(r) {
+  let pico = 0, sat = 0, nan = 0, salto = 0;
+  for (const d of canales(r)) for (let k = 0; k < d.length; k++) { const v = d[k]; if (v !== v) nan++; const a = Math.abs(v); if (a > pico) pico = a; if (a > 1) sat++; if (k && Math.abs(v - d[k - 1]) > salto) salto = Math.abs(v - d[k - 1]); }
+  return { picoDb: +(20 * Math.log10(pico)).toFixed(2), saturadas: sat, nan, saltoMax: +salto.toFixed(4) };
+}
+
+// 1. Prueba nula: neutro vs señal directa, muestra a muestra (misma alineación: mismo instante de inicio).
+export async function pruebaNula(canciones = ['01', '02', '03', '04', '05', '06', '07', '08', '09']) {
+  const L = [];
+  for (const n of canciones) {
+    const b = await decodificar(n);
+    const [a, x] = await Promise.all([render(b, I, { directo: true }), render(b, I)]);
+    let max = 0, sum = 0, ref = 0, N = 0;
+    for (let ch = 0; ch < 2; ch++) { const d0 = a.getChannelData(ch), d1 = x.getChannelData(ch); for (let k = 0; k < d0.length; k++) { const e = d1[k] - d0[k]; if (Math.abs(e) > max) max = Math.abs(e); sum += e * e; ref += d0[k] * d0[k]; N++; } }
+    L.push(`${n}: diferencia máx ${max === 0 ? '0 (idéntica)' : (20 * Math.log10(max)).toFixed(1) + ' dBFS'} · residuo ${sum === 0 ? '−∞' : (10 * Math.log10(sum / ref)).toFixed(1) + ' dB'} respecto a la señal · ${N / 2} muestras`);
+  }
+  return L.join('\n');
+}
+
+// 2. Combinaciones intermedias y mixtas, canciones completas.
+export const COMBINACIONES = [
+  { graves: 3 }, { medios: 3 }, { agudos: 3 }, { graves: 6, agudos: -6 }, { graves: -6, agudos: 6 },
+  { graves: 4, medios: -2, agudos: 2 }, { graves: 2, medios: 2, agudos: 2, espacio: 30 }, { medios: 6, espacio: 50 },
+  { graves: 6, espacio: 60 }, { agudos: 6, espacio: 100 }, { graves: -3, medios: 4, agudos: -3, espacio: 70 },
+  { graves: 6, medios: 6, agudos: 6, espacio: 100 }, { espacio: 100 }, { graves: -6, medios: -6, agudos: -6, espacio: 100 },
+].map(c => ({ ...I, ...c }));
+export async function combinaciones(canciones = ['01', '02', '03', '04', '05', '06', '07', '08', '09']) {
+  const L = []; let peor = { picoDb: -99 };
+  for (const n of canciones) {
+    const b = await decodificar(n); let fila = [];
+    for (const p of COMBINACIONES) { const m = medidas(await render(b, p)); fila.push(m.picoDb + (m.saturadas ? `!${m.saturadas}` : '')); if (m.picoDb > peor.picoDb) peor = { ...m, n, p }; }
+    L.push(`${n}: ${fila.join(' ')}`);
+  }
+  L.push(`peor caso: ${peor.picoDb} dBFS en ${peor.n} con ${JSON.stringify(peor.p)}`);
+  return L.join('\n');
+}
+
+// 3. Cambios rápidos: 200 ajustes aleatorios en 10 s (cada 50 ms). Se compara el salto máximo entre
+//    muestras con el de la misma señal sin cambios: un chasquido aparecería como salto anómalo.
+export async function cambiosRapidos(n = '05', desde = 50) {
+  const b = await decodificar(n), al = (a, z) => Math.round(a + Math.random() * (z - a));
+  const cambios = Array.from({ length: 200 }, (_, k) => [(k + 1) * .05, { ...I, cancion: al(40, 100), graves: al(-6, 6), medios: al(-6, 6), agudos: al(-6, 6), espacio: al(0, 100) }]);
+  const base = medidas(await render(b, I, { desde, seg: 10.5 })), mov = medidas(await render(b, I, { desde, seg: 10.5, cambios }));
+  return `sin cambios: salto máx ${base.saltoMax}, pico ${base.picoDb} · con 200 cambios: salto máx ${mov.saltoMax}, pico ${mov.picoDb}, saturadas ${mov.saturadas}, NaN ${mov.nan}`;
 }
