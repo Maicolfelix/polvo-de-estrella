@@ -1,0 +1,32 @@
+{
+  "app.js": {
+    "mtime": 1792265475.0342288,
+    "seen": 1792265562.9688542,
+    "ast_hash": "d02c208f9c6ab5c65a52261478452c43",
+    "semantic_hash": ""
+  },
+  "audio.js": {
+    "mtime": 1792265475.0347412,
+    "seen": 1792265562.9688542,
+    "ast_hash": "945b469f0a87d0538595df4e17fa8849",
+    "semantic_hash": ""
+  },
+  "datos.js": {
+    "mtime": 1792220885.046035,
+    "seen": 1792265562.9688542,
+    "ast_hash": "66c0f48266880775518eb07eb29837d0",
+    "semantic_hash": ""
+  },
+  "escena.js": {
+    "mtime": 1792265475.036744,
+    "seen": 1792265562.9688542,
+    "ast_hash": "530d43f0adbd0988130b15809ec4d55b",
+    "semantic_hash": ""
+  },
+  "habitaciones.js": {
+    "mtime": 1792223269.5377815,
+    "seen": 1792265562.9688542,
+    "ast_hash": "dfc5b0ed7399a68225fd02b052ea1149",
+    "semantic_hash": ""
+  }
+}

@@ -1,3 +1,5 @@
 # binario de conversión (descargar aparte, ver LEEME.md)
 tools/ffmpeg.exe
 node_modules/
+js/graphify-out/cache/
+js/graphify-out/graph.html
