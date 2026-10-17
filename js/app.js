@@ -192,7 +192,6 @@ function cambiar(i) {
 }
 function volver() {
   if (modo !== 'habitacion') return;
-  if (!panel.hidden) cerrarPanel();
   const i = actual;
   modo = 'saliendo';
   A.salirCancion();
@@ -237,29 +236,52 @@ $('#seek').addEventListener('input', e => {
   if (song.duration) { song.currentTime = e.target.value / 1000 * song.duration; $('#tiempo').textContent = fmt(song.currentTime); }
 });
 $('#seek').addEventListener('change', () => arrastrando = false);
-$('#vol').addEventListener('input', e => { A.setVolumen(e.target.value / 100); guardarPrefs(); pintarPanel(); });
 $('#anterior').addEventListener('click', () => cambiar(actual - 1));
 $('#siguiente').addEventListener('click', () => cambiar(actual + 1));
 $('#volver').addEventListener('click', volver);
 const progreso = () => song.duration ? song.currentTime / song.duration : 0;
 
-/* ---------- sonido global ---------- */
-let mudo = false;
+/* ---------- sonido: silencio y volumen ---------- */
+// Volumen de la canción 0–100 %, como un reproductor normal. Silenciar no pierde el nivel:
+// al reactivar se recupera el último volumen distinto de cero. Nada de esto inicia ni reanuda una canción.
+let mudo = false, vol = 100, ultimoVol = 100;
+try { localStorage.removeItem('pde-tu-sonido'); } catch {}   // ajustes de «Tu sonido» (retirado): no deben quedar
+{ const v = +leer('pde-vol'); if (leer('pde-vol') != null && v >= 0 && v <= 100) { vol = v; if (v > 0) ultimoVol = v; } }
+{ const u = +leer('pde-vol-ultimo'); if (u > 0 && u <= 100) ultimoVol = u; }
+A.setVolumen(vol / 100);
+const silenciado = () => !A.activo || mudo || vol === 0;
 function pintarSonido() {
-  const off = !A.activo || mudo;
-  for (const b of [$('#btnSonido'), $('#mudo')]) { b.classList.toggle('silencio', off); }
+  const off = silenciado(), r = $('#vol');
+  for (const b of [$('#btnSonido'), $('#mudo')]) b.classList.toggle('silencio', off);
   $('#btnSonido').setAttribute('aria-pressed', !off);
   $('#txtSonido').textContent = off ? 'Sin sonido' : 'Sonido';
   $('#mudo').setAttribute('aria-pressed', off);
   $('#mudo').setAttribute('aria-label', off ? 'Activar sonido' : 'Silenciar');
+  r.value = off ? 0 : vol;                                   // en silencio la barra se ve a cero…
+  r.setAttribute('aria-valuetext', off ? 'Silenciado' : vol + ' %');
+  pintarRango(r);
+}
+function ponerVol(v) {
+  vol = v; if (v > 0) ultimoVol = v;
+  A.setVolumen(v / 100);
+  guardar('pde-vol', v); guardar('pde-vol-ultimo', ultimoVol);
 }
 async function alternarMudo(forzar) {
-  if (!A.activo) { await A.activar(); mudo = false; A.setMudo(false); if (modo === 'nave') A.ambiente(true, 3); pintarSonido(); return; }
-  mudo = forzar ?? !mudo;
+  if (!A.activo) { await A.activar(); mudo = false; A.setMudo(false); if (vol === 0) ponerVol(ultimoVol); if (modo === 'nave') A.ambiente(true, 3); pintarSonido(); return; }
+  const callar = forzar ?? !silenciado();
+  if (callar) mudo = true;
+  else { mudo = false; if (vol === 0) ponerVol(ultimoVol); }   // …y al reactivar vuelve al último nivel
   A.setMudo(mudo);
   if (mudo && escuchando != null) pararPre();
   pintarSonido();
 }
+$('#vol').addEventListener('input', async e => {
+  const v = +e.target.value;
+  if (v > 0 && !A.activo) { await A.activar(); if (modo === 'nave') A.ambiente(true, 3); }
+  ponerVol(v);
+  if (v > 0 && mudo) { mudo = false; A.setMudo(false); }      // subir la barra reactiva el sonido (no la reproducción)
+  pintarSonido();
+});
 $('#btnSonido').addEventListener('click', () => alternarMudo());
 $('#mudo').addEventListener('click', () => alternarMudo());
 $('#conSonido').addEventListener('click', async () => {
@@ -273,70 +295,6 @@ $('#sinSonido').addEventListener('click', () => {
 });
 pintarSonido();
 
-/* ---------- Tu sonido ---------- */
-// Preferencias locales (sin cuenta ni envío). Recuperarlas nunca inicia audio.
-const panel = $('#tuSonido'), fondoPanel = $('#tsFondo'), btnPanel = $('#btnTuSonido');
-const CLAVE_PREFS = 'pde-tu-sonido';
-const UNIDAD = { cancion: ' %', espacio: ' %', ambiente: ' %', graves: ' dB', medios: ' dB', agudos: ' dB' };
-const NOMBRE = { graves: 'Graves', medios: 'Medios', agudos: 'Agudos' };
-const deslizadores = [...panel.querySelectorAll('input[data-pref]')];
-const conSigno = (k, v) => (UNIDAD[k] === ' dB' && v > 0 ? '+' : '') + v + UNIDAD[k];
-function guardarPrefs() { guardar(CLAVE_PREFS, JSON.stringify(A.preferencias())); }
-function cargarPrefs() {
-  let p = null;
-  try { p = JSON.parse(leer(CLAVE_PREFS) || 'null'); } catch {}
-  if (!p) { const v = leer('pde-vol'); if (v != null) p = { cancion: +v }; }   // migra el volumen anterior
-  if (p) A.ponerPreferencias(p);                    // solo guarda valores: no crea audio ni reproduce
-  pintarPanel();
-}
-function pintarPanel() {
-  const p = A.preferencias(), ini = A.PREFS_INICIALES, orig = A.comparandoOriginal();
-  for (const r of deslizadores) {
-    const k = r.dataset.pref; r.value = p[k]; pintarRango(r);
-    const txt = conSigno(k, p[k]);
-    r.setAttribute('aria-valuetext', txt);
-    panel.querySelector(`output[for="${r.id}"]`).textContent = txt;
-  }
-  const v = $('#vol'); v.value = p.cancion; pintarRango(v); v.setAttribute('aria-valuetext', p.cancion + ' %');
-  const activos = [];
-  if (['graves', 'medios', 'agudos'].some(k => p[k] !== ini[k])) activos.push('ecualizador');
-  if (p.espacio > 0) activos.push('espacio ' + p.espacio + ' %');
-  const est = $('#tsEstado');
-  est.textContent = orig ? 'Comparando: sonido original' : activos.length ? 'Ajustes activos: ' + activos.join(' · ') : 'Sonido original';
-  est.classList.toggle('activo', !orig && activos.length > 0);
-  $('#tsComparar').setAttribute('aria-pressed', orig);
-  $('#tsComparar').textContent = orig ? 'Volver a mis ajustes' : 'Comparar con original';
-}
-deslizadores.forEach(r => r.addEventListener('input', () => {
-  A.ponerPreferencias({ ...A.preferencias(), [r.dataset.pref]: +r.value });
-  guardarPrefs(); pintarPanel();
-}));
-$('#tsComparar').addEventListener('click', () => { A.compararOriginal(!A.comparandoOriginal()); pintarPanel(); });
-$('#tsReset').addEventListener('click', () => { A.compararOriginal(false); A.ponerPreferencias(A.PREFS_INICIALES); guardarPrefs(); pintarPanel(); });
-function abrirPanel() {
-  panel.hidden = fondoPanel.hidden = false;
-  btnPanel.setAttribute('aria-expanded', true);
-  pintarPanel();
-  $('#tsCerrar').focus();
-}
-function cerrarPanel() {
-  if (panel.hidden) return;
-  if (A.comparandoOriginal()) A.compararOriginal(false);   // la comparación es temporal
-  panel.hidden = fondoPanel.hidden = true;
-  btnPanel.setAttribute('aria-expanded', false);
-  btnPanel.focus();
-}
-btnPanel.addEventListener('click', () => panel.hidden ? abrirPanel() : cerrarPanel());
-$('#tsCerrar').addEventListener('click', cerrarPanel);
-fondoPanel.addEventListener('click', cerrarPanel);
-// modal: el foco no sale del panel mientras está abierto
-panel.addEventListener('keydown', e => {
-  if (e.key !== 'Tab') return;
-  const f = [...panel.querySelectorAll('button,input')].filter(x => !x.disabled);
-  if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f.at(-1).focus(); }
-  else if (!e.shiftKey && document.activeElement === f.at(-1)) { e.preventDefault(); f[0].focus(); }
-});
-cargarPrefs();
 
 /* ---------- índice de canciones ---------- */
 const indice = $('#indice'), btnIndice = $('#btnIndice');
@@ -356,7 +314,7 @@ document.addEventListener('pointerdown', e => { if (!indice.hidden && !indice.co
 $('#saltar').addEventListener('click', e => { e.preventDefault(); irAPuerta(0); botones[0].focus({ preventScroll: true }); });
 
 addEventListener('keydown', e => {
-  if (e.key === 'Escape') { if (!panel.hidden) { cerrarPanel(); return; } if (!indice.hidden) { cerrarIndice(); btnIndice.focus(); return; } if (modo === 'habitacion') volver(); }
+  if (e.key === 'Escape') { if (!indice.hidden) { cerrarIndice(); btnIndice.focus(); return; } if (modo === 'habitacion') volver(); }
   if (modo === 'habitacion' && e.key === ' ' && !e.target.closest('button,input,a')) { e.preventDefault(); $('#play').click(); }
 });
 

@@ -76,52 +76,9 @@
     </div>
     <div class="vol">
       <button class="icono" id="mudo" aria-label="Silenciar" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="altavoz" d="M4 9h4l5-4v14l-5-4H4z"/><path class="ondas" d="M16 8.5a5 5 0 0 1 0 7"/><path class="cruz" d="M16 9l5 6M21 9l-5 6"/></svg></button>
-      <input type="range" id="vol" min="0" max="100" value="100" aria-label="Volumen de la canción">
-      <button class="btn btn-sutil btn-ts" id="btnTuSonido" aria-label="Tu sonido" aria-haspopup="dialog" aria-expanded="false" aria-controls="tuSonido">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4v16M12 4v16M19 4v16"/><path d="M3 15h4M10 8h4M17 13h4"/></svg><span>Tu sonido</span>
-      </button>
+      <input type="range" id="vol" min="0" max="100" value="100" step="1" aria-label="Volumen" aria-valuetext="100 %">
     </div>
   </nav>
-
-  <div class="ts-fondo" id="tsFondo" hidden></div>
-  <section class="tu-sonido" id="tuSonido" role="dialog" aria-modal="true" aria-labelledby="tsTitulo" aria-describedby="tsEstado" hidden>
-    <header class="ts-cab">
-      <div>
-        <h3 id="tsTitulo">Tu sonido</h3>
-        <p class="ts-estado" id="tsEstado">Sonido original</p>
-      </div>
-      <button class="icono" id="tsCerrar" aria-label="Cerrar Tu sonido"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    </header>
-    <div class="ts-cuerpo">
-      <div class="ts-fila">
-        <label for="tsCancion">Volumen de la canción</label><output id="oCancion" for="tsCancion">100 %</output>
-        <input type="range" id="tsCancion" data-pref="cancion" min="0" max="100" step="1">
-      </div>
-      <fieldset class="ts-grupo">
-        <legend>Ecualizador</legend>
-        <div class="ts-fila"><label for="tsGraves">Graves</label><output id="oGraves" for="tsGraves">0 dB</output>
-          <input type="range" id="tsGraves" data-pref="graves" min="-6" max="6" step="1"></div>
-        <div class="ts-fila"><label for="tsMedios">Medios</label><output id="oMedios" for="tsMedios">0 dB</output>
-          <input type="range" id="tsMedios" data-pref="medios" min="-6" max="6" step="1"></div>
-        <div class="ts-fila"><label for="tsAgudos">Agudos</label><output id="oAgudos" for="tsAgudos">0 dB</output>
-          <input type="range" id="tsAgudos" data-pref="agudos" min="-6" max="6" step="1"></div>
-      </fieldset>
-      <div class="ts-fila">
-        <label for="tsEspacio">Espacio</label><output id="oEspacio" for="tsEspacio">0 %</output>
-        <input type="range" id="tsEspacio" data-pref="espacio" min="0" max="100" step="5" aria-describedby="tsNotaEspacio">
-        <p class="ts-nota" id="tsNotaEspacio">Una sala suave alrededor de la canción. La voz se mantiene al frente.</p>
-      </div>
-      <div class="ts-fila">
-        <label for="tsAmbiente">Ambiente</label><output id="oAmbiente" for="tsAmbiente">100 %</output>
-        <input type="range" id="tsAmbiente" data-pref="ambiente" min="0" max="100" step="1" aria-describedby="tsNotaAmbiente">
-        <p class="ts-nota" id="tsNotaAmbiente">La instrumental de fondo; se escucha mientras recorres el espacio entre las puertas.</p>
-      </div>
-    </div>
-    <footer class="ts-pie">
-      <button class="btn" id="tsComparar" aria-pressed="false">Comparar con original</button>
-      <button class="btn btn-sutil" id="tsReset">Restablecer</button>
-    </footer>
-  </section>
 </main>
 
 <div id="recorrido" aria-hidden="true"></div>
