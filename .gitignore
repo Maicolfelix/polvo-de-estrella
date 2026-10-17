@@ -3,3 +3,4 @@ tools/ffmpeg.exe
 node_modules/
 js/graphify-out/cache/
 js/graphify-out/graph.html
+js/graphify-out/20*/
