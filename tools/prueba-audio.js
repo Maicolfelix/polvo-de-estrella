@@ -110,143 +110,50 @@ export async function correrSinSonido() {
   return L.join('\n');
 }
 
-// Panel «Tu sonido». Requiere sonido activado por un clic real. Cuenta nodos creados para detectar duplicados.
-export async function correrPanel() {
-  const P = window.__pde, A = P.A, s = A.elementos.song, L = [];
+// Volumen y silencio. Requiere sonido activado por un clic real.
+export async function correrVolumen() {
+  const P = window.__pde, A = P.A, s = A.elementos.song, L = [], v = $('#vol'), m = $('#mudo');
   const ok = (cond, txt) => L.push((cond ? 'OK   ' : 'FALLA') + ' ' + txt);
-  const C = { fuentes: 0, filtros: 0 }, proto = AudioContext.prototype;
-  const of = proto.createMediaElementSource, ob = proto.createBiquadFilter;
+  const mover = x => { v.value = x; v.dispatchEvent(new Event('input', { bubbles: true })); };
+  const C = { fuentes: 0 }, proto = AudioContext.prototype, of = proto.createMediaElementSource;
   proto.createMediaElementSource = function (...a) { C.fuentes++; return of.apply(this, a); };
-  // solo cuenta dentro de la habitación: el trueno de la nave crea su propio filtro efímero, ajeno al panel
-  proto.createBiquadFilter = function (...a) { if (P.estado().modo === 'habitacion') C.filtros++; return ob.apply(this, a); };
-  const mover = (id, v) => { const r = $(id); r.value = v; r.dispatchEvent(new Event('input', { bubbles: true })); };
-  const panelAbierto = () => !$('#tuSonido').hidden;
   try {
+    ok(!document.querySelector('#tuSonido, #btnTuSonido, [data-pref]'), 'no queda rastro del panel «Tu sonido»');
+    ok(localStorage.getItem('pde-tu-sonido') === null, 'los ajustes antiguos del panel se borraron');
     scrollTo(0, innerHeight * P.escena.uDePuerta(0)); await w(2500);
     toque(document.querySelectorAll('.puerta')[0]); await modo('habitacion'); await w(1500);
-    // 1. abrir y cerrar varias veces
+    // volumen mientras suena
     const t0 = s.currentTime;
-    ok(getComputedStyle($('#tuSonido')).display === 'none', 'cerrado: el panel no ocupa pantalla');
-    for (let k = 0; k < 5; k++) { toque($('#btnTuSonido')); await w(150); toque($('#tsCerrar')); await w(150); }
-    ok(C.fuentes === 0 && C.filtros === 0, `abrir/cerrar ×5: sin nodos nuevos (fuentes ${C.fuentes}, filtros ${C.filtros})`);
-    ok(!s.paused && s.currentTime > t0 && sonando(A).join() === 'song', 'abrir/cerrar no pausa ni duplica');
-    ok(document.activeElement === $('#btnTuSonido'), 'al cerrar, el foco vuelve a «Tu sonido»');
-    // 2. ajustar mientras suena y en pausa
-    toque($('#btnTuSonido')); await w(200);
-    ok(panelAbierto() && $('#btnTuSonido').getAttribute('aria-expanded') === 'true' && getComputedStyle($('#tuSonido')).display !== 'none', 'panel abierto y visible, aria-expanded=true');
-    mover('#tsGraves', 4); mover('#tsAgudos', -3); mover('#tsEspacio', 60); await w(300);
-    ok(!s.paused && sonando(A).join() === 'song', 'ajustar mientras suena: sigue sonando una sola vez');
-    ok($('#oGraves').textContent === '+4 dB' && $('#tsAgudos').getAttribute('aria-valuetext') === '-3 dB', 'valores visibles y accesibles');
-    ok(/espacio 60/.test($('#tsEstado').textContent), 'estado textual: ' + $('#tsEstado').textContent);
+    for (const x of [80, 30, 65, 100, 50]) { mover(x); await w(60); }
+    await w(500);
+    ok(!s.paused && s.currentTime > t0 && sonando(A).join() === 'song', 'mover la barra mientras suena: no reinicia ni duplica');
+    ok(Math.abs(A.volumen() - .5) < .001 && v.getAttribute('aria-valuetext') === '50 %', 'volumen 50 %: ' + v.getAttribute('aria-valuetext'));
+    // silenciar y recuperar el último nivel
+    toque(m); await w(400);
+    ok(A.niveles().master < .02 && v.value === '0' && m.getAttribute('aria-pressed') === 'true', 'silenciar (fundido de 0,25 s): salida ' + A.niveles().master + ', barra a 0, icono silenciado');
+    ok(!s.paused, 'silenciar no pausa la canción');
+    toque(m); await w(500);
+    ok(A.niveles().master > .9 && v.value === '50' && Math.abs(A.volumen() - .5) < .001, 'reactivar: vuelve a 50 %');
+    // bajar a cero con la barra y reactivar con el altavoz
+    mover(0); await w(300);
+    ok(m.getAttribute('aria-pressed') === 'true' && A.volumen() === 0, 'barra a 0 = silencio');
+    toque(m); await w(400);
+    ok(v.value === '50' && Math.abs(A.volumen() - .5) < .001, 'altavoz tras barra a 0: recupera el último nivel distinto de cero (50 %)');
+    // en pausa: mover la barra no reanuda
     toque($('#play')); await w(300);
     const tp = s.currentTime;
-    mover('#tsMedios', 5); mover('#tsEspacio', 100); mover('#tsCancion', 70); await w(800);
-    ok(s.paused && Math.abs(s.currentTime - tp) < .02 && sonando(A).length === 0, 'ajustar en pausa: sigue en pausa y en la misma posición');
-    // 3. pausa/reanudar con reverb: la compuerta va tras la reverb y la cola se vacía
-    ok(A.niveles().song === 0, 'en pausa con espacio 100 %: salida de canción a 0 (sin cola)');
+    for (const x of [90, 20, 70]) { mover(x); await w(80); }
+    toque(m); await w(200); toque(m); await w(400);
+    ok(s.paused && Math.abs(s.currentTime - tp) < .02 && sonando(A).length === 0, 'en pausa: barra y altavoz no reanudan la canción');
     toque($('#play')); await w(800);
-    ok(!s.paused && s.currentTime > tp && s.currentTime < tp + 1.5, `reanuda desde ${tp.toFixed(2)} una vez`);
-    // 4. cambiar de canción con ajustes activos
-    const antes = JSON.stringify(A.preferencias());
+    ok(!s.paused && s.currentTime > tp && s.currentTime < tp + 1.5, 'reanuda una vez desde la misma posición');
+    // cambio de canción conserva el volumen y no crea fuentes
     toque($('#siguiente')); await w(2500);
-    ok(JSON.stringify(A.preferencias()) === antes && A.niveles().fuentes.song === '02.m4a' && sonando(A).join() === 'song', 'cambiar de canción conserva ajustes y suena solo la nueva');
-    ok(C.fuentes === 0 && C.filtros === 0, 'cambiar de canción no crea rutas nuevas');
-    // 5. cambiar y pausar durante la carga
-    toque($('#siguiente')); await w(80); toque($('#play')); await w(2000);
-    ok(A.niveles().fuentes.song === '03.m4a' && s.paused && sonando(A).length === 0, 'siguiente + pausa en carga: canción 03 cargada y en pausa');
-    // 6. silencio general: mover controles no lo rompe
-    toque($('#play')); await w(600);
-    toque($('#mudo')); await w(400);
-    mover('#tsCancion', 100); mover('#tsGraves', 6); mover('#tsAmbiente', 40); await w(400);
-    ok(A.niveles().master === 0 && A.estaMudo(), 'en silencio: mover controles no devuelve el sonido');
-    toque($('#mudo')); await w(500);
-    // 7. comparar y restablecer sin reinicios
-    const tc = s.currentTime;
-    toque($('#tsComparar')); await w(300);
-    ok($('#tsComparar').getAttribute('aria-pressed') === 'true' && /original/.test($('#tsEstado').textContent), 'comparar: estado visible');
-    ok(!s.paused && s.currentTime >= tc && A.preferencias().cancion === 100, 'comparar: no reinicia ni cambia volumen');
-    toque($('#tsComparar')); await w(200);
-    toque($('#play')); await w(300);
-    const tq = s.currentTime;
-    toque($('#tsComparar')); await w(300); toque($('#tsReset')); await w(400);
-    ok(s.paused && Math.abs(s.currentTime - tq) < .02, 'comparar/restablecer en pausa no inicia audio');
-    ok(JSON.stringify(A.preferencias()) === JSON.stringify(A.PREFS_INICIALES) && $('#tsComparar').getAttribute('aria-pressed') === 'false', 'restablecer: valores iniciales');
-    // 9. arrastrar un control en móvil no mueve lo de detrás
-    const hs = $('#habScroll').scrollTop, r = $('#tsEspacio').getBoundingClientRect();
-    const o = { pointerType: 'touch', clientX: r.x + 10, clientY: r.y + r.height / 2, bubbles: true, pointerId: 9 };
-    ok(document.elementFromPoint(o.clientX, o.clientY) === $('#tsEspacio'), 'el control recibe el toque (nada encima)');
-    ok(getComputedStyle($('#tsEspacio')).touchAction === 'none', 'touch-action: none en los controles (el arrastre no desplaza)');
-    $('#tsEspacio').dispatchEvent(new PointerEvent('pointerdown', o)); $('#tsEspacio').dispatchEvent(new PointerEvent('pointermove', { ...o, clientX: o.clientX + 120, clientY: o.clientY + 40 })); $('#tsEspacio').dispatchEvent(new PointerEvent('pointerup', o));
-    ok($('#habScroll').scrollTop === hs && P.estado().modo === 'habitacion', 'arrastrar: la letra no se desplaza y la habitación sigue igual');
-    // 11. duración y velocidad intactas
-    ok(s.playbackRate === 1 && Math.abs(s.duration - 136.2) < 1, `velocidad ${s.playbackRate}, duración ${s.duration.toFixed(1)} s`);
-    // Escape cierra el panel, no la habitación
-    $('#tsCerrar').focus(); window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); await w(200);
-    ok(!panelAbierto() && P.estado().modo === 'habitacion', 'Escape cierra el panel sin salir de la habitación');
+    ok(A.niveles().fuentes.song === '02.m4a' && sonando(A).join() === 'song' && Math.abs(A.volumen() - .7) < .001, 'cambiar de canción: suena solo la nueva, con el mismo volumen (70 %)');
+    ok(C.fuentes === 0, 'sin fuentes de audio nuevas (' + C.fuentes + ')');
+    ok(localStorage.getItem('pde-vol') === '70', 'el volumen se guarda (pde-vol = ' + localStorage.getItem('pde-vol') + ')');
     toque($('#volver')); await modo('nave'); await w(2500);
-    const esperado = .3 * A.preferencias().ambiente / 100;
-    ok(sonando(A).join() === 'inst' && Math.abs(A.niveles().inst - esperado) < .03, `al volver: instrumental al ambiente elegido (${A.preferencias().ambiente} % → ${A.niveles().inst})`);
-  } finally {
-    proto.createMediaElementSource = of; proto.createBiquadFilter = ob;
-  }
+    ok(sonando(A).join() === 'inst', 'al volver: solo la instrumental');
+  } finally { proto.createMediaElementSource = of; }
   return L.join('\n');
-}
-
-// ---------- Verificación técnica de la cadena «Tu sonido» (render offline; no es una escucha) ----------
-import { cadenaCancion, PREFS_INICIALES as I } from '/js/audio.js';
-const SR = 44100;
-const decodificar = async n => new OfflineAudioContext(2, SR, SR).decodeAudioData(await (await fetch(`/audio/${n}.m4a`)).arrayBuffer());
-async function render(buf, p, { desde = 0, seg = buf.duration, cambios = null, directo = false } = {}) {
-  const len = Math.floor(SR * Math.min(seg, buf.duration - desde)), o = new OfflineAudioContext(2, len, SR), s = o.createBufferSource();
-  s.buffer = buf;
-  if (directo) s.connect(o.destination);
-  else { const c = cadenaCancion(o, s, o.destination); c.aplicar(p, false, .001); if (cambios) for (const [t, q] of cambios) o.suspend(t).then(() => { c.aplicar(q, false, .04); o.resume(); }); }
-  s.start(0, desde);
-  return o.startRendering();
-}
-const canales = r => [r.getChannelData(0), r.getChannelData(1)];
-function medidas(r) {
-  let pico = 0, sat = 0, nan = 0, salto = 0;
-  for (const d of canales(r)) for (let k = 0; k < d.length; k++) { const v = d[k]; if (v !== v) nan++; const a = Math.abs(v); if (a > pico) pico = a; if (a > 1) sat++; if (k && Math.abs(v - d[k - 1]) > salto) salto = Math.abs(v - d[k - 1]); }
-  return { picoDb: +(20 * Math.log10(pico)).toFixed(2), saturadas: sat, nan, saltoMax: +salto.toFixed(4) };
-}
-
-// 1. Prueba nula: neutro vs señal directa, muestra a muestra (misma alineación: mismo instante de inicio).
-export async function pruebaNula(canciones = ['01', '02', '03', '04', '05', '06', '07', '08', '09']) {
-  const L = [];
-  for (const n of canciones) {
-    const b = await decodificar(n);
-    const [a, x] = await Promise.all([render(b, I, { directo: true }), render(b, I)]);
-    let max = 0, sum = 0, ref = 0, N = 0;
-    for (let ch = 0; ch < 2; ch++) { const d0 = a.getChannelData(ch), d1 = x.getChannelData(ch); for (let k = 0; k < d0.length; k++) { const e = d1[k] - d0[k]; if (Math.abs(e) > max) max = Math.abs(e); sum += e * e; ref += d0[k] * d0[k]; N++; } }
-    L.push(`${n}: diferencia máx ${max === 0 ? '0 (idéntica)' : (20 * Math.log10(max)).toFixed(1) + ' dBFS'} · residuo ${sum === 0 ? '−∞' : (10 * Math.log10(sum / ref)).toFixed(1) + ' dB'} respecto a la señal · ${N / 2} muestras`);
-  }
-  return L.join('\n');
-}
-
-// 2. Combinaciones intermedias y mixtas, canciones completas.
-export const COMBINACIONES = [
-  { graves: 3 }, { medios: 3 }, { agudos: 3 }, { graves: 6, agudos: -6 }, { graves: -6, agudos: 6 },
-  { graves: 4, medios: -2, agudos: 2 }, { graves: 2, medios: 2, agudos: 2, espacio: 30 }, { medios: 6, espacio: 50 },
-  { graves: 6, espacio: 60 }, { agudos: 6, espacio: 100 }, { graves: -3, medios: 4, agudos: -3, espacio: 70 },
-  { graves: 6, medios: 6, agudos: 6, espacio: 100 }, { espacio: 100 }, { graves: -6, medios: -6, agudos: -6, espacio: 100 },
-].map(c => ({ ...I, ...c }));
-export async function combinaciones(canciones = ['01', '02', '03', '04', '05', '06', '07', '08', '09']) {
-  const L = []; let peor = { picoDb: -99 };
-  for (const n of canciones) {
-    const b = await decodificar(n); let fila = [];
-    for (const p of COMBINACIONES) { const m = medidas(await render(b, p)); fila.push(m.picoDb + (m.saturadas ? `!${m.saturadas}` : '')); if (m.picoDb > peor.picoDb) peor = { ...m, n, p }; }
-    L.push(`${n}: ${fila.join(' ')}`);
-  }
-  L.push(`peor caso: ${peor.picoDb} dBFS en ${peor.n} con ${JSON.stringify(peor.p)}`);
-  return L.join('\n');
-}
-
-// 3. Cambios rápidos: 200 ajustes aleatorios en 10 s (cada 50 ms). Se compara el salto máximo entre
-//    muestras con el de la misma señal sin cambios: un chasquido aparecería como salto anómalo.
-export async function cambiosRapidos(n = '05', desde = 50) {
-  const b = await decodificar(n), al = (a, z) => Math.round(a + Math.random() * (z - a));
-  const cambios = Array.from({ length: 200 }, (_, k) => [(k + 1) * .05, { ...I, cancion: al(40, 100), graves: al(-6, 6), medios: al(-6, 6), agudos: al(-6, 6), espacio: al(0, 100) }]);
-  const base = medidas(await render(b, I, { desde, seg: 10.5 })), mov = medidas(await render(b, I, { desde, seg: 10.5, cambios }));
-  return `sin cambios: salto máx ${base.saltoMax}, pico ${base.picoDb} · con 200 cambios: salto máx ${mov.saltoMax}, pico ${mov.picoDb}, saturadas ${mov.saturadas}, NaN ${mov.nan}`;
 }

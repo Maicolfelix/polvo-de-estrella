@@ -69,3 +69,15 @@ Registro breve de continuidad: decisiones y resultados verificables. Contexto de
 - Inicios provisionales de preescucha, sin revisar a oído.
 
 **Siguiente paso.** Resultado de la prueba en el teléfono; con aprobación, fusionar en `main`.
+
+## 2026-10-17 · Corrección de alcance: solo volumen (rama `fix/volumen`, desde `feat/tu-sonido`)
+
+**Alcance confirmado por el artista: únicamente volumen**, como en un reproductor normal. El panel «Tu sonido» fue una interpretación incorrecta y se **retiró por completo**: botón, panel, EQ, espacio, ambiente, comparar, restablecer, su cadena de procesamiento (`cadenaCancion`, compensación, convolución) y sus preferencias. Al cargar se borra la clave `pde-tu-sonido`; ningún ajuste antiguo altera las canciones. Las secciones anteriores sobre «Tu sonido» quedan como historial, no como funcionalidad vigente.
+
+**Ahora.** Canción → ganancia de volumen (0–100 %, suavizado ~100 ms) → compuerta de pausa → master. Sin efectos sobre las canciones completas. Altavoz: silenciar/reactivar; al reactivar recupera el último volumen distinto de cero (también si se bajó la barra a 0). Mover la barra no inicia ni reanuda una canción. Se guardan `pde-vol` y `pde-vol-ultimo`. La barra es visible también en teléfono, junto al altavoz.
+
+**Se conserva.** Controlador único y corrección de pausa; copias web corregidas (02, 03, 05, 07, 07-pre); WAV intactos; tratamiento de preescucha e instrumental (nivel base 0,3, ducking 0,08).
+
+**Pruebas (emulación 375×812).** `correrVolumen()` 15/15: sin rastro del panel ni de sus ajustes tras recargar; volumen mientras suena sin reinicio ni duplicado; silenciar/reactivar recupera 50 %; barra a 0 + altavoz recupera el último nivel; en pausa la barra y el altavoz no reanudan; cambio de canción conserva el volumen sin crear fuentes; volumen guardado. `correr()` 22/22 (pausa). Retiradas las pruebas del panel y de su cadena.
+
+**Pendiente.** Prueba en teléfono físico (pausa y volumen) y escucha del artista.
