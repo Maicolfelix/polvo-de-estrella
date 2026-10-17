@@ -14,7 +14,14 @@ set -- \
  08 ESTO_ES_REAL_DESDE_EL_DIA_UNO_MAVO_MASTER_ESTUDIO_V2 \
  09 THE_LAST_OF_MAVO_MASTER_ESTUDIO_V2
 mkdir -p audio
+# Excepciones (2026-10-17): con el codificador aac de ffmpeg a 160k, las copias 02, 03, 05 y 07 decodificaban
+# por encima de 0 dBFS (+0,46 a +1,47) aunque sus WAV no pasan de −1,1 dBFS: sobreimpulso del códec en
+# transitorios (en la 02, el arranque). Se codifican con aac_mf (Media Foundation, Windows) a 256k: pico
+# decodificado ≈ −1,0 dBFS, sin cambiar nivel, duración ni alineación. Verificar con tools/nivel.py.
 while [ $# -gt 0 ]; do
-  $F -v error -y -i "$D/$2.wav" -c:a aac -b:a 160k -movflags +faststart "audio/$1.m4a"
+  case $1 in
+    02|03|05|07) $F -v error -y -i "$D/$2.wav" -c:a aac_mf -b:a 256k -movflags +faststart "audio/$1.m4a" ;;
+    *)           $F -v error -y -i "$D/$2.wav" -c:a aac -b:a 160k -movflags +faststart "audio/$1.m4a" ;;
+  esac
   shift 2
 done
