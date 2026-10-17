@@ -10,7 +10,7 @@ export const elementos = { inst, pre, song };
 
 // Reverb del ambiente. Valores ajustados midiendo picos/RMS con un render offline (ver verificarReverb).
 export const REVERB = { seco: .86, humedo: .45, duracion: 2.6, predelay: .024, pasaAltos: 240, pasaBajos: 6200 };
-export const NIVEL = { inst: .5, instDuck: .14, pre: 1, viento: .16, trueno: .5 };
+export const NIVEL = { inst: .3, instDuck: .08, pre: 1, viento: .16, trueno: .5 }; // inst .3 ≈ −4,4 dB respecto a antes: fondo discreto
 
 let ctx, master, instG, preG, songG, vientoG, vientoF, cancionPre = -1, cancionSong = -1;
 let tokPre = 0, tokSong = 0, tokAmb = 0; // cada pausa diferida solo actúa si nadie volvió a usar esa fuente
