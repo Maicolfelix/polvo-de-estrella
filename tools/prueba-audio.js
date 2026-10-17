@@ -129,21 +129,30 @@ export async function correrVolumen() {
     ok(!s.paused && s.currentTime > t0 && sonando(A).join() === 'song', 'mover la barra mientras suena: no reinicia ni duplica');
     ok(Math.abs(A.volumen() - .5) < .001 && v.getAttribute('aria-valuetext') === '50 %', 'volumen 50 %: ' + v.getAttribute('aria-valuetext'));
     // silenciar y recuperar el último nivel
-    toque(m); await w(400);
-    ok(A.niveles().master < .02 && v.value === '0' && m.getAttribute('aria-pressed') === 'true', 'silenciar (fundido de 0,25 s): salida ' + A.niveles().master + ', barra a 0, icono silenciado');
+    const fin = ms => w(ms + 200);                         // fin del fundido + margen de la pestaña de pruebas
+    toque(m); await fin(A.FUNDIDO.silencio * 1000);
+    ok(A.niveles().master === 0 && v.value === '0' && m.getAttribute('aria-pressed') === 'true', `silenciar: salida exactamente 0 tras ${A.FUNDIDO.silencio * 1000} ms (${A.niveles().master}), barra a 0, icono silenciado`);
     ok(!s.paused, 'silenciar no pausa la canción');
-    toque(m); await w(500);
-    ok(A.niveles().master > .9 && v.value === '50' && Math.abs(A.volumen() - .5) < .001, 'reactivar: vuelve a 50 %');
+    toque(m); await fin(A.FUNDIDO.silencio * 1000);
+    ok(A.niveles().master === 1 && v.value === '50' && A.niveles().cancion === .5, `reactivar: salida 1 y volumen 50 % (${A.niveles().master}, ${A.niveles().cancion})`);
+    // alternar rápido: no debe quedar una operación pendiente que vuelva a silenciar
+    for (let k = 0; k < 7; k++) { toque(m); await w(40); }  // 7 toques: termina silenciado
+    await fin(A.FUNDIDO.silencio * 1000);
+    ok(A.niveles().master === 0, `7 toques rápidos → silencio exacto (${A.niveles().master})`);
+    toque(m); await w(30); toque(m); await w(30); toque(m); // 3 más: termina con sonido
+    await fin(A.FUNDIDO.silencio * 1000); const g1 = A.niveles().master; await w(800);
+    ok(g1 === 1 && A.niveles().master === 1, `toques rápidos terminando en sonido: queda en 1 y sigue en 1 800 ms después (${g1} → ${A.niveles().master})`);
     // bajar a cero con la barra y reactivar con el altavoz
-    mover(0); await w(300);
-    ok(m.getAttribute('aria-pressed') === 'true' && A.volumen() === 0, 'barra a 0 = silencio');
+    mover(0); await fin(A.FUNDIDO.volumen * 1000);
+    ok(m.getAttribute('aria-pressed') === 'true' && A.volumen() === 0 && A.niveles().cancion === 0, `barra a 0: ganancia de la canción exactamente 0 (${A.niveles().cancion})`);
     toque(m); await w(400);
-    ok(v.value === '50' && Math.abs(A.volumen() - .5) < .001, 'altavoz tras barra a 0: recupera el último nivel distinto de cero (50 %)');
+    await fin(A.FUNDIDO.volumen * 1000);
+    ok(v.value === '50' && A.niveles().cancion === .5 && A.niveles().master === 1, `altavoz tras barra a 0: recupera el último nivel distinto de cero (${A.niveles().cancion})`);
     // en pausa: mover la barra no reanuda
     toque($('#play')); await w(300);
     const tp = s.currentTime;
     for (const x of [90, 20, 70]) { mover(x); await w(80); }
-    toque(m); await w(200); toque(m); await w(400);
+    for (let k = 0; k < 6; k++) { toque(m); await w(40); } await fin(A.FUNDIDO.silencio * 1000);
     ok(s.paused && Math.abs(s.currentTime - tp) < .02 && sonando(A).length === 0, 'en pausa: barra y altavoz no reanudan la canción');
     toque($('#play')); await w(800);
     ok(!s.paused && s.currentTime > tp && s.currentTime < tp + 1.5, 'reanuda una vez desde la misma posición');

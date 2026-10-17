@@ -81,3 +81,13 @@ Registro breve de continuidad: decisiones y resultados verificables. Contexto de
 **Pruebas (emulación 375×812).** `correrVolumen()` 15/15: sin rastro del panel ni de sus ajustes tras recargar; volumen mientras suena sin reinicio ni duplicado; silenciar/reactivar recupera 50 %; barra a 0 + altavoz recupera el último nivel; en pausa la barra y el altavoz no reanudan; cambio de canción conserva el volumen sin crear fuentes; volumen guardado. `correr()` 22/22 (pausa). Retiradas las pruebas del panel y de su cadena.
 
 **Pendiente.** Prueba en teléfono físico (pausa y volumen) y escucha del artista.
+
+## 2026-10-17 · Cierre exacto del silencio (rama `fix/volumen`)
+
+**Causa.** Silencio y volumen usaban `setTargetAtTime` (aproximación exponencial): nunca llegan al valor final; quedaba ≈ 0,008 a los 400 ms y la prueba anterior se había relajado para aceptarlo.
+
+**Cambio.** `fundir()` en `js/audio.js`: rampa lineal que termina exactamente en el objetivo en un plazo fijo (`FUNDIDO.silencio` 0,25 s, `FUNDIDO.volumen` 0,1 s). Cada llamada cancela lo programado y parte del valor actual: alternar rápido no deja operaciones pendientes. `niveles()` informa master y volumen sin redondear.
+
+**Pruebas (emulación 375×812, sin tolerancia).** `correrVolumen()` 17/17: silenciar → master 0 exacto; reactivar → 1 y volumen 50 %; 7 toques rápidos → 0 exacto; toques rápidos terminando en sonido → 1 y sigue en 1 a los 800 ms; barra a 0 → ganancia de canción 0 exacta; altavoz tras barra a 0 recupera el último nivel; en pausa barra y altavoz (también alternando rápido) no reanudan. `correr()` 22/22.
+
+**Pendiente.** Teléfono físico y escucha del artista (clics al silenciar o mover el volumen).

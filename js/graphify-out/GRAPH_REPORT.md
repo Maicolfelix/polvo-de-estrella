@@ -1,16 +1,16 @@
 # Graph Report - js  (2026-10-17)
 
 ## Corpus Check
-- 5 files · ~15,933 words
+- 5 files · ~15,990 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 136 nodes · 239 edges · 16 communities (15 shown, 1 thin omitted)
+- 138 nodes · 242 edges · 16 communities (15 shown, 1 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 12 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `bf0fd503`
+- Built from commit: `f3006e01`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -34,7 +34,7 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `crearEscena()` - 31 edges
-2. `rampa()` - 11 edges
+2. `rampa()` - 9 edges
 3. `entrarCancion()` - 8 edges
 4. `entrar()` - 7 edges
 5. `tick()` - 7 edges
@@ -67,7 +67,7 @@ Nodes (14): atmos, aviso, ayuda, botones, btnIndice, capa, CAPTURA, escena (+6 m
 
 ### Community 1 - "audio.js"
 Cohesion: 0.11
-Nodes (8): activo, avisos, elementos, inst, NIVEL, pre, REVERB, song
+Nodes (9): activo, avisos, elementos, FUNDIDO, inst, NIVEL, pre, REVERB (+1 more)
 
 ### Community 2 - "escena.js"
 Cohesion: 0.17
@@ -78,16 +78,16 @@ Cohesion: 0.18
 Nodes (5): crearEscena(), entrar(), quitarVentana(), render(), salir()
 
 ### Community 4 - "entrarCancion"
-Cohesion: 0.32
-Nodes (12): ambiente(), avisar(), cambiarCancion(), detenerPreYa(), entrarCancion(), marcar(), pausar(), playPausa() (+4 more)
+Cohesion: 0.29
+Nodes (13): ambiente(), avisar(), cambiarCancion(), cargarCancion(), detenerPreYa(), entrarCancion(), marcar(), pausar() (+5 more)
 
 ### Community 6 - "actualizar"
 Cohesion: 0.36
 Nodes (9): cl(), actualizar(), actualizarRayo(), dibujarRayo(), estacion(), moverParticulas(), poseScroll(), eio() (+1 more)
 
 ### Community 7 - "rampa"
-Cohesion: 0.29
-Nodes (7): abrirPre(), cerrarPre(), detenerPre(), rampa(), setMudo(), silencioTotal(), viento()
+Cohesion: 0.33
+Nodes (6): abrirPre(), cerrarPre(), detenerPre(), rampa(), silencioTotal(), viento()
 
 ### Community 8 - "entrar"
 Cohesion: 0.40
@@ -98,8 +98,8 @@ Cohesion: 0.67
 Nodes (3): avisar(), iniciarPre(), pararPre()
 
 ### Community 10 - "activar"
-Cohesion: 0.40
-Nodes (5): activar(), cargarCancion(), fuentePre(), fuenteSong(), prepararPre()
+Cohesion: 0.29
+Nodes (7): activar(), fuentePre(), fuenteSong(), fundir(), prepararPre(), setMudo(), setVolumen()
 
 ### Community 11 - "cadenaReverb"
 Cohesion: 0.40
@@ -122,7 +122,7 @@ Cohesion: 0.50
 Nodes (4): anillo(), arco(), contorno(), formaU()
 
 ## Knowledge Gaps
-- **25 isolated node(s):** `hab`, `llegada`, `capa`, `velo`, `escena` (+20 more)
+- **26 isolated node(s):** `hab`, `llegada`, `capa`, `velo`, `escena` (+21 more)
   These have ≤1 connection - possible missing edges. (Counts symbols only; 54 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -130,15 +130,15 @@ Nodes (4): anillo(), arco(), contorno(), formaU()
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `crearEscena()` connect `crearEscena` to `app.js`, `escena.js`, `actualizar`, `contorno`?**
-  _High betweenness centrality (0.293) - this node is a cross-community bridge._
+  _High betweenness centrality (0.289) - this node is a cross-community bridge._
 - **Are the 8 inferred relationships involving `crearEscena()` (e.g. with `actualizar()` and `entrar()`) actually correct?**
   _`crearEscena()` has 8 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `hab`, `llegada`, `capa` to the rest of the system?**
-  _25 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _26 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `app.js` be split into smaller, more focused modules?**
   _Cohesion score 0.10526315789473684 - nodes in this community are weakly interconnected._
 - **Why does `CANCIONES` connect `escena.js` to `app.js`, `audio.js`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **Should `audio.js` be split into smaller, more focused modules?**
   _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
 - **Why does `crearAtmosfera()` connect `habitaciones.js` to `app.js`?**
