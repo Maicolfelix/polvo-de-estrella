@@ -15,7 +15,7 @@ export const NIVEL = { inst: .3, instDuck: .08, pre: 1, viento: .16, trueno: .5 
 let ctx, master, instG, preG, songG, vientoG, vientoF, cancionPre = -1, cancionSong = -1;
 let tokPre = 0, tokSong = 0, tokAmb = 0; // cada pausa diferida solo actúa si nadie volvió a usar esa fuente
 export let activo = false;
-let volumen = 1, mudo = false;
+let mudo = false;
 
 function impulso(c, { duracion, predelay }) {
   const sr = c.sampleRate, n = Math.floor(sr * (duracion + predelay)), ir = c.createBuffer(2, n, sr);
@@ -45,6 +45,82 @@ function cadenaReverb(c, entrada, salida, R = REVERB) {
   entrada.connect(hp).connect(conv).connect(lp).connect(hum).connect(salida);
 }
 
+// ---- Tu sonido: ajustes de escucha, solo sobre la canción completa ----
+// graves: estante en 150 Hz (cuerpo bajo la voz, sin retumbe) · medios: campana ancha (Q 0,9) en 1,4 kHz,
+// presencia de voz y guitarra · agudos: estante en 6 kHz (aire y brillo, por encima de las sibilantes).
+export const PREFS_INICIALES = Object.freeze({ cancion: 100, graves: 0, medios: 0, agudos: 0, espacio: 0, ambiente: 100 });
+const EQ = { graves: { tipo: 'lowshelf', f: 150 }, medios: { tipo: 'peaking', f: 1400, q: .9 }, agudos: { tipo: 'highshelf', f: 6000 } };
+// espacio al 100 %: envío ≈ −11 dB, cola de 1,5 s con pre-delay de 28 ms; filtrado para no empastar graves ni sibilantes
+export const ESPACIO = { duracion: 1.5, predelay: .028, pasaAltos: 350, pasaBajos: 5500, maximo: .28 };
+
+function irEspacio(c) {
+  const sr = c.sampleRate, p0 = Math.floor(ESPACIO.predelay * sr), n = p0 + Math.floor(ESPACIO.duracion * sr), ir = c.createBuffer(2, n, sr);
+  const tau = ESPACIO.duracion / 6.9;
+  for (let ch = 0; ch < 2; ch++) {
+    const d = ir.getChannelData(ch); let lp = 0;
+    for (let i = p0; i < n; i++) { const t = (i - p0) / sr, a = .3 + .6 * Math.min(1, t / ESPACIO.duracion); lp = lp * a + (Math.random() * 2 - 1) * (1 - a); d[i] = lp * Math.exp(-t / tau) * 2; }
+  }
+  return ir;
+}
+// Una sola cadena por contexto; se crea una vez y solo se reajustan sus parámetros.
+export function cadenaCancion(c, entrada, salida) {
+  const comp = c.createGain();                         // margen: compensa el realce para no saturar
+  entrada.connect(comp);
+  let prev = comp; const bandas = {};
+  for (const [k, d] of Object.entries(EQ)) {
+    const b = c.createBiquadFilter(); b.type = d.tipo; b.frequency.value = d.f; if (d.q) b.Q.value = d.q; b.gain.value = 0;
+    prev.connect(b); prev = b; bandas[k] = b;
+  }
+  const suma = c.createGain();
+  prev.connect(suma);                                  // señal seca: la voz siempre al frente
+  const envio = c.createGain(); envio.gain.value = 0;
+  const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = ESPACIO.pasaAltos;
+  const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = ESPACIO.pasaBajos;
+  const ir = irEspacio(c);
+  let conv = c.createConvolver(); conv.normalize = true; conv.buffer = ir;
+  prev.connect(envio); envio.connect(hp); conv.connect(lp); lp.connect(suma);
+  let colaConectada = false, tCola;
+  const conectarCola = on => {                         // sin espacio, la convolución no trabaja (ahorro en teléfono)
+    clearTimeout(tCola);
+    if (on && !colaConectada) { hp.connect(conv); colaConectada = true; }
+    if (!on && colaConectada) tCola = setTimeout(() => { hp.disconnect(); colaConectada = false; }, 300);
+  };
+  // Sin compresor: el DynamicsCompressor del navegador añade ganancia de compensación y alteraría el master
+  // aun en posición neutra. El margen lo da `comp` (−realce dB), medido sin saturación en las nueve canciones.
+  const vol = c.createGain();
+  suma.connect(vol).connect(salida);
+  return {
+    aplicar(p, original, seg = .04) {
+      const t = c.currentTime, k = original ? 0 : 1;
+      for (const b of Object.keys(EQ)) bandas[b].gain.setTargetAtTime(p[b] * k, t, seg);
+      const humedo = p.espacio / 100 * ESPACIO.maximo * k;
+      envio.gain.setTargetAtTime(humedo, t, seg);
+      const realce = Math.max(0, p.graves, p.medios, p.agudos) * k + 1.5 * (p.espacio / 100) * k;
+      comp.gain.setTargetAtTime(10 ** (-realce / 20), t, seg);
+      vol.gain.setTargetAtTime(p.cancion / 100, t, seg);
+      conectarCola(humedo > 0);
+    },
+    // pausa/cambio: la cola guardada se descarta, reanudar nunca recupera reverb vieja
+    vaciarCola() {
+      const nuevo = c.createConvolver(); nuevo.normalize = true; nuevo.buffer = ir;
+      if (colaConectada) hp.disconnect();
+      conv.disconnect(); conv = nuevo; conv.connect(lp);
+      if (colaConectada) hp.connect(conv);
+    },
+  };
+}
+let prefs = { ...PREFS_INICIALES }, original = false, cs = null;
+export const preferencias = () => ({ ...prefs });
+export const comparandoOriginal = () => original;
+export function ponerPreferencias(p) {
+  for (const k of Object.keys(PREFS_INICIALES)) if (Number.isFinite(+p?.[k])) prefs[k] = +p[k];
+  cs?.aplicar(prefs, original);
+  if (instG && !enHabitacion && !inst.paused) rampa(instG, nivelInst(), .3);
+}
+export function compararOriginal(on) { original = !!on; cs?.aplicar(prefs, original, .02); }
+const nivelInst = () => NIVEL.inst * prefs.ambiente / 100;
+const nivelDuck = () => NIVEL.instDuck * prefs.ambiente / 100;
+
 function sala(c, sec) {
   const n = c.sampleRate * sec | 0, b = c.createBuffer(2, n, c.sampleRate);
   for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n) ** 3; }
@@ -70,8 +146,10 @@ function crear() {
   preG = ctx.createGain(); preG.gain.value = 0;
   sPre.connect(shelf).connect(lp); lp.connect(dry).connect(preG); lp.connect(conv).connect(wet).connect(preG);
   preG.connect(master);
-  songG = ctx.createGain(); songG.gain.value = 0;
-  ctx.createMediaElementSource(song).connect(songG).connect(master);
+  songG = ctx.createGain(); songG.gain.value = 0;   // compuerta de pausa: va al final, corta también la cola
+  cs = cadenaCancion(ctx, ctx.createMediaElementSource(song), songG);
+  cs.aplicar(prefs, original, .001);
+  songG.connect(master);
   // viento: ruido en bucle, filtrado; su nivel lo mueve la escena
   const n = ctx.sampleRate * 4, b = ctx.createBuffer(2, n, ctx.sampleRate);
   for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); let br = 0; for (let i = 0; i < n; i++) { br = br * .985 + (Math.random() * 2 - 1) * .015; d[i] = br * 6 + (Math.random() * 2 - 1) * .05; } }
@@ -101,7 +179,7 @@ export async function activar() {
     if (!quiere) song.play().catch(() => {});       // el evento 'play' la detiene al instante
   }
   activo = true;
-  rampa(master, mudo ? 0 : volumen, .3);
+  rampa(master, mudo ? 0 : 1, .3);
   return ctx;
 }
 export const contexto = () => ctx;
@@ -112,8 +190,9 @@ export const niveles = () => ctx && ({
   sonando: { inst: !inst.paused, pre: !pre.paused, song: !song.paused },
   fuentes: { pre: pre.src.split('/').pop(), song: song.src.split('/').pop() },
 });
-export function setVolumen(v) { volumen = v; if (ctx && !mudo) rampa(master, v, .08); }
-export function setMudo(m) { mudo = m; if (ctx) rampa(master, m ? 0 : volumen, .25); }
+// el volumen del reproductor es el de la canción (100 % = nivel base, sin amplificar); el silencio general manda
+export function setVolumen(v) { ponerPreferencias({ ...prefs, cancion: Math.round(v * 100) }); }
+export function setMudo(m) { mudo = m; if (ctx) rampa(master, m ? 0 : 1, .25); }
 export const estaMudo = () => mudo || !activo;
 
 const fuentePre = i => `audio/${CANCIONES[i].n}-pre.m4a`;
@@ -123,7 +202,7 @@ const fuenteSong = i => `audio/${CANCIONES[i].n}.m4a`;
 export function ambiente(on, seg = 2.5) {
   if (!ctx) return;
   const yo = ++tokAmb;
-  if (on) { inst.play().catch(() => {}); rampa(instG, NIVEL.inst, seg); }
+  if (on) { inst.play().catch(() => {}); rampa(instG, nivelInst(), seg); }
   else { rampa(instG, 0, seg); setTimeout(() => { if (yo === tokAmb) inst.pause(); }, seg * 1000 + 600); }
 }
 
@@ -134,11 +213,11 @@ export function prepararPre(i) {               // llamada dentro del gesto en t�
   if (cancionPre !== i) { cancionPre = i; pre.src = fuentePre(i); }
   if (pre.paused) pre.play().catch(() => {});
 }
-export function abrirPre() { tokPre++; tokAmb++; rampa(preG, NIVEL.pre, .7); rampa(instG, NIVEL.instDuck, .9); }
+export function abrirPre() { tokPre++; tokAmb++; rampa(preG, NIVEL.pre, .7); rampa(instG, nivelDuck(), .9); }
 export function cerrarPre(volverAmbiente = true) {
   if (!ctx) return;
   rampa(preG, 0, .55);
-  if (volverAmbiente) { tokAmb++; rampa(instG, NIVEL.inst, 1.4); }
+  if (volverAmbiente) { tokAmb++; rampa(instG, nivelInst(), 1.4); }
   const yo = ++tokPre;
   setTimeout(() => { if (yo === tokPre) pre.pause(); }, 900);
 }
@@ -184,6 +263,7 @@ export function pausar() {
   quiere = false; marcar(); avisar();
   silenciarYa(songG);                        // silencio inmediato…
   song.pause();                              // …y parada real: conserva la posición
+  cs?.vaciarCola();
 }
 export function playPausa() { quiere ? pausar() : reproducir(); }
 
@@ -209,6 +289,7 @@ export function cambiarCancion(i) {
     if (yo !== tokCambio) return;              // otro cambio o la salida lo invalidaron
     cambiando = false;
     song.pause();
+    cs?.vaciarCola();
     cargarCancion(i);
     song.currentTime = 0;
     if (quiere) { song.play().catch(() => {}); subir(songG, .6); }
@@ -219,7 +300,7 @@ export function salirCancion() {
   quiere = false; marcar(); avisar();
   if (!ctx) { song.pause(); return; }
   rampa(songG, 0, .5);                       // cola breve de 0,5 s, luego parada real
-  setTimeout(() => { if (!quiere) song.pause(); }, 550);
+  setTimeout(() => { if (!quiere) { song.pause(); cs?.vaciarCola(); } }, 550);
   ambiente(true, 3.2);
 }
 
@@ -278,4 +359,22 @@ export async function verificarReverb(R = REVERB) {
     return { picoDb: +(20 * Math.log10(pico)).toFixed(2), rmsDb: +(10 * Math.log10(sum / L.length)).toFixed(2) };
   };
   return { seco: await medir(false), conReverb: await medir(true), niveles: NIVEL, reverb: R };
+}
+
+// Mide la cadena «Tu sonido» sin sonar: render offline de un tramo de la canción con unos ajustes dados.
+// Devuelve pico, RMS y muestras saturadas (|x| ≥ 1) a la salida y a la entrada (master original).
+export async function verificarCancion(i, p = PREFS_INICIALES, desde = 60, seg = 30, comparar = false) {
+  const datos = await (await fetch(fuenteSong(i))).arrayBuffer();
+  const buf = await new OfflineAudioContext(2, 44100, 44100).decodeAudioData(datos);
+  const medir = r => {
+    let pico = 0, sum = 0, sat = 0;
+    for (let ch = 0; ch < 2; ch++) { const d = r.getChannelData(ch); for (let k = 0; k < d.length; k++) { const v = Math.abs(d[k]); if (v > pico) pico = v; if (v >= 1) sat++; sum += d[k] * d[k]; } }
+    return { picoDb: +(20 * Math.log10(pico)).toFixed(2), rmsDb: +(10 * Math.log10(sum / (r.length * 2))).toFixed(2), saturadas: sat };
+  };
+  const o = new OfflineAudioContext(2, 44100 * seg, 44100), s = o.createBufferSource(); s.buffer = buf;
+  const c = cadenaCancion(o, s, o.destination); c.aplicar(p, comparar, .001);
+  s.start(0, desde);
+  const salida = medir(await o.startRendering());
+  const o2 = new OfflineAudioContext(2, 44100 * seg, 44100), s2 = o2.createBufferSource(); s2.buffer = buf; s2.connect(o2.destination); s2.start(0, desde);
+  return { original: medir(await o2.startRendering()), salida, duracion: +buf.duration.toFixed(2) };
 }
