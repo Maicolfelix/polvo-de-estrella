@@ -162,3 +162,12 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 @media (max-width:760px){ .btn-seguir{bottom:calc(170px + env(safe-area-inset-bottom))} }
 /* la letra se desvanece bajo los botones superiores en vez de chocar con ellos */
 .hab-scroll{-webkit-mask-image:linear-gradient(transparent 0,transparent 64px,#000 128px);mask-image:linear-gradient(transparent 0,transparent 64px,#000 128px)}
+/* rótulo de cada puerta: placa de bronce pegada al pie de su puerta, legible en cualquier fondo */
+.rotulo{top:calc(100% + 10px);padding:.6rem 1rem .62rem;border-radius:4px;backdrop-filter:none;-webkit-backdrop-filter:none;
+  background:linear-gradient(#1c150d,#0f0b07);border:1px solid rgba(201,162,74,.55);box-shadow:inset 0 1px 0 rgba(255,226,160,.12),0 8px 18px -8px #000}
+.rotulo::before{content:"";position:absolute;left:50%;top:-11px;width:1px;height:10px;background:rgba(201,162,74,.5)}
+.rotulo .titulo{color:#f1e6cf}
+/* habitación 1: la sala del mar en 3D queda detrás de la letra */
+#habitacion.con-sala{background:transparent}
+#habitacion.con-sala #atmos{display:none}
+#habitacion.con-sala .hab-contenido::before{background:linear-gradient(90deg,transparent,rgba(4,6,9,.62) 14%,rgba(4,6,9,.62) 86%,transparent)}

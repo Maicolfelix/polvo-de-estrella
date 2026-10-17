@@ -218,7 +218,7 @@ export function entrarCancion(i, retraso = .9) {
   silenciarYa(songG);
   song.play().catch(() => {});
   subir(songG, 1.4, retraso);
-  ambiente(false, 1.8);
+  ambiente(false, Math.max(.45, retraso * 1.6));   // la instrumental se va al ritmo de la entrada (más rápido con movimiento reducido)
 }
 export function cambiarCancion(i) {
   const yo = ++tokCambio;

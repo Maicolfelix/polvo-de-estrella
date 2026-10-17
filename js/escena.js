@@ -6,6 +6,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { CANCIONES } from './datos.js';
+import { crearSalaMar } from './sala-mar.js';
 
 const V2 = THREE.Vector2, V3 = THREE.Vector3;
 const cl = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -17,25 +18,25 @@ const IW = 3.8, MURO = .6, Z0 = -.9, Z1 = -23.1;
 export const MOVIL = matchMedia('(pointer: coarse)').matches || innerWidth < 700;
 
 // ---------- utilidades de geometría ----------
-function arco(cx, y0, w, R, n = 14) {
+export function arco(cx, y0, w, R, n = 14) {
   const c = R - w, thA = Math.acos(-c / R), p = [];
   for (let i = 0; i <= n; i++) { const th = Math.PI + (thA - Math.PI) * i / n; p.push(new V2(cx + c + R * Math.cos(th), y0 + R * Math.sin(th))); }
   for (let i = n - 1; i >= 0; i--) p.push(new V2(2 * cx - p[i].x, p[i].y));
   return p;
 }
-const altoArco = (w, R) => Math.sqrt(R * R - (R - w) ** 2);
-const contorno = (cx, { w, s, R }, base = 0) => [new V2(cx - w, base), ...arco(cx, base + s, w, R), new V2(cx + w, base)];
-const formaU = (cx, ext, int) => new THREE.Shape([...contorno(cx, ext), ...contorno(cx, int).reverse()]);
+export const altoArco = (w, R) => Math.sqrt(R * R - (R - w) ** 2);
+export const contorno = (cx, { w, s, R }, base = 0) => [new V2(cx - w, base), ...arco(cx, base + s, w, R), new V2(cx + w, base)];
+export const formaU = (cx, ext, int) => new THREE.Shape([...contorno(cx, ext), ...contorno(cx, int).reverse()]);
 function anillo(cx, ext, int, base) {
   const s = new THREE.Shape(contorno(cx, ext, base - (ext.w - int.w)));
   s.holes.push(new THREE.Path(contorno(cx, int, base)));
   return s;
 }
-const extruir = (shape, depth) => new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 28 });
+export const extruir = (shape, depth) => new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 28 });
 const caja = (w, h, d, x, y, z) => new THREE.BoxGeometry(w, h, d).translate(x, y, z);
 
 // UV en metros reales, proyección por triángulo según su normal (sin costuras de escala entre piezas)
-function uvMundo(g, tile) {
+export function uvMundo(g, tile) {
   if (g.index) g = g.toNonIndexed();
   const p = g.attributes.position, uv = new Float32Array(p.count * 2);
   const a = new V3(), b = new V3(), c = new V3(), n = new V3();
@@ -81,6 +82,37 @@ function texturaPlaca(n) {
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
 }
 
+// Inyecta el envejecimiento en un MeshStandardMaterial (sin texturas nuevas: ruido 3D en el shader).
+export function envejecer(mat, { base = 0, alto = 2.4, fuerza = .5, vetas = .3, musgo = .3, macro = .3 } = {}) {
+  const f = v => v.toFixed(3);
+  mat.onBeforeCompile = sh => {
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vMundo;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvMundo = (modelMatrix * vec4(transformed, 1.)).xyz;');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', `#include <common>
+varying vec3 vMundo;
+float h3(vec3 p){ return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }
+float n3(vec3 p){ vec3 i = floor(p), q = fract(p); q = q*q*(3.-2.*q);
+  return mix(mix(mix(h3(i), h3(i+vec3(1,0,0)), q.x), mix(h3(i+vec3(0,1,0)), h3(i+vec3(1,1,0)), q.x), q.y),
+             mix(mix(h3(i+vec3(0,0,1)), h3(i+vec3(1,0,1)), q.x), mix(h3(i+vec3(0,1,1)), h3(i+vec3(1,1,1)), q.x), q.y), q.z); }
+float fbm3(vec3 p){ float v = 0., a = .5; for (int i = 0; i < 4; i++) { v += a * n3(p); p *= 2.03; a *= .5; } return v; }`)
+      .replace('#include <map_fragment>', `#include <map_fragment>
+{ float y = vMundo.y - ${f(base)};
+  float sube = ${alto > 0 ? `1. - smoothstep(0., ${f(alto)}, y + (fbm3(vMundo * 1.3) - .5) * .9)` : '0.'};
+  float vet = smoothstep(.56, .86, fbm3(vec3(vMundo.x * 2.4, vMundo.y * .16, vMundo.z * 2.4)));
+  float mus = smoothstep(.6, .82, fbm3(vMundo * .8 + 3.1)) * max(sube, ${alto > 0 ? '0.' : '1.'});
+  diffuseColor.rgb *= (1. - ${f(macro)} * .5) + ${f(macro)} * fbm3(vMundo * .11);
+  diffuseColor.rgb *= 1. - ${f(fuerza)} * sube - ${f(vetas)} * vet;
+  diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.03, .042, .024), mus * ${f(musgo)});
+}`)
+      .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+roughnessFactor *= ${alto > 0 ? `mix(1., .6, 1. - smoothstep(0., ${f(alto * .6)}, vMundo.y - ${f(base)}))` : '1.'};`);
+  };
+  mat.customProgramCacheKey = () => `env-${base}-${alto}-${fuerza}-${vetas}-${musgo}-${macro}`;
+  mat.needsUpdate = true;
+}
+
 export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, MOVIL ? 1.4 : 1.75));
@@ -123,6 +155,13 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     vidrio: new THREE.MeshStandardMaterial({ color: 0x050304, roughness: .2, metalness: 0, emissive: 0x6a1812, emissiveIntensity: .55 }),
     vidrioCalido: new THREE.MeshStandardMaterial({ color: 0x050304, roughness: .2, emissive: 0xc06a2a, emissiveIntensity: .9 }),
   };
+
+  // Envejecimiento en coordenadas de mundo: suciedad y humedad que suben del suelo, chorreones,
+  // musgo en la base y variación tonal amplia para que ninguna superficie se vea uniforme.
+  envejecer(M.piedra, { base: 0, alto: 3.4, fuerza: .62, vetas: .5, musgo: .45, macro: .75 });
+  envejecer(M.muro, { base: B, alto: 1.1, fuerza: .22, vetas: .14, musgo: 0, macro: .25 });
+  envejecer(M.tierra, { base: 0, alto: 0, fuerza: 0, vetas: 0, musgo: 0, macro: .55 });
+  envejecer(M.suelo, { base: 0, alto: 0, fuerza: 0, vetas: 0, musgo: .5, macro: .3 });
 
   // ---------- lotes: todo lo estático de un material se fusiona en una sola malla ----------
   const lotes = new Map();
@@ -256,6 +295,13 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     barras.count = puntas.count = k; }
   barras.castShadow = puntas.castShadow = true;
   scene.add(barras, puntas);
+  // molduras: cornisa bajo el gablete, imposta a la altura de las lancetas, alféizares y labio del zócalo
+  poner(M.piedra, caja(14.6, .3, .42, 0, B + 11.02, .14), 1.2);
+  for (const s of [-1, 1]) {
+    poner(M.piedra, caja(3.1, .22, .3, s * 5.65, B + 4.3, .1), 1);
+    poner(M.piedra, caja(1.5, .16, .4, s * 5.45, B + 4.52, .14), 1);
+  }
+  poner(M.piedra, caja(17.9, .14, 26.7, 0, B - .07, -11.6), 1.5);
   // faroles a los lados de la escalinata
   const faroles = [];
   for (const s of [-1, 1]) {
@@ -280,7 +326,13 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
   for (const s of [-1, 1]) {
     const piv = new THREE.Group(); piv.position.set(s * UMBRAL.w, B, -.83);
     const hoja = new THREE.Mesh(new THREE.BoxGeometry(UMBRAL.w, 3.7, .1).translate(-s * UMBRAL.w / 2, 1.85, 0), M.madera);
-    hoja.castShadow = hoja.receiveShadow = true; piv.add(hoja); scene.add(piv); hojasPortal.push([piv, s]);
+    hoja.castShadow = hoja.receiveShadow = true; piv.add(hoja);
+    for (const y of [.55, 1.85, 3.15]) {   // pernios de hierro y bisagras
+      const banda = new THREE.Mesh(new THREE.BoxGeometry(UMBRAL.w * .92, .1, .03), M.hierro); banda.position.set(-s * UMBRAL.w * .47, y, .065); piv.add(banda);
+      const pin = new THREE.Mesh(new THREE.CylinderGeometry(.035, .035, .16, 10), M.hierro); pin.position.set(0, y, .02); piv.add(pin);
+    }
+    const aro = new THREE.Mesh(new THREE.TorusGeometry(.09, .016, 8, 20), M.hierro); aro.position.set(-s * UMBRAL.w * .86, 1.5, .09); piv.add(aro);
+    scene.add(piv); hojasPortal.push([piv, s]);
   }
   const luzPortal = new THREE.PointLight(0xffb27a, 6, 16, 2); luzPortal.position.set(0, B + 2.5, -3.2); scene.add(luzPortal);
   const luzPorche = new THREE.PointLight(0xff9a62, 2.5, 7, 2); luzPorche.position.set(0, B + 3, .2); scene.add(luzPorche);
@@ -379,6 +431,7 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     marco.add(hab);
     const fondo = new THREE.Mesh(new THREE.PlaneGeometry(anchoHab * .9, altoHab * .95), new THREE.MeshBasicMaterial({ map: glowTex, color: luz, transparent: true, opacity: .25, blending: THREE.AdditiveBlending, depthWrite: false }));
     fondo.position.set(0, altoHab * .45, -1.78); marco.add(fondo);
+    if (d.i === 0) hab.visible = fondo.visible = false;   // la puerta 1 da a la sala del mar (portal)
     // luz que se escapa por debajo y su reflejo en el mármol
     const rendija = new THREE.Mesh(new THREE.BoxGeometry(dim.w * 2 - .04, .012, .02), new THREE.MeshBasicMaterial({ color: luz }));
     rendija.position.set(0, .006, .03); marco.add(rendija);
@@ -387,6 +440,21 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     // placa con el número
     const placa = new THREE.Mesh(new THREE.PlaneGeometry(.46, .27), new THREE.MeshStandardMaterial({ map: texturaPlaca(c.n), roughness: .4, metalness: .5, emissive: 0x2a1c08, emissiveIntensity: .4 }));
     placa.position.set(0, dim.s + ap + .42, d.lado === 0 ? 1.0 : .62); marco.add(placa);
+    // acabado nuevo (muestra en la puerta 1; se extenderá a las demás tras la revisión)
+    if (d.i === 0) {
+      for (const { piv, s } of hojas) for (const y of [.42, 1.55, 2.75]) {
+        const banda = new THREE.Mesh(new THREE.BoxGeometry(dim.w * .9, .07, .022), M.hierro); banda.position.set(-s * dim.w * .47, y, .078); piv.add(banda);
+        const punta = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, .022, 10).rotateX(Math.PI / 2), M.hierro); punta.position.set(-s * dim.w * .9, y, .078); piv.add(punta);
+        const pin = new THREE.Mesh(new THREE.CylinderGeometry(.028, .028, .14, 10), M.hierro); pin.position.set(0, y, .03); piv.add(pin);
+      }
+      const clave = new THREE.Mesh(new THREE.BoxGeometry(.24, .34, .2), M.piedra); clave.position.set(0, dim.s + ap + .06, .55); marco.add(clave);
+      const umbral = new THREE.Mesh(new THREE.BoxGeometry(dim.w * 2 + .26, .05, .56), M.piedra); umbral.position.set(0, .025, .26); umbral.receiveShadow = true; marco.add(umbral);
+      // farol de hierro en la columna contigua (a 1,1 m de la puerta, hacia la entrada de la nave)
+      const brazo = new THREE.Mesh(new THREE.BoxGeometry(.04, .04, .3), M.hierro); brazo.position.set(-1.1, 2.45, .88); marco.add(brazo);
+      const caja = new THREE.Mesh(new THREE.BoxGeometry(.16, .24, .16), M.vidrioCalido); caja.position.set(-1.1, 2.3, 1.02); marco.add(caja);
+      const techo = new THREE.Mesh(new THREE.ConeGeometry(.14, .12, 4).rotateY(Math.PI / 4), M.hierro); techo.position.set(-1.1, 2.48, 1.02); marco.add(techo);
+      const llama = new THREE.PointLight(0xffa860, 1.8, 4.5, 2); llama.position.set(-1.1, 2.3, 1.1); marco.add(llama);
+    }
     return { ...d, c, luz, marco, hojas, matHab, fondo, rendija, charco, ap, abierto: 0, objetivo: 0, brillo: 0, objetivoBrillo: 0 };
   });
 
@@ -417,18 +485,67 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
 
   const arbolesLejos = tex('arboles_lejos', true, 'png'), arbolesCerca = tex('arboles_cerca', true, 'png');
   arbolesLejos.wrapS = arbolesCerca.wrapS = THREE.RepeatWrapping;
-  const bosque = (t, w, h, x, z, ry, rep = 1) => {
-    const mat = new THREE.MeshBasicMaterial({ map: t, transparent: true, alphaTest: .05, depthWrite: false, color: 0x5a4a50, fog: true, side: THREE.DoubleSide });
-    t.repeat.set(rep, 1);
+  // capas de bosque con dos semillas, espejadas y desplazadas: ningún tramo se repite a la vista
+  const lejos2 = tex('arboles_lejos2', true, 'png'), cerca2 = tex('arboles_cerca2', true, 'png');
+  const capaBosque = (t, w, h, x, z, ry, rep, off, espejo, tono) => {
+    const t2 = t.clone(); t2.wrapS = THREE.RepeatWrapping; t2.repeat.set(rep * (espejo ? -1 : 1), 1); t2.offset.x = off; t2.needsUpdate = true;
+    const mat = new THREE.MeshBasicMaterial({ map: t2, transparent: true, alphaTest: .05, depthWrite: false, color: tono, fog: true, side: THREE.DoubleSide });
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); m.position.set(x, h / 2 - .5, z); m.rotation.y = ry; scene.add(m);
   };
-  bosque(arbolesLejos, 420, 46, 0, -150, 0, 3);
-  bosque(arbolesLejos, 260, 40, -120, -10, Math.PI / 2.4, 2);
-  bosque(arbolesLejos, 260, 40, 120, -10, -Math.PI / 2.4, 2);
-  bosque(arbolesCerca, 90, 26, -42, -48, .5);
-  bosque(arbolesCerca, 90, 26, 44, -52, -.45);
-  bosque(arbolesCerca, 70, 22, -58, 20, 1.2);
-  bosque(arbolesCerca, 70, 22, 60, 24, -1.25);
+  capaBosque(arbolesLejos, 460, 44, 0, -170, 0, 3, .13, false, 0x4a3c42);
+  capaBosque(lejos2, 420, 38, 20, -135, 0, 2.6, .41, true, 0x55464b);
+  capaBosque(arbolesLejos, 280, 40, -125, -15, Math.PI / 2.4, 2, .7, true, 0x4d3f45);
+  capaBosque(lejos2, 280, 36, 128, -5, -Math.PI / 2.4, 2.2, .2, false, 0x4d3f45);
+  capaBosque(arbolesCerca, 90, 26, -44, -50, .5, 1, .1, false, 0x5a4a50);
+  capaBosque(cerca2, 80, 24, 46, -56, -.45, 1, .55, true, 0x5a4a50);
+  capaBosque(cerca2, 70, 22, -60, 22, 1.2, 1, .3, false, 0x5a4a50);
+  capaBosque(arbolesCerca, 70, 22, 62, 26, -1.25, 1, .8, true, 0x5a4a50);
+  // árboles secos en 3D cerca del camino: ramas que proyectan sombra con la luna
+  { const geos = []; let semilla = 11;
+    const rnd = () => (semilla = semilla * 16807 % 2147483647) / 2147483647;
+    const ramas = (o, dir, largo, radio, nivel) => {
+      const g = new THREE.CylinderGeometry(radio * .66, radio, largo, 6, 1, true);
+      g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new V3(0, 1, 0), dir));
+      const mid = o.clone().addScaledVector(dir, largo / 2); g.translate(mid.x, mid.y, mid.z); geos.push(g);
+      if (!nivel || radio < .025) return;
+      const fin = o.clone().addScaledVector(dir, largo);
+      for (let k = 0, n = 2 + (rnd() < .45); k < n; k++)
+        ramas(fin, dir.clone().add(new V3(rnd() - .5, rnd() * .4, rnd() - .5).multiplyScalar(1.4)).normalize(), largo * (.6 + rnd() * .22), radio * .63, nivel - 1);
+    };
+    for (const [x, z, h] of [[-10, 30, 4.2], [12.5, 38, 5], [-17, 49, 5.6], [15, 60, 4.6], [-12.5, 12, 4.8], [14, 6, 5.2], [-20, -8, 6], [19, -16, 5.4]]) {
+      ramas(new V3(x, 0, z), new V3((rnd() - .5) * .15, 1, (rnd() - .5) * .15).normalize(), h * .42, .2 + h * .02, MOVIL ? 4 : 5);
+    }
+    const arboles = new THREE.Mesh(mergeGeometries(geos.map(g => g.toNonIndexed()), false), new THREE.MeshStandardMaterial({ color: 0x15100e, roughness: .95, side: THREE.DoubleSide }));
+    arboles.castShadow = true; scene.add(arboles); }
+  // matas de hierba seca (tarjetas cruzadas instanciadas) y rocas a lo largo del camino, la verja y el zócalo
+  { const hierbaTex = tex('hierba', true, 'png'); hierbaTex.wrapS = hierbaTex.wrapT = THREE.ClampToEdgeWrapping;
+    const tarjeta = mergeGeometries([new THREE.PlaneGeometry(1, 1).translate(0, .5, 0), new THREE.PlaneGeometry(1, 1).translate(0, .5, 0).rotateY(Math.PI / 2)]);
+    const N = MOVIL ? 700 : 1500, mats = new THREE.InstancedMesh(tarjeta, new THREE.MeshStandardMaterial({ map: hierbaTex, alphaTest: .5, side: THREE.DoubleSide, roughness: 1, color: 0x9a8f6c }), N);
+    const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(); let semilla = 5;
+    const rnd = () => (semilla = semilla * 16807 % 2147483647) / 2147483647;
+    for (let k = 0; k < N; k++) {
+      const zona = rnd(); let x, z;
+      if (zona < .45) { const lado = rnd() < .5 ? -1 : 1; x = lado * (2.05 + rnd() * 2.4); z = 18 + rnd() * 52; }          // bordes del camino
+      else if (zona < .65) { x = (rnd() - .5) * 78; z = 16.3 + rnd() * 1.4; if (Math.abs(x) < 2.8) x += 6; }               // pie de la verja
+      else if (zona < .85) { const lado = rnd() < .5 ? -1 : 1; x = lado * (9.3 + rnd() * 1.6); z = -24 + rnd() * 27; }      // costados del zócalo
+      else { x = (rnd() - .5) * 60; z = -30 + rnd() * 100; if (Math.abs(x) < 10 && z < 18) x += 22 * Math.sign(x || 1); } // campo
+      const sc = .35 + rnd() * .75;
+      m4.compose(new V3(x, 0, z), q.setFromEuler(e.set(0, rnd() * Math.PI, 0)), new V3(sc * (.8 + rnd() * .5), sc, sc));
+      mats.setMatrixAt(k, m4);
+    }
+    mats.receiveShadow = true; scene.add(mats);
+    const roca = new THREE.IcosahedronGeometry(.5, 1), pr = roca.attributes.position;
+    for (let k = 0; k < pr.count; k++) { const v = new V3().fromBufferAttribute(pr, k); v.multiplyScalar(.75 + .5 * Math.abs(Math.sin(v.x * 7.1 + v.y * 3.3 + v.z * 5.7))); v.y *= .6; pr.setXYZ(k, v.x, v.y, v.z); }
+    roca.computeVertexNormals();
+    const rocas = new THREE.InstancedMesh(roca, pbr('piedra', { normal: 1.2, color: 0x9c948e }), 70);
+    for (let k = 0; k < 70; k++) {
+      const lado = rnd() < .5 ? -1 : 1, x = k < 40 ? lado * (2.3 + rnd() * 5) : (rnd() - .5) * 70, z = k < 40 ? 19 + rnd() * 50 : -28 + rnd() * 90;
+      if (k >= 40 && Math.abs(x) < 10 && z < 18) continue;
+      const sc = .25 + rnd() * .9;
+      m4.compose(new V3(x, sc * .12, z), q.setFromEuler(e.set(rnd(), rnd() * 6, rnd())), new V3(sc, sc * (.6 + rnd() * .5), sc));
+      rocas.setMatrixAt(k, m4);
+    }
+    rocas.castShadow = rocas.receiveShadow = true; scene.add(rocas); }
 
   const nieblaTex = tex('niebla'); nieblaTex.wrapS = nieblaTex.wrapT = THREE.RepeatWrapping;
   const capasNiebla = [];
@@ -514,7 +631,8 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
 
   /* ===================== POSTPROCESO ===================== */
   const composer = new EffectComposer(renderer);
-  composer.addPass(new RenderPass(scene, camera));
+  const pasoEscena = new RenderPass(scene, camera);
+  composer.addPass(pasoEscena);
   const bloom = new UnrealBloomPass(new V2(256, 256), .55, .6, .82);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
@@ -565,6 +683,9 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     FACTOR_PUERTA = camera.aspect < 1 ? .97 : .8;
     camera.updateProjectionMatrix();
     bloom.resolution.set(w / 2, h / 2);
+    renderer.getDrawingBufferSize(tamPortal);
+    rtPortal.setSize(Math.round(tamPortal.x * .6), Math.round(tamPortal.y * .6));
+    portal.material.uniforms.uRes.value.copy(tamPortal);
   }
 
   const mundo = (d, x, y, z) => d.marco.localToWorld(new V3(x, y, z));
@@ -577,7 +698,7 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
   function entrar(i, lienzo) {
     const d = puertas[i];
     quitarVentana();
-    if (lienzo) {
+    if (lienzo && d.i !== 0) {
       const t = new THREE.CanvasTexture(lienzo); t.colorSpace = THREE.SRGBColorSpace;
       const alto = 2 * DIST_VENTANA * Math.tan(THREE.MathUtils.degToRad(fovBase() + 9) / 2), ancho = alto * camera.aspect;
       ventana = new THREE.Mesh(new THREE.PlaneGeometry(ancho, alto), new THREE.MeshBasicMaterial({ map: t, toneMapped: false, fog: false }));
@@ -589,7 +710,7 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     return new Promise(res => {
       const a = anim = { tipo: 'entrar', d, inicio: performance.now(), t: 0, dur: rm ? .55 : 2.5, p0, t0, pf, tf, pin, tin, res, avisado: false };
       // respaldo: si el navegador deja de pintar (pantalla bloqueada, pestaña oculta) la interfaz no se queda a medias
-      setTimeout(() => { if (!a.avisado) { a.avisado = true; res(); } }, a.dur * 800 + 400);
+      setTimeout(() => { if (!a.avisado) { a.avisado = true; a.respaldo = true; res(); } }, a.dur * 800 + 400);
     });
   }
   function salir(i) {
@@ -608,6 +729,17 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     cam.p.copy(mundo(puertas[i], 0, 1.62, -1.77 + DIST_VENTANA)); cam.t.copy(mundo(puertas[i], 0, 1.62, -4));
   }
 
+  // Cierra la entrada aunque no haya habido fotogramas (pantalla bloqueada, pestaña oculta):
+  // deja la cámara en la pose final dentro de la habitación y la puerta abierta.
+  function terminarEntrada(forzar = false) {
+    if (!anim || !(forzar || anim.respaldo)) return;
+    const a = anim; anim = null; retenido = true;
+    a.d.abierto = a.d.objetivo = 1; a.d.objetivoBrillo = 1;
+    cam.p.copy(a.pin); cam.t.copy(a.tin);
+    camera.fov = fovBase() + (rm ? 0 : 9); camera.updateProjectionMatrix();
+    camera.position.copy(cam.p); camera.lookAt(cam.t);
+    if (!a.avisado) { a.avisado = true; a.res(); }
+  }
   function quitarVentana() {
     if (!ventana) return;
     ventana.parent.remove(ventana); ventana.material.map.dispose(); ventana.material.dispose(); ventana.geometry.dispose(); ventana = null;
@@ -715,7 +847,8 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
       if (anim && anim.d === d) d.abierto = Math.max(d.abierto, rm ? cl(anim.t / .35) : eio(cl((anim.t - .35) / 1.1)));
       d.brillo += (d.objetivoBrillo - d.brillo) * cl(dt * 2.5);
       const ang = cl(d.abierto) * 1.8;
-      d.hojas.forEach(({ piv, s }) => piv.rotation.y = -s * ang); // se abren hacia la habitación
+      // se abren hacia la habitación; la puerta 1 hacia la nave, hasta quedar contra el derrame del muro
+      d.hojas.forEach(({ piv, s }) => piv.rotation.y = d.i === 0 ? s * Math.min(ang, 1.52) : -s * ang);
       d.matHab.emissiveIntensity = .012 + d.brillo * .018;
       d.fondo.material.opacity = ventana && ventana.parent === d.marco ? 0 : .18 + d.brillo * .7;
       d.charco.material.opacity = .16 + d.brillo * .35 + d.abierto * .3;
@@ -733,7 +866,43 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     return f;
   }
 
-  function render() { composer.render(); }
+  // ---------- portal de la puerta 1: la sala del mar con la perspectiva real de la cámara ----------
+  // La pose de la cámara se traslada del espacio de la puerta al de la sala (ANCLA); al cruzar el umbral
+  // se pasa a dibujar la sala directamente desde esa misma pose, sin corte.
+  const sala = crearSalaMar({ tex, rm });
+  const ANCLA = new THREE.Matrix4().makeTranslation(0, 0, .04), tmpM = new THREE.Matrix4(), tamPortal = new V2();
+  const rtPortal = new THREE.WebGLRenderTarget(2, 2, { type: THREE.HalfFloatType });
+  const d0 = puertas[0];
+  const portal = new THREE.Mesh(new THREE.PlaneGeometry(d0.dim.w * 2 + .04, d0.dim.s + d0.ap + .04).translate(0, (d0.dim.s + d0.ap) / 2, -.04), new THREE.ShaderMaterial({
+    uniforms: { tMap: { value: rtPortal.texture }, uRes: { value: new V2(1, 1) } },
+    vertexShader: 'void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }',
+    fragmentShader: 'uniform sampler2D tMap; uniform vec2 uRes; void main(){ gl_FragColor = texture2D(tMap, gl_FragCoord.xy / uRes); }',
+  }));
+  portal.visible = false; d0.marco.add(portal);
+  let progresoSala = 0;
+  function camaraSala() {
+    camera.updateMatrixWorld(); d0.marco.updateMatrixWorld();
+    sala.camara.matrixWorld.copy(ANCLA).multiply(tmpM.copy(d0.marco.matrixWorld).invert()).multiply(camera.matrixWorld);
+    sala.camara.matrixWorldInverse.copy(sala.camara.matrixWorld).invert();
+    sala.camara.projectionMatrix.copy(camera.projectionMatrix); sala.camara.projectionMatrixInverse.copy(camera.projectionMatrixInverse);
+  }
+  const enSala = () => { const l = d0.marco.worldToLocal(cam.p.clone()); return l.z < -.06 && Math.abs(l.x) < 1.5 && l.y > 0 && l.y < 4.5; };
+  function render() {
+    if (enSala()) {
+      camaraSala(); portal.visible = false;
+      pasoEscena.scene = sala.escena; pasoEscena.camera = sala.camara;
+    } else {
+      pasoEscena.scene = scene; pasoEscena.camera = camera;
+      portal.visible = d0.abierto > .01 && cam.p.distanceTo(d0.marco.position) < 16;
+      if (portal.visible) {
+        sala.actualizar(1 / 60, progresoSala); camaraSala();
+        renderer.setRenderTarget(rtPortal); renderer.render(sala.escena, sala.camara); renderer.setRenderTarget(null);
+      }
+    }
+    composer.render();
+  }
+  // dentro de la habitación 1 solo se anima la sala (la escena principal no se actualiza)
+  function actualizarSala(dt, p) { progresoSala = p; sala.actualizar(dt, p); }
 
   // rectángulo de pantalla de cada puerta, para los botones accesibles superpuestos
   const proy = new V3();
@@ -756,7 +925,7 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
 
   // ponytail: reinicia el polvo interior tras cada entrada en vez de simular su regreso
   return {
-    renderer, camera, scene, tamano, actualizar, render, entrar, salir, ponerEnPuerta, preescucha, rectPuertas,
+    renderer, camera, scene, tamano, actualizar, render, entrar, salir, ponerEnPuerta, preescucha, rectPuertas, actualizarSala, terminarEntrada,
     uDePuerta, U_FIN, U_EXT, U_NAVE, PASO, reponerPolvo: () => reponerParticulas(polvoInt),
     cancelarMezcla: () => { mezcla = null; },
     depurar: () => ({ anim: anim && { t: +anim.t.toFixed(2), dur: anim.dur, avisado: anim.avisado }, mezcla: !!mezcla, cam: cam.p.toArray().map(v => +v.toFixed(2)) }),

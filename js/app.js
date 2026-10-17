@@ -167,12 +167,14 @@ function pintarHabitacion(i, fundido) {
     $('#tiempo').textContent = '0:00';
   };
   atmos.poner(i);
+  hab.classList.toggle('con-sala', i === 0);   // la habitación 1 se ve a través de la escena 3D
   document.querySelectorAll('#listaIndice button').forEach((b, k) => b.setAttribute('aria-current', k === i));
   if (!fundido) return aplicar();
   hab.classList.add('cambiando');
   setTimeout(() => { aplicar(); hab.classList.remove('cambiando'); }, 450);
 }
 function abrirHabitacion(i) {
+  escena.terminarEntrada();
   actual = i;
   pintarHabitacion(i, false);
   hab.hidden = false;
@@ -180,7 +182,7 @@ function abrirHabitacion(i) {
   requestAnimationFrame(() => hab.classList.add('visible'));
   $('#hab-titulo').focus({ preventScroll: true });
   pintarPlay();
-  setTimeout(() => { if (modo === 'entrando') { modo = 'habitacion'; A.viento(0, 400, 1); } }, RM ? 420 : 1150);
+  setTimeout(() => { if (modo === 'entrando') { escena.terminarEntrada(true); modo = 'habitacion'; A.viento(0, 400, 1); } }, RM ? 420 : 1150);
 }
 function cambiar(i) {
   i = (i + 9) % 9;
@@ -397,12 +399,14 @@ function tick(now) {
   }
   const vel = Math.abs(u - uPrevio) / Math.max(dt, .001); uPrevio = u;
 
+  const salaMar = actual === 0 && modo !== 'nave';   // la habitación 1 es la sala 3D del mar
   if (modo !== 'habitacion') {
     escena.actualizar(dt, u);
+    if (salaMar) escena.actualizarSala(dt, progreso());
     escena.render();
     colocarPuertas();
-  }
-  if (modo !== 'nave') { atmos.dibujar(dt, progreso(), RM); actualizarLetra(); }
+  } else if (salaMar) { escena.actualizarSala(dt, progreso()); escena.render(); }
+  if (modo !== 'nave') { if (!salaMar) atmos.dibujar(dt, progreso(), RM); actualizarLetra(); }
 
   // interfaz según el recorrido
   const a = cl(u / .55);
@@ -427,7 +431,7 @@ const CAPTURA = new URLSearchParams(location.search).has('captura');
 requestAnimationFrame(tick);
 
 // para pruebas desde la consola
-window.__pde = { escena, A, entrar, volver, cambiar, estado: () => ({ modo, actual, escuchando, u: uSuave }) };
+window.__pde = { escena, A, entrar, volver, cambiar, actualizarLetra, estado: () => ({ modo, actual, escuchando, u: uSuave }) };
 // revisión local: renderiza un punto del recorrido y lo envía a tools/receptor-capturas.mjs
 if (CAPTURA) {
   const enviar = (n, lienzo) => fetch('http://127.0.0.1:8766/?n=' + n, { method: 'POST', body: lienzo.toDataURL('image/jpeg', .9) }).then(r => r.text());

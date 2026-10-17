@@ -227,7 +227,25 @@ def tierra(n=1024, nombre='tierra'):
     guardar(nombre + '_nor', normal(alto, 6))
     guardar(nombre + '_rug', np.dstack([rug] * 3))
 
+# ---------- matas de hierba seca (RGBA, para tarjetas cruzadas) ----------
+def hierba(nombre='hierba', w=256, h=256, briznas=70, semilla=91):
+    r = np.random.default_rng(semilla)
+    a = np.zeros((h, w), np.float32); col = np.zeros((h, w, 3), np.float32)
+    y, x = np.mgrid[0:h, 0:w].astype(np.float32)
+    for _ in range(briznas):
+        x0 = r.uniform(w * .15, w * .85); alto = r.uniform(.45, .98) * h; curva = r.uniform(-.5, .5) * w * .35
+        t = np.clip((h - y) / alto, 0, 1)
+        cx = x0 + curva * t ** 2
+        ancho = (1 - t) * r.uniform(2.2, 4.2) + .5
+        m = (np.abs(x - cx) < ancho) & (y > h - alto)
+        tono = r.uniform(.75, 1.25)
+        c = np.array([.11, .1, .055]) * tono * (.6 + .5 * t[..., None])
+        a = np.where(m, 1, a); col = np.where(m[..., None], c, col)
+    guardar(nombre, np.dstack([srgb(col * 2.2), a]), png=True)
+
 if __name__ == '__main__':
+    hierba(); arboles('arboles_lejos2', 73, num=52, hmin=.25, hmax=.6); arboles('arboles_cerca2', 74, num=15, hmin=.6, hmax=1.0); print('hierba y bosques extra', flush=True)
+    if __import__('sys').argv[1:] == ['extra']: raise SystemExit
     tierra(); print('tierra', flush=True)
     silleria(); print('piedra', flush=True)
     silleria(filas=12, semilla=4, nombre='muro'); print('muro', flush=True)
