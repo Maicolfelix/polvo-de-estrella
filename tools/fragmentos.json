@@ -1,0 +1,47 @@
+{
+ "audio/01.m4a": {
+  "inicio": 24,
+  "duracion": 155.6,
+  "repeticion": 0.973
+ },
+ "audio/02.m4a": {
+  "inicio": 55,
+  "duracion": 129.7,
+  "repeticion": 0.967
+ },
+ "audio/03.m4a": {
+  "inicio": 73,
+  "duracion": 136.2,
+  "repeticion": 0.944
+ },
+ "audio/04.m4a": {
+  "inicio": 82,
+  "duracion": 136.7,
+  "repeticion": 0.956
+ },
+ "audio/05.m4a": {
+  "inicio": 114,
+  "duracion": 165.9,
+  "repeticion": 0.945
+ },
+ "audio/06.m4a": {
+  "inicio": 40,
+  "duracion": 156.8,
+  "repeticion": 0.929
+ },
+ "audio/07.m4a": {
+  "inicio": 68,
+  "duracion": 154.2,
+  "repeticion": 0.941
+ },
+ "audio/08.m4a": {
+  "inicio": 101,
+  "duracion": 210.7,
+  "repeticion": 0.981
+ },
+ "audio/09.m4a": {
+  "inicio": 50,
+  "duracion": 201.8,
+  "repeticion": 0.927
+ }
+}
