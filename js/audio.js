@@ -53,6 +53,10 @@ function sala(c, sec) {
 
 function crear() {
   ctx = new (window.AudioContext || window.webkitAudioContext)();
+  // iOS suspende el contexto tras una llamada o al bloquear la pantalla: se reanuda con el siguiente toque
+  const reanudar = () => { if (ctx.state !== 'running') ctx.resume().catch(() => {}); };
+  document.addEventListener('pointerdown', reanudar, true);
+  document.addEventListener('keydown', reanudar, true);
   master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
   inst.src = 'audio/instrumental.m4a';
   instG = ctx.createGain(); instG.gain.value = 0; instG.connect(master);
@@ -90,7 +94,11 @@ export async function activar() {
   await ctx.resume();
   if (!activo) {
     // Safari/iOS: cada elemento debe reproducirse una vez dentro del gesto (en silencio)
-    for (const a of [pre, song]) { if (!a.src) a.src = a === pre ? fuentePre(0) : fuenteSong(0); a.play().then(() => a.pause()).catch(() => {}); }
+    if (!pre.src) pre.src = fuentePre(0);
+    if (!song.src) song.src = fuenteSong(0);
+    const t = tokPre;
+    pre.play().then(() => { if (t === tokPre) pre.pause(); }).catch(() => {});
+    if (!quiere) song.play().catch(() => {});       // el evento 'play' la detiene al instante
   }
   activo = true;
   rampa(master, mudo ? 0 : volumen, .3);
@@ -136,44 +144,83 @@ export function cerrarPre(volverAmbiente = true) {
 }
 export function detenerPre() { if (!ctx) return; const yo = ++tokPre; rampa(preG, 0, .2); setTimeout(() => { if (yo === tokPre) pre.pause(); }, 300); }
 
-// ---- canción ----
+// ---- canción: un solo controlador ----
+// `quiere` es la verdad (lo que el usuario pidió); el elemento <audio> se ajusta a ella.
+// Cualquier reproducción que arranque tarde (promesa pendiente, desbloqueo iOS, carga lenta)
+// y no coincida con `quiere` se corta en el evento 'play'.
+let quiere = false, cambiando = false, tokCambio = 0, ultimaAccion = 0, enHabitacion = false;
+const avisos = new Set();
+export const alCambiarEstado = f => avisos.add(f);
+const avisar = () => avisos.forEach(f => f(quiere));
+export const estaSonando = () => quiere;
+const marcar = () => { ultimaAccion = performance.now(); };
+
+song.addEventListener('play', () => { if (!quiere || cambiando) song.pause(); });
+song.addEventListener('ended', () => { quiere = false; avisar(); });
+// pausa ajena (llamada, bloqueo de pantalla, auriculares): el botón debe reflejarla
+song.addEventListener('pause', () => { if (quiere && !cambiando && performance.now() - ultimaAccion > 500) { quiere = false; avisar(); } });
+// la preescucha nunca suena con una habitación abierta
+pre.addEventListener('play', () => { if (enHabitacion) pre.pause(); });
+
+function silenciarYa(g) { if (!ctx) return; const t = ctx.currentTime; g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(0, t); }
+function subir(g, seg, retraso = 0) {
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t);
+  g.gain.setTargetAtTime(1, t + retraso, seg / 3);
+}
+function detenerPreYa() { tokPre++; if (ctx) silenciarYa(preG); pre.pause(); }
+
 export function cargarCancion(i) {
   if (cancionSong !== i) { cancionSong = i; song.src = fuenteSong(i); song.load(); }
 }
-export function entrarCancion(i, retraso = .9) {
-  if (!ctx) return;
-  tokSong++;
-  cargarCancion(i);
-  song.currentTime = 0;
+export function reproducir() {
+  quiere = true; marcar(); avisar();
+  if (cambiando) return;                     // el cambio en curso la arrancará
   song.play().catch(() => {});
-  rampa(preG, 0, .8);
-  const yo = ++tokPre; setTimeout(() => { if (yo === tokPre) pre.pause(); }, 1500);
-  ambiente(false, 1.8);
-  songG.gain.cancelScheduledValues(ctx.currentTime); songG.gain.setValueAtTime(0, ctx.currentTime);
-  songG.gain.setTargetAtTime(1, ctx.currentTime + retraso, .45);
+  subir(songG, .08);                         // entrada de 80 ms: sin chasquido
 }
-export async function cambiarCancion(i) {
-  if (!ctx) { cargarCancion(i); return; }
-  const yo = ++tokSong;
-  rampa(songG, 0, .45);
-  await new Promise(r => setTimeout(r, 480));
-  if (yo !== tokSong) return;
+export function pausar() {
+  quiere = false; marcar(); avisar();
+  silenciarYa(songG);                        // silencio inmediato…
+  song.pause();                              // …y parada real: conserva la posición
+}
+export function playPausa() { quiere ? pausar() : reproducir(); }
+
+export function entrarCancion(i, retraso = .9) {
+  enHabitacion = true; tokCambio++; cambiando = false;
+  detenerPreYa();
   cargarCancion(i);
   song.currentTime = 0;
+  if (!ctx) { quiere = false; avisar(); return; }   // «Sin sonido»: se carga pero no suena
+  quiere = true; marcar(); avisar();
+  silenciarYa(songG);
   song.play().catch(() => {});
-  rampa(songG, 1, .9);
+  subir(songG, 1.4, retraso);
+  ambiente(false, 1.8);
+}
+export function cambiarCancion(i) {
+  const yo = ++tokCambio;
+  if (!ctx) { cargarCancion(i); song.currentTime = 0; return; }
+  quiere = true; marcar(); avisar();          // pasar de canción implica escucharla
+  cambiando = true;
+  rampa(songG, 0, .12);
+  setTimeout(() => {
+    if (yo !== tokCambio) return;              // otro cambio o la salida lo invalidaron
+    cambiando = false;
+    song.pause();
+    cargarCancion(i);
+    song.currentTime = 0;
+    if (quiere) { song.play().catch(() => {}); subir(songG, .6); }
+  }, 140);
 }
 export function salirCancion() {
+  enHabitacion = false; tokCambio++; cambiando = false;
+  quiere = false; marcar(); avisar();
   if (!ctx) { song.pause(); return; }
-  const yo = ++tokSong;
-  rampa(songG, 0, 1);
-  setTimeout(() => { if (yo === tokSong) song.pause(); }, 1300);
+  rampa(songG, 0, .5);                       // cola breve de 0,5 s, luego parada real
+  setTimeout(() => { if (!quiere) song.pause(); }, 550);
   ambiente(true, 3.2);
-}
-export function playPausa() {
-  tokSong++;
-  if (song.paused) { song.play().catch(() => {}); if (ctx) rampa(songG, 1, .3); }
-  else song.pause();
 }
 
 // ---- viento ----

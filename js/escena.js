@@ -587,7 +587,9 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     const pf = mundo(d, 0, 1.62, 2.1), tf = mundo(d, 0, 1.45, 0);
     const pin = mundo(d, 0, 1.62, -1.77 + DIST_VENTANA), tin = mundo(d, 0, 1.62, -4);
     return new Promise(res => {
-      anim = { tipo: 'entrar', d, inicio: performance.now(), t: 0, dur: rm ? .55 : 2.5, p0, t0, pf, tf, pin, tin, res, avisado: false };
+      const a = anim = { tipo: 'entrar', d, inicio: performance.now(), t: 0, dur: rm ? .55 : 2.5, p0, t0, pf, tf, pin, tin, res, avisado: false };
+      // respaldo: si el navegador deja de pintar (pantalla bloqueada, pestaña oculta) la interfaz no se queda a medias
+      setTimeout(() => { if (!a.avisado) { a.avisado = true; res(); } }, a.dur * 800 + 400);
     });
   }
   function salir(i) {

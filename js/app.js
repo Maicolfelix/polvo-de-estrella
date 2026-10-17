@@ -147,8 +147,8 @@ async function entrar(i) {
   document.body.classList.add('bloqueado');
   capa.inert = llegada.inert = true;
   $('#ayuda').style.opacity = 0;
-  if (A.activo) { A.rafaga(RM ? 1 : 2.6, RM ? .35 : 1); A.entrarCancion(i, RM ? .25 : 1.15); }
-  else A.cargarCancion(i);
+  if (A.activo) A.rafaga(RM ? 1 : 2.6, RM ? .35 : 1);
+  A.entrarCancion(i, RM ? .25 : 1.15);          // sin sonido: solo carga, no suena
   atmos.poner(i); atmos.dibujar(1 / 60, 0, RM);
   await escena.entrar(i, $('#atmos'));
   abrirHabitacion(i);
@@ -186,7 +186,7 @@ function cambiar(i) {
   actual = i;
   escena.ponerEnPuerta(i);
   pintarHabitacion(i, true);
-  if (A.activo) A.cambiarCancion(i); else A.cargarCancion(i);
+  A.cambiarCancion(i);
   scrollTo({ top: escena.uDePuerta(i) * H, behavior: 'auto' });
   uSuave = uObjetivo = escena.uDePuerta(i);
 }
@@ -209,18 +209,19 @@ function volver() {
 
 /* ---------- reproductor ---------- */
 function pintarRango(r) { r.style.setProperty('--v', (r.value - r.min) / (r.max - r.min) * 100 + '%'); }
+// el botón refleja lo pedido (A.estaSonando), no el estado transitorio del <audio>
 function pintarPlay() {
-  const p = $('#play');
-  p.classList.toggle('pausado', song.paused);
-  p.setAttribute('aria-label', song.paused ? 'Reproducir' : 'Pausa');
+  const p = $('#play'), suena = A.estaSonando();
+  p.classList.toggle('pausado', !suena);
+  p.setAttribute('aria-label', suena ? 'Pausa' : 'Reproducir');
 }
+A.alCambiarEstado(pintarPlay);
+let activando = false;
 $('#play').addEventListener('click', async () => {
-  if (!A.activo) { await A.activar(); pintarSonido(); }
+  if (activando) return;                       // toques repetidos mientras se desbloquea el audio
+  if (!A.activo) { activando = true; try { await A.activar(); pintarSonido(); } finally { activando = false; } }
   A.playPausa();
 });
-song.addEventListener('play', pintarPlay);
-song.addEventListener('pause', pintarPlay);
-song.addEventListener('ended', pintarPlay);
 song.addEventListener('loadedmetadata', () => $('#duracion').textContent = fmt(song.duration));
 let arrastrando = false;
 song.addEventListener('timeupdate', () => {
