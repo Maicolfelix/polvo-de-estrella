@@ -1,0 +1,178 @@
+{
+ "n": "09",
+ "titulo": "THE LAST OF US (MAVO)",
+ "duracion": 201.79,
+ "metodo": "demucs htdemucs + torchaudio MMS_FA (forced_align)",
+ "lineas": [
+  {
+   "linea": "Así de bajito para que me escuches cuando cante en tu oído, destino agridulce",
+   "inicio": 25.4,
+   "fin": 36.8,
+   "confianza": 0.398,
+   "energia": 0.83,
+   "ritmo": 5.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  null,
+  {
+   "linea": "Míra al cielo un ratico hay estrellas en el norte que dicen mi apellido y otra gritan tu nombre",
+   "inicio": 37.36,
+   "fin": 49.34,
+   "confianza": 0.586,
+   "energia": 0.82,
+   "ritmo": 6.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Otras gritan tu nombre",
+   "inicio": 52.56,
+   "fin": 58.0,
+   "confianza": 0.016,
+   "energia": 0.92,
+   "ritmo": 3.5,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.02"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Otros gritan tu nombre",
+   "inicio": 58.94,
+   "fin": 62.16,
+   "confianza": 0.022,
+   "energia": 0.97,
+   "ritmo": 5.9,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.02"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Ver tu silueta cambiaría mi cara",
+   "inicio": 62.98,
+   "fin": 66.58,
+   "confianza": 0.712,
+   "energia": 0.81,
+   "ritmo": 7.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "No sé si lo dañaría pero decirte “me gustas” me gustaría",
+   "inicio": 67.32,
+   "fin": 74.18,
+   "confianza": 0.702,
+   "energia": 0.76,
+   "ritmo": 6.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Así de bajito para que me escuches y cuando salga en tus sueños",
+   "inicio": 74.54,
+   "fin": 83.08,
+   "confianza": 0.53,
+   "energia": 0.84,
+   "ritmo": 6.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "sepas que por ti ya yo luche",
+   "inicio": 83.56,
+   "fin": 85.76,
+   "confianza": 0.594,
+   "energia": 0.81,
+   "ritmo": 10.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "A mi me gustaría ser el amor de tu vida pero en mi vida el amor es tu vida",
+   "inicio": 86.62,
+   "fin": 98.36,
+   "confianza": 0.483,
+   "energia": 0.79,
+   "ritmo": 4.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Qué pasaría si pasaria, me besarías o de mí pasarías",
+   "inicio": 99.32,
+   "fin": 111.08,
+   "confianza": 0.661,
+   "energia": 0.84,
+   "ritmo": 3.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Yo en ti pienso noche y día y aún con eso siempre te extrañaría",
+   "inicio": 111.62,
+   "fin": 123.12,
+   "confianza": 0.519,
+   "energia": 0.79,
+   "ritmo": 4.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Así de bajito para decirte todo todo",
+   "inicio": 148.34,
+   "fin": 153.12,
+   "confianza": 0.449,
+   "energia": 0.8,
+   "ritmo": 6.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y aunque quede un poquito",
+   "inicio": 153.72,
+   "fin": 156.7,
+   "confianza": 0.785,
+   "energia": 0.8,
+   "ritmo": 7.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "En cada canción estuvo una frase de tu libro favorito",
+   "inicio": 157.38,
+   "fin": 162.9,
+   "confianza": 0.721,
+   "energia": 0.77,
+   "ritmo": 8.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "No se porque lo explico si soy un polvo intentando ser infinito",
+   "inicio": 163.62,
+   "fin": 171.12,
+   "confianza": 0.907,
+   "energia": 0.72,
+   "ritmo": 6.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  }
+ ]
+}

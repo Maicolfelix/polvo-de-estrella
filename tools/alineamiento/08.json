@@ -1,0 +1,438 @@
+{
+ "n": "08",
+ "titulo": "ESTO ES REAL",
+ "duracion": 210.73,
+ "metodo": "demucs htdemucs + torchaudio MMS_FA (forced_align)",
+ "lineas": [
+  {
+   "linea": "Esto es reaal",
+   "inicio": 3.14,
+   "fin": 5.68,
+   "confianza": 0.265,
+   "energia": 0.87,
+   "ritmo": 4.3,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.27"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Tú me llevas a querer amar",
+   "inicio": 6.48,
+   "fin": 10.6,
+   "confianza": 0.425,
+   "energia": 0.74,
+   "ritmo": 5.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Donde no dan ganas de dudar",
+   "inicio": 11.08,
+   "fin": 15.02,
+   "confianza": 0.546,
+   "energia": 0.88,
+   "ritmo": 5.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Donde firmo si esto real aaaa",
+   "inicio": 15.7,
+   "fin": 21.66,
+   "confianza": 0.363,
+   "energia": 0.79,
+   "ritmo": 4.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y ya",
+   "inicio": 22.42,
+   "fin": 22.74,
+   "confianza": 0.16,
+   "energia": 0.82,
+   "ritmo": 9.4,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.16"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Eres todo lo que yo soñé",
+   "inicio": 24.94,
+   "fin": 27.28,
+   "confianza": 0.338,
+   "energia": 0.78,
+   "ritmo": 8.1,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.34"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Y aún te tengo aunque desperté",
+   "inicio": 30.0,
+   "fin": 31.86,
+   "confianza": 0.102,
+   "energia": 0.72,
+   "ritmo": 13.4,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.10"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Solo pienso en volverte a ver",
+   "inicio": 33.98,
+   "fin": 38.08,
+   "confianza": 0.571,
+   "energia": 0.82,
+   "ritmo": 5.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Yo aún no puedo de creerlo",
+   "inicio": 41.98,
+   "fin": 45.02,
+   "confianza": 0.434,
+   "energia": 0.82,
+   "ritmo": 6.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Todo lo que hago me recuerda a ti",
+   "inicio": 45.98,
+   "fin": 50.12,
+   "confianza": 0.664,
+   "energia": 0.79,
+   "ritmo": 6.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Cuando diga todo lo que siento",
+   "inicio": 51.14,
+   "fin": 54.22,
+   "confianza": 0.732,
+   "energia": 0.88,
+   "ritmo": 8.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Vas a saber que siempre fuiste para mí",
+   "inicio": 55.6,
+   "fin": 59.28,
+   "confianza": 0.638,
+   "energia": 0.75,
+   "ritmo": 8.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y esooo no quiero cambiarlo",
+   "inicio": 60.36,
+   "fin": 65.1,
+   "confianza": 0.577,
+   "energia": 0.83,
+   "ritmo": 4.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Porque dolería",
+   "inicio": 67.26,
+   "fin": 70.78,
+   "confianza": 0.736,
+   "energia": 0.89,
+   "ritmo": 3.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Porque dolería",
+   "inicio": 71.84,
+   "fin": 75.34,
+   "confianza": 0.741,
+   "energia": 0.88,
+   "ritmo": 3.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Yoooo",
+   "inicio": 78.66,
+   "fin": 81.78,
+   "confianza": 0.252,
+   "energia": 1.01,
+   "ritmo": 1.6,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.25"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Seeee",
+   "inicio": 82.08,
+   "fin": 84.14,
+   "confianza": 0.231,
+   "energia": 0.71,
+   "ritmo": 2.4,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.23"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Que aún dudas de mi",
+   "inicio": 84.46,
+   "fin": 86.9,
+   "confianza": 0.464,
+   "energia": 0.89,
+   "ritmo": 6.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Siempre te diré",
+   "inicio": 88.74,
+   "fin": 93.72,
+   "confianza": 0.624,
+   "energia": 0.88,
+   "ritmo": 2.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Que esto es real tú me llevas a querer amar",
+   "inicio": 94.66,
+   "fin": 101.66,
+   "confianza": 0.559,
+   "energia": 0.84,
+   "ritmo": 4.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Donde no dan ganas de dudar",
+   "inicio": 102.7,
+   "fin": 106.3,
+   "confianza": 0.696,
+   "energia": 0.88,
+   "ritmo": 6.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Dónde firmo si esto es verdad",
+   "inicio": 107.34,
+   "fin": 110.08,
+   "confianza": 0.795,
+   "energia": 0.79,
+   "ritmo": 8.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Eres todo lo que yo soñé",
+   "inicio": 116.56,
+   "fin": 118.94,
+   "confianza": 0.736,
+   "energia": 0.77,
+   "ritmo": 8.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y aún te tengo aunque desperté",
+   "inicio": 121.1,
+   "fin": 123.5,
+   "confianza": 0.701,
+   "energia": 0.66,
+   "ritmo": 10.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Solo pienso en volverte a ver",
+   "inicio": 125.64,
+   "fin": 129.7,
+   "confianza": 0.727,
+   "energia": 0.74,
+   "ritmo": 5.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y lo repetiría hasta el último de mis días",
+   "inicio": 133.5,
+   "fin": 137.98,
+   "confianza": 0.679,
+   "energia": 0.84,
+   "ritmo": 7.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Porque siempre serás mi primera elección",
+   "inicio": 138.32,
+   "fin": 142.24,
+   "confianza": 0.871,
+   "energia": 0.73,
+   "ritmo": 8.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Aunque este contigo cuidaré donde caminas",
+   "inicio": 142.96,
+   "fin": 147.12,
+   "confianza": 0.818,
+   "energia": 0.73,
+   "ritmo": 8.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Por cada paso contigo es lo mejor",
+   "inicio": 147.48,
+   "fin": 151.46,
+   "confianza": 0.592,
+   "energia": 0.79,
+   "ritmo": 6.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Niégamelo que yo soy tu lov y",
+   "inicio": 152.0,
+   "fin": 156.18,
+   "confianza": 0.639,
+   "energia": 0.78,
+   "ritmo": 5.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Estoy esperando en tu cora desde el lobby",
+   "inicio": 156.7,
+   "fin": 160.7,
+   "confianza": 0.618,
+   "energia": 0.83,
+   "ritmo": 8.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Es que aún que me des la espalda quiero gritarte hasta que me escuches que",
+   "inicio": 161.28,
+   "fin": 167.02,
+   "confianza": 0.693,
+   "energia": 0.83,
+   "ritmo": 10.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Esto es real tú me llevas a querer amar",
+   "inicio": 168.12,
+   "fin": 175.56,
+   "confianza": 0.651,
+   "energia": 0.81,
+   "ritmo": 4.2,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Donde no dan ganas de dudar",
+   "inicio": 176.06,
+   "fin": 179.64,
+   "confianza": 0.52,
+   "energia": 0.81,
+   "ritmo": 6.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Dónde firmo si esto es verdad",
+   "inicio": 180.68,
+   "fin": 184.66,
+   "confianza": 0.619,
+   "energia": 0.83,
+   "ritmo": 6.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Eres todo lo que yo soñé",
+   "inicio": 189.92,
+   "fin": 192.28,
+   "confianza": 0.545,
+   "energia": 0.87,
+   "ritmo": 8.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y aún te tengo aunque desperté",
+   "inicio": 194.4,
+   "fin": 196.82,
+   "confianza": 0.418,
+   "energia": 0.7,
+   "ritmo": 10.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Solo pienso en volverte a ver",
+   "inicio": 198.94,
+   "fin": 202.5,
+   "confianza": 0.621,
+   "energia": 0.8,
+   "ritmo": 6.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  }
+ ]
+}

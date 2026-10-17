@@ -1,8 +1,8 @@
 {
   "app.js": {
-    "mtime": 1792269050.219527,
-    "seen": 1792270207.395449,
-    "ast_hash": "f12ef3d43d6acfdbdd7d08175f801d64",
+    "mtime": 1792271520.9505563,
+    "seen": 1792274062.0270758,
+    "ast_hash": "0ae89bbd38df9791e72d8b8d24cad02c",
     "semantic_hash": ""
   },
   "audio.js": {
@@ -27,6 +27,18 @@
     "mtime": 1792223269.5377815,
     "seen": 1792265562.9688542,
     "ast_hash": "dfc5b0ed7399a68225fd02b052ea1149",
+    "semantic_hash": ""
+  },
+  "letras.js": {
+    "mtime": 1792271333.5070443,
+    "seen": 1792274062.0270758,
+    "ast_hash": "2833322d184ff6fd05aefcb65b11dcb8",
+    "semantic_hash": ""
+  },
+  "tiempos.js": {
+    "mtime": 1792273874.9977896,
+    "seen": 1792274062.0270758,
+    "ast_hash": "a82f58f4b0f7e5cae54346996b78d62e",
     "semantic_hash": ""
   }
 }

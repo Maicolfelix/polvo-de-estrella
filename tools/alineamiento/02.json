@@ -1,0 +1,235 @@
+{
+ "n": "02",
+ "titulo": "TU SILUETA NO ME DAÑA",
+ "duracion": 129.71,
+ "metodo": "demucs htdemucs + torchaudio MMS_FA (forced_align)",
+ "lineas": [
+  {
+   "linea": "Mujer de labios rojos",
+   "inicio": 1.4,
+   "fin": 4.56,
+   "confianza": 0.53,
+   "energia": 0.75,
+   "ritmo": 5.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Dimensión en sus ojos",
+   "inicio": 5.06,
+   "fin": 8.08,
+   "confianza": 0.58,
+   "energia": 0.7,
+   "ritmo": 6.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Aún yo sigo roto esperándote",
+   "inicio": 8.64,
+   "fin": 13.0,
+   "confianza": 0.758,
+   "energia": 0.7,
+   "ritmo": 5.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  null,
+  {
+   "linea": "Y yo que pensaba",
+   "inicio": 13.24,
+   "fin": 14.58,
+   "confianza": 0.266,
+   "energia": 0.89,
+   "ritmo": 9.7,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.27"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "que la luna avisaría si fallabas",
+   "inicio": 15.52,
+   "fin": 18.32,
+   "confianza": 0.577,
+   "energia": 0.77,
+   "ritmo": 9.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Sin saber que siempre fuiste la favorita",
+   "inicio": 19.04,
+   "fin": 22.66,
+   "confianza": 0.575,
+   "energia": 0.79,
+   "ritmo": 9.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "De este cuento aunque ya no quede nada",
+   "inicio": 22.8,
+   "fin": 27.72,
+   "confianza": 0.449,
+   "energia": 0.75,
+   "ritmo": 6.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "se me va la posibilidad de poder ser tu mitad que va, ya no quiero más que me usen otra vez creo que ya aprendí",
+   "inicio": 29.86,
+   "fin": 52.66,
+   "confianza": 0.422,
+   "energia": 0.83,
+   "ritmo": 3.8,
+   "estado": "incierto",
+   "motivos": [
+    "demasiado larga (22.8 s)"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Cómo se va la culpa que acostumbra mi cuerpo",
+   "inicio": 55.36,
+   "fin": 58.58,
+   "confianza": 0.708,
+   "energia": 0.78,
+   "ritmo": 11.2,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Son cigarros sin encender para dañarme indirectamente",
+   "inicio": 60.04,
+   "fin": 63.16,
+   "confianza": 0.36,
+   "energia": 0.76,
+   "ritmo": 15.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Ese último abrazo gritando “vuelve a encontrarte”",
+   "inicio": 63.3,
+   "fin": 66.46,
+   "confianza": 0.498,
+   "energia": 0.71,
+   "ritmo": 13.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Me dio una enseñanza que aún se a quien se dirige",
+   "inicio": 66.82,
+   "fin": 70.2,
+   "confianza": 0.253,
+   "energia": 0.75,
+   "ritmo": 11.5,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.25"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Tu silueta no me daña, si tu mirada de decepción",
+   "inicio": 70.9,
+   "fin": 77.3,
+   "confianza": 0.417,
+   "energia": 0.77,
+   "ritmo": 5.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Aunque no sea una excepción al paso del tiempo siempre te buscaré",
+   "inicio": 77.98,
+   "fin": 84.0,
+   "confianza": 0.626,
+   "energia": 0.73,
+   "ritmo": 9.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y cuando los años me hagan daño, dejaré de acordarme de lo actual para que el pasado me entregue tu mejor versión",
+   "inicio": 98.56,
+   "fin": 109.44,
+   "confianza": 0.701,
+   "energia": 0.81,
+   "ritmo": 8.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Que esa es la que siempre quise encontrar",
+   "inicio": 109.72,
+   "fin": 112.22,
+   "confianza": 0.789,
+   "energia": 0.66,
+   "ritmo": 13.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y aunque la luna diga que te extraña",
+   "inicio": 112.52,
+   "fin": 115.28,
+   "confianza": 0.752,
+   "energia": 0.76,
+   "ritmo": 10.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Yo solamente me guío del sol",
+   "inicio": 116.48,
+   "fin": 119.3,
+   "confianza": 0.582,
+   "energia": 0.82,
+   "ritmo": 8.2,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Ahora se está nublando mi corazón",
+   "inicio": 119.9,
+   "fin": 122.6,
+   "confianza": 0.714,
+   "energia": 0.78,
+   "ritmo": 10.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y yo te sigo cantando hasta quedarme sin voz",
+   "inicio": 123.08,
+   "fin": 128.38,
+   "confianza": 0.475,
+   "energia": 0.84,
+   "ritmo": 6.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  }
+ ]
+}

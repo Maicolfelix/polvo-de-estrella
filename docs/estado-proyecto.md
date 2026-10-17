@@ -91,3 +91,32 @@ Registro breve de continuidad: decisiones y resultados verificables. Contexto de
 **Pruebas (emulación 375×812, sin tolerancia).** `correrVolumen()` 17/17: silenciar → master 0 exacto; reactivar → 1 y volumen 50 %; 7 toques rápidos → 0 exacto; toques rápidos terminando en sonido → 1 y sigue en 1 a los 800 ms; barra a 0 → ganancia de canción 0 exacta; altavoz tras barra a 0 recupera el último nivel; en pausa barra y altavoz (también alternando rápido) no reanudan. `correr()` 22/22.
 
 **Pendiente.** Teléfono físico y escucha del artista (clics al silenciar o mover el volumen).
+
+## 2026-10-17 · Letras fieles y sincronizadas (rama `feat/letras`, desde `fix/volumen`)
+
+**Fuente y presentación.** `js/datos.js` (letras del artista) no se modifica. `js/letras.js` aplica ediciones mínimas —tildes, separación y puntuación inequívocas— y esa lista es el registro editorial (40 ediciones). `node tools/validar-letras.mjs` exige, línea a línea, las mismas letras que el original sin contar tildes, mayúsculas, signos ni espacios: ninguna palabra añadida, quitada o sustituida. Se conservan «cora», «pa», «to», «pesao», «mami», «todololo», «Nonono», vocalizaciones y mayúsculas originales.
+**Dudas reales (sin aplicar, en `DUDAS` de `js/letras.js`):** 01 «La razones», «la archivé»/«las archivé», «Si no estoy lo a tu ladoooo» · 02 «si/sí tu mirada de decepción», «tu mitad que va» · 03 «Donde tú estabas» (¿pregunta?), «después dejarme» · 04 «si yo te las cuenta» · 07 «Porque ahora estás dispuesta» (¿«¿Por qué…?»?), «todos los día», «el día hoy» · 08 «si esto real» · 09 «y otra gritan».
+
+**Sincronización — método reproducible.** `tools/alinear.py`: Demucs `htdemucs` separa la voz del WAV → torchaudio `MMS_FA` hace alineamiento forzado de la letra del artista (no transcribe; un comodín entre líneas absorbe música y ad-libs sin inventar texto) → inicio/fin por línea. Estado `incierto` si confianza < 0,35, poca voz en el tramo, ritmo > 22 letras/s o línea > 14 s. WAV y copias web: desfase 0 muestras en las nueve (correlación cruzada), por lo que los tiempos del WAV valen para el audio de la página. `node tools/tiempos.mjs` genera `js/tiempos.js`; `node tools/resumen-alineamiento.mjs` resume. Entorno (fuera del repo): `uv venv ~/.cache/pde-alinear` + `torch==2.5.1 torchaudio==2.5.1` (CPU) + `demucs==4.0.1 soundfile`; modelos en `~/.cache/torch`, voces en `~/.cache/pde-alinear-stems`.
+
+| Canción | Líneas | auto | inciertas |
+|---|---|---|---|
+| 01 SI NO ESTOY A TU LADO | 39 | 29 | 10 |
+| 02 TU SILUETA NO ME DAÑA | 20 | 17 | 3 |
+| 03 POR QUE ESTAS TAN BIEN… | 24 | 16 | 8 |
+| 04 SE ACABA EL VERANO | 23 | 19 | 4 |
+| 05 TODOLOLO | 33 | 26 | 7 |
+| 06 DEBERIA SER UN SUEÑO MAS | 19 | 18 | 1 |
+| 07 QUE PASARíA? | 29 | 23 | 6 |
+| 08 ESTO ES REAL | 38 | 32 | 6 |
+| 09 THE LAST OF US (MAVO) | 15 | 13 | 2 |
+
+Las inciertas se concentran en repeticiones («No voy a decir…», «Todololo», «Fuck» ×3, «Otras/Otros gritan tu nombre»), vocalizaciones largas y la línea larga de 02 (22,8 s). Detalle por línea: `tools/alineamiento/NN.json`.
+
+**Presentación.** Línea activa por contraste y una barra fina del color de la canción (sin cambio de tamaño); vecinas legibles; seguimiento suave al 36 % de la altura; desplazamiento manual → «Seguir canción»; nunca se resalta una línea futura; tras 1,2 s del final de una línea se apaga; margen inferior para que el reproductor no tape el final; letra difuminada bajo los botones superiores; sin anuncios automáticos para lectores de pantalla. Reloj único: `song.currentTime`.
+
+**Pruebas (navegador, emulación 375×812).** `validar-letras.mjs`: presentación fiel y tiempos ordenados, sin solapes, dentro de la duración, uno por línea. `correrNueve()` 9/9: audio, título y nº de líneas correctos; línea activa correcta al inicio, medio y final; sin línea futura tras el final. `correrLetra('01')` 13/13 en `?rm` (pausa congela, reanuda, búsqueda adelante/atrás, silencio no detiene, manual + «Seguir canción», cambio de canción limpia, volver cancela); con desplazamiento suave, las comprobaciones de posición dependen del tiempo de animación en la pestaña de pruebas. Regresión: `correr()` + `correrVolumen()` 39/39.
+
+**No validado.** Exactitud auditiva de los tiempos (nada se ha escuchado): **todas** las líneas son alineamiento automático; las 47 inciertas son prioridad de revisión. Teléfono físico.
+
+**Siguiente paso.** Revisión a oído del artista (empezando por las inciertas) y corrección de tiempos en `tools/alineamiento/NN.json` → `node tools/tiempos.mjs`.

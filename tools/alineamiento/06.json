@@ -1,0 +1,220 @@
+{
+ "n": "06",
+ "titulo": "DEBERIA SER UN SUEÑO MAS",
+ "duracion": 156.79,
+ "metodo": "demucs htdemucs + torchaudio MMS_FA (forced_align)",
+ "lineas": [
+  {
+   "linea": "Como a mí me gustaría que tú y yo",
+   "inicio": 0.1,
+   "fin": 6.4,
+   "confianza": 0.733,
+   "energia": 0.84,
+   "ritmo": 4.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Estuviéramos juntos toda la eternidad",
+   "inicio": 7.98,
+   "fin": 14.74,
+   "confianza": 0.655,
+   "energia": 0.87,
+   "ritmo": 4.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Toda la eternidad",
+   "inicio": 15.72,
+   "fin": 19.62,
+   "confianza": 0.64,
+   "energia": 0.94,
+   "ritmo": 3.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  null,
+  {
+   "linea": "Como a mí me gustaría que tú y yo",
+   "inicio": 39.14,
+   "fin": 45.12,
+   "confianza": 0.52,
+   "energia": 0.74,
+   "ritmo": 4.2,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Estuviéramos juntos hasta la eternidad",
+   "inicio": 46.6,
+   "fin": 52.7,
+   "confianza": 0.493,
+   "energia": 0.79,
+   "ritmo": 5.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Hasta la eternidad",
+   "inicio": 53.54,
+   "fin": 57.74,
+   "confianza": 0.483,
+   "energia": 0.81,
+   "ritmo": 3.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Pero esto es un sueño y me temo",
+   "inicio": 58.74,
+   "fin": 64.66,
+   "confianza": 0.583,
+   "energia": 0.77,
+   "ritmo": 4.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Que nada será realidad",
+   "inicio": 66.1,
+   "fin": 70.46,
+   "confianza": 0.409,
+   "energia": 0.91,
+   "ritmo": 4.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Que nada será realidad",
+   "inicio": 70.98,
+   "fin": 73.5,
+   "confianza": 0.551,
+   "energia": 0.83,
+   "ritmo": 7.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Cuando quiero algo lo jodo, ahora solo camino codo a codo",
+   "inicio": 77.72,
+   "fin": 82.08,
+   "confianza": 0.52,
+   "energia": 0.85,
+   "ritmo": 10.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Tengo miedo a fallarte y a perderme estando solo",
+   "inicio": 82.58,
+   "fin": 87.02,
+   "confianza": 0.679,
+   "energia": 0.73,
+   "ritmo": 9.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "No he conseguido escaparme de esa puta jaula de oro donde estoy acomodado pero aún lloro e ignoro",
+   "inicio": 87.22,
+   "fin": 96.8,
+   "confianza": 0.653,
+   "energia": 0.82,
+   "ritmo": 8.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Todo eso que me dijiste me dolió y tú nunca lo viste, no sabía cómo quedarme pero contra la corriente no se resiste",
+   "inicio": 97.28,
+   "fin": 106.7,
+   "confianza": 0.779,
+   "energia": 0.72,
+   "ritmo": 9.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Mami como supiste en serio donde herirme",
+   "inicio": 106.76,
+   "fin": 109.18,
+   "confianza": 0.749,
+   "energia": 0.65,
+   "ritmo": 14.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Si me creía hierro y empecé a derretirme",
+   "inicio": 109.26,
+   "fin": 111.68,
+   "confianza": 0.607,
+   "energia": 0.75,
+   "ritmo": 13.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "No guardo rencor aunque ya debería irme y aún me gustaría decirte",
+   "inicio": 111.96,
+   "fin": 116.5,
+   "confianza": 0.586,
+   "energia": 0.74,
+   "ritmo": 11.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Como a mí me gustaría que tú y yo",
+   "inicio": 117.52,
+   "fin": 123.58,
+   "confianza": 0.644,
+   "energia": 0.85,
+   "ritmo": 4.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Estuviéramos juntos toda la eternidad",
+   "inicio": 125.16,
+   "fin": 131.12,
+   "confianza": 0.65,
+   "energia": 0.92,
+   "ritmo": 5.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Toda la eternidad",
+   "inicio": 132.42,
+   "fin": 136.52,
+   "confianza": 0.163,
+   "energia": 0.89,
+   "ritmo": 3.7,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.16"
+   ],
+   "palabras": []
+  }
+ ]
+}

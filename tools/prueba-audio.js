@@ -215,3 +215,28 @@ export async function correrLetra(n = '01') {
   ok(sonando(A).join() === 'inst', 'volver: se cancela el seguimiento y suena solo la instrumental');
   return L.join('\n');
 }
+
+// Recorre las nueve habitaciones: audio, título y letra corresponden; tiempos al inicio, medio y final.
+export async function correrNueve() {
+  const P = window.__pde, A = P.A, s = A.elementos.song, L = [];
+  const ok = (cond, txt) => L.push((cond ? 'OK   ' : 'FALLA') + ' ' + txt);
+  const { TIEMPOS } = await import('/js/tiempos.js'), { CANCIONES } = await import('/js/datos.js');
+  const activa = () => { const e = document.querySelector('#letra .linea.activa'); return e ? +e.dataset.i : -1; };
+  scrollTo(0, innerHeight * P.escena.uDePuerta(0)); await w(2500);
+  toque(document.querySelectorAll('.puerta')[0]); await modo('habitacion'); await w(800);
+  for (let i = 0; i < 9; i++) {
+    const c = CANCIONES[i], T = TIEMPOS[c.n].lineas;
+    if (i) { toque($('#siguiente')); await w(1600); }
+    if (!s.paused) { toque($('#play')); await w(200); }
+    const idx = T.map((x, k) => x ? k : -1).filter(k => k >= 0), pick = [idx[0], idx[Math.floor(idx.length / 2)], idx.at(-1)];
+    const res = [];
+    for (const k of pick) { s.currentTime = (T[k][0] + T[k][1]) / 2; await w(350); res.push(activa() === k); }
+    s.currentTime = Math.min(T[idx.at(-1)][1] + 5, s.duration - .2); await w(350); res.push(activa() === -1 || T[idx.at(-1)][1] + 1.2 > s.currentTime);
+    const fuente = s.src.split('/').pop();
+    ok(fuente === c.n + '.m4a' && $('#hab-titulo').textContent === c.titulo && document.querySelectorAll('#letra .linea').length === T.length && res.every(Boolean),
+      `${c.n} ${c.titulo}: audio ${fuente}, ${T.length} líneas, inicio/medio/final ${res.slice(0, 3).map(b => b ? '✓' : '✗').join('')}, tras el final sin línea futura ${res[3] ? '✓' : '✗'}`);
+    toque($('#play')); await w(300);
+  }
+  toque($('#volver')); await modo('nave');
+  return L.join('\n');
+}

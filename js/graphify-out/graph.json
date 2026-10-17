@@ -16,7 +16,7 @@
       "file_type": "code",
       "norm_label": "fmt()",
       "source_file": "js/app.js",
-      "source_location": "L13"
+      "source_location": "L15"
     },
     {
       "id": "app_leer",
@@ -28,7 +28,19 @@
       "file_type": "code",
       "norm_label": "leer()",
       "source_file": "js/app.js",
-      "source_location": "L12"
+      "source_location": "L14"
+    },
+    {
+      "id": "app_manual",
+      "label": "manual()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "app.js",
+      "file_type": "code",
+      "norm_label": "manual()",
+      "source_file": "js/app.js",
+      "source_location": "L254"
     },
     {
       "id": "app_medir",
@@ -40,7 +52,7 @@
       "file_type": "code",
       "norm_label": "medir()",
       "source_file": "js/app.js",
-      "source_location": "L32"
+      "source_location": "L34"
     },
     {
       "id": "app_volver",
@@ -52,7 +64,7 @@
       "file_type": "code",
       "norm_label": "volver()",
       "source_file": "js/app.js",
-      "source_location": "L193"
+      "source_location": "L195"
     },
     {
       "id": "audio_alcambiarestado",
@@ -304,7 +316,7 @@
       "file_type": "code",
       "norm_label": "cambiar()",
       "source_file": "js/app.js",
-      "source_location": "L183"
+      "source_location": "L185"
     },
     {
       "id": "app_irapuerta",
@@ -316,7 +328,7 @@
       "file_type": "code",
       "norm_label": "irapuerta()",
       "source_file": "js/app.js",
-      "source_location": "L65"
+      "source_location": "L67"
     },
     {
       "id": "app_pintarhabitacion",
@@ -328,7 +340,19 @@
       "file_type": "code",
       "norm_label": "pintarhabitacion()",
       "source_file": "js/app.js",
-      "source_location": "L156"
+      "source_location": "L158"
+    },
+    {
+      "id": "app_pintarletra",
+      "label": "pintarLetra()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "pintarHabitacion",
+      "file_type": "code",
+      "norm_label": "pintarletra()",
+      "source_file": "js/app.js",
+      "source_location": "L217"
     },
     {
       "id": "app_pintarrango",
@@ -340,7 +364,43 @@
       "file_type": "code",
       "norm_label": "pintarrango()",
       "source_file": "js/app.js",
-      "source_location": "L211"
+      "source_location": "L270"
+    },
+    {
+      "id": "letras_lineaspresentacion",
+      "label": "lineasPresentacion()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "pintarHabitacion",
+      "file_type": "code",
+      "norm_label": "lineaspresentacion()",
+      "source_file": "js/letras.js",
+      "source_location": "L83"
+    },
+    {
+      "id": "app_actualizarletra",
+      "label": "actualizarLetra()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "tick",
+      "file_type": "code",
+      "norm_label": "actualizarletra()",
+      "source_file": "js/app.js",
+      "source_location": "L243"
+    },
+    {
+      "id": "app_centrar",
+      "label": "centrar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "tick",
+      "file_type": "code",
+      "norm_label": "centrar()",
+      "source_file": "js/app.js",
+      "source_location": "L237"
     },
     {
       "id": "app_cl",
@@ -352,7 +412,7 @@
       "file_type": "code",
       "norm_label": "cl()",
       "source_file": "js/app.js",
-      "source_location": "L7"
+      "source_location": "L9"
     },
     {
       "id": "app_colocarpuertas",
@@ -364,7 +424,19 @@
       "file_type": "code",
       "norm_label": "colocarpuertas()",
       "source_file": "js/app.js",
-      "source_location": "L52"
+      "source_location": "L54"
+    },
+    {
+      "id": "app_lineaactiva",
+      "label": "lineaActiva()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "tick",
+      "file_type": "code",
+      "norm_label": "lineaactiva()",
+      "source_file": "js/app.js",
+      "source_location": "L231"
     },
     {
       "id": "app_progreso",
@@ -376,7 +448,7 @@
       "file_type": "code",
       "norm_label": "progreso()",
       "source_file": "js/app.js",
-      "source_location": "L242"
+      "source_location": "L301"
     },
     {
       "id": "app_tick",
@@ -388,7 +460,7 @@
       "file_type": "code",
       "norm_label": "tick()",
       "source_file": "js/app.js",
-      "source_location": "L327"
+      "source_location": "L386"
     },
     {
       "id": "app_alternarmudo",
@@ -400,7 +472,7 @@
       "file_type": "code",
       "norm_label": "alternarmudo()",
       "source_file": "js/app.js",
-      "source_location": "L269"
+      "source_location": "L328"
     },
     {
       "id": "app_guardar",
@@ -412,7 +484,7 @@
       "file_type": "code",
       "norm_label": "guardar()",
       "source_file": "js/app.js",
-      "source_location": "L11"
+      "source_location": "L13"
     },
     {
       "id": "app_pintarsonido",
@@ -424,7 +496,7 @@
       "file_type": "code",
       "norm_label": "pintarsonido()",
       "source_file": "js/app.js",
-      "source_location": "L253"
+      "source_location": "L312"
     },
     {
       "id": "app_ponervol",
@@ -436,7 +508,7 @@
       "file_type": "code",
       "norm_label": "ponervol()",
       "source_file": "js/app.js",
-      "source_location": "L264"
+      "source_location": "L323"
     },
     {
       "id": "app_silenciado",
@@ -448,15 +520,27 @@
       "file_type": "code",
       "norm_label": "silenciado()",
       "source_file": "js/app.js",
-      "source_location": "L252"
+      "source_location": "L311"
+    },
+    {
+      "id": "escena_altoarco",
+      "label": "altoArco()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "altoarco()",
+      "source_file": "js/escena.js",
+      "source_location": "L26"
     },
     {
       "id": "escena_anillo",
       "label": "anillo()",
       "_callable": true,
       "_origin": "ast",
-      "community": 15,
-      "community_name": "contorno",
+      "community": 3,
+      "community_name": "crearEscena",
       "file_type": "code",
       "norm_label": "anillo()",
       "source_file": "js/escena.js",
@@ -467,120 +551,48 @@
       "label": "arco()",
       "_callable": true,
       "_origin": "ast",
-      "community": 15,
-      "community_name": "contorno",
+      "community": 3,
+      "community_name": "crearEscena",
       "file_type": "code",
       "norm_label": "arco()",
       "source_file": "js/escena.js",
       "source_location": "L20"
     },
     {
-      "id": "escena_contorno",
-      "label": "contorno()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "contorno",
-      "file_type": "code",
-      "norm_label": "contorno()",
-      "source_file": "js/escena.js",
-      "source_location": "L27"
-    },
-    {
-      "id": "escena_formau",
-      "label": "formaU()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "contorno",
-      "file_type": "code",
-      "norm_label": "formau()",
-      "source_file": "js/escena.js",
-      "source_location": "L28"
-    },
-    {
-      "id": "escena_altoarco",
-      "label": "altoArco()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "escena.js",
-      "file_type": "code",
-      "norm_label": "altoarco()",
-      "source_file": "js/escena.js",
-      "source_location": "L26"
-    },
-    {
       "id": "escena_caja",
       "label": "caja()",
       "_callable": true,
       "_origin": "ast",
-      "community": 2,
-      "community_name": "escena.js",
+      "community": 3,
+      "community_name": "crearEscena",
       "file_type": "code",
       "norm_label": "caja()",
       "source_file": "js/escena.js",
       "source_location": "L35"
     },
     {
-      "id": "escena_extruir",
-      "label": "extruir()",
+      "id": "escena_cl",
+      "label": "cl()",
       "_callable": true,
       "_origin": "ast",
-      "community": 2,
-      "community_name": "escena.js",
+      "community": 3,
+      "community_name": "crearEscena",
       "file_type": "code",
-      "norm_label": "extruir()",
+      "norm_label": "cl()",
       "source_file": "js/escena.js",
-      "source_location": "L34"
+      "source_location": "L11"
     },
     {
-      "id": "escena_texturagradiente",
-      "label": "texturaGradiente()",
+      "id": "escena_contorno",
+      "label": "contorno()",
       "_callable": true,
       "_origin": "ast",
-      "community": 2,
-      "community_name": "escena.js",
+      "community": 3,
+      "community_name": "crearEscena",
       "file_type": "code",
-      "norm_label": "texturagradiente()",
+      "norm_label": "contorno()",
       "source_file": "js/escena.js",
-      "source_location": "L66"
-    },
-    {
-      "id": "escena_texturaplaca",
-      "label": "texturaPlaca()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "escena.js",
-      "file_type": "code",
-      "norm_label": "texturaplaca()",
-      "source_file": "js/escena.js",
-      "source_location": "L73"
-    },
-    {
-      "id": "escena_texturaradial",
-      "label": "texturaRadial()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "escena.js",
-      "file_type": "code",
-      "norm_label": "texturaradial()",
-      "source_file": "js/escena.js",
-      "source_location": "L59"
-    },
-    {
-      "id": "escena_uvmundo",
-      "label": "uvMundo()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "escena.js",
-      "file_type": "code",
-      "norm_label": "uvmundo()",
-      "source_file": "js/escena.js",
-      "source_location": "L38"
+      "source_location": "L27"
     },
     {
       "id": "escena_crearescena",
@@ -595,6 +607,30 @@
       "source_location": "L84"
     },
     {
+      "id": "escena_crearescena_actualizar",
+      "label": "actualizar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "actualizar()",
+      "source_file": "js/escena.js",
+      "source_location": "L666"
+    },
+    {
+      "id": "escena_crearescena_actualizarrayo",
+      "label": "actualizarRayo()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "actualizarrayo()",
+      "source_file": "js/escena.js",
+      "source_location": "L619"
+    },
+    {
       "id": "escena_crearescena_cerrarlotes",
       "label": "cerrarLotes()",
       "_callable": true,
@@ -607,6 +643,18 @@
       "source_location": "L130"
     },
     {
+      "id": "escena_crearescena_dibujarrayo",
+      "label": "dibujarRayo()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "dibujarrayo()",
+      "source_file": "js/escena.js",
+      "source_location": "L488"
+    },
+    {
       "id": "escena_crearescena_entrar",
       "label": "entrar()",
       "_callable": true,
@@ -617,6 +665,30 @@
       "norm_label": "entrar()",
       "source_file": "js/escena.js",
       "source_location": "L577"
+    },
+    {
+      "id": "escena_crearescena_estacion",
+      "label": "estacion()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "estacion()",
+      "source_file": "js/escena.js",
+      "source_location": "L532"
+    },
+    {
+      "id": "escena_crearescena_moverparticulas",
+      "label": "moverParticulas()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "moverparticulas()",
+      "source_file": "js/escena.js",
+      "source_location": "L648"
     },
     {
       "id": "escena_crearescena_particulas",
@@ -641,6 +713,18 @@
       "norm_label": "ponerenpuerta()",
       "source_file": "js/escena.js",
       "source_location": "L605"
+    },
+    {
+      "id": "escena_crearescena_posescroll",
+      "label": "poseScroll()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "posescroll()",
+      "source_file": "js/escena.js",
+      "source_location": "L539"
     },
     {
       "id": "escena_crearescena_preescucha",
@@ -737,6 +821,102 @@
       "norm_label": "tex()",
       "source_file": "js/escena.js",
       "source_location": "L103"
+    },
+    {
+      "id": "escena_eio",
+      "label": "eio()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "eio()",
+      "source_file": "js/escena.js",
+      "source_location": "L13"
+    },
+    {
+      "id": "escena_extruir",
+      "label": "extruir()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "extruir()",
+      "source_file": "js/escena.js",
+      "source_location": "L34"
+    },
+    {
+      "id": "escena_formau",
+      "label": "formaU()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "formau()",
+      "source_file": "js/escena.js",
+      "source_location": "L28"
+    },
+    {
+      "id": "escena_suave",
+      "label": "suave()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "suave()",
+      "source_file": "js/escena.js",
+      "source_location": "L12"
+    },
+    {
+      "id": "escena_texturagradiente",
+      "label": "texturaGradiente()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "texturagradiente()",
+      "source_file": "js/escena.js",
+      "source_location": "L66"
+    },
+    {
+      "id": "escena_texturaplaca",
+      "label": "texturaPlaca()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "texturaplaca()",
+      "source_file": "js/escena.js",
+      "source_location": "L73"
+    },
+    {
+      "id": "escena_texturaradial",
+      "label": "texturaRadial()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "texturaradial()",
+      "source_file": "js/escena.js",
+      "source_location": "L59"
+    },
+    {
+      "id": "escena_uvmundo",
+      "label": "uvMundo()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "uvmundo()",
+      "source_file": "js/escena.js",
+      "source_location": "L38"
     },
     {
       "id": "audio_ambiente",
@@ -991,114 +1171,6 @@
       "source_location": "L10"
     },
     {
-      "id": "escena_cl",
-      "label": "cl()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "cl()",
-      "source_file": "js/escena.js",
-      "source_location": "L11"
-    },
-    {
-      "id": "escena_crearescena_actualizar",
-      "label": "actualizar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "actualizar()",
-      "source_file": "js/escena.js",
-      "source_location": "L666"
-    },
-    {
-      "id": "escena_crearescena_actualizarrayo",
-      "label": "actualizarRayo()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "actualizarrayo()",
-      "source_file": "js/escena.js",
-      "source_location": "L619"
-    },
-    {
-      "id": "escena_crearescena_dibujarrayo",
-      "label": "dibujarRayo()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "dibujarrayo()",
-      "source_file": "js/escena.js",
-      "source_location": "L488"
-    },
-    {
-      "id": "escena_crearescena_estacion",
-      "label": "estacion()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "estacion()",
-      "source_file": "js/escena.js",
-      "source_location": "L532"
-    },
-    {
-      "id": "escena_crearescena_moverparticulas",
-      "label": "moverParticulas()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "moverparticulas()",
-      "source_file": "js/escena.js",
-      "source_location": "L648"
-    },
-    {
-      "id": "escena_crearescena_posescroll",
-      "label": "poseScroll()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "posescroll()",
-      "source_file": "js/escena.js",
-      "source_location": "L539"
-    },
-    {
-      "id": "escena_eio",
-      "label": "eio()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "eio()",
-      "source_file": "js/escena.js",
-      "source_location": "L13"
-    },
-    {
-      "id": "escena_suave",
-      "label": "suave()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "suave()",
-      "source_file": "js/escena.js",
-      "source_location": "L12"
-    },
-    {
       "id": "audio_abrirpre",
       "label": "abrirPre()",
       "_callable": true,
@@ -1180,7 +1252,7 @@
       "file_type": "code",
       "norm_label": "abrirhabitacion()",
       "source_file": "js/app.js",
-      "source_location": "L173"
+      "source_location": "L175"
     },
     {
       "id": "app_cerrarindice",
@@ -1192,7 +1264,7 @@
       "file_type": "code",
       "norm_label": "cerrarindice()",
       "source_file": "js/app.js",
-      "source_location": "L308"
+      "source_location": "L367"
     },
     {
       "id": "app_entrar",
@@ -1204,7 +1276,7 @@
       "file_type": "code",
       "norm_label": "entrar()",
       "source_file": "js/app.js",
-      "source_location": "L135"
+      "source_location": "L137"
     },
     {
       "id": "app_espera",
@@ -1216,7 +1288,7 @@
       "file_type": "code",
       "norm_label": "espera()",
       "source_file": "js/app.js",
-      "source_location": "L134"
+      "source_location": "L136"
     },
     {
       "id": "app_pintarplay",
@@ -1228,7 +1300,7 @@
       "file_type": "code",
       "norm_label": "pintarplay()",
       "source_file": "js/app.js",
-      "source_location": "L213"
+      "source_location": "L272"
     },
     {
       "id": "app_avisar",
@@ -1240,7 +1312,7 @@
       "file_type": "code",
       "norm_label": "avisar()",
       "source_file": "js/app.js",
-      "source_location": "L71"
+      "source_location": "L73"
     },
     {
       "id": "app_iniciarpre",
@@ -1252,7 +1324,7 @@
       "file_type": "code",
       "norm_label": "iniciarpre()",
       "source_file": "js/app.js",
-      "source_location": "L72"
+      "source_location": "L74"
     },
     {
       "id": "app_pararpre",
@@ -1264,7 +1336,7 @@
       "file_type": "code",
       "norm_label": "pararpre()",
       "source_file": "js/app.js",
-      "source_location": "L86"
+      "source_location": "L88"
     },
     {
       "id": "app",
@@ -1286,7 +1358,7 @@
       "file_type": "code",
       "norm_label": "atmos",
       "source_file": "js/app.js",
-      "source_location": "L39"
+      "source_location": "L41"
     },
     {
       "id": "app_aviso",
@@ -1297,7 +1369,7 @@
       "file_type": "code",
       "norm_label": "aviso",
       "source_file": "js/app.js",
-      "source_location": "L70"
+      "source_location": "L72"
     },
     {
       "id": "app_ayuda",
@@ -1308,7 +1380,7 @@
       "file_type": "code",
       "norm_label": "ayuda",
       "source_file": "js/app.js",
-      "source_location": "L324"
+      "source_location": "L383"
     },
     {
       "id": "app_botones",
@@ -1319,7 +1391,7 @@
       "file_type": "code",
       "norm_label": "botones",
       "source_file": "js/app.js",
-      "source_location": "L42"
+      "source_location": "L44"
     },
     {
       "id": "app_btnindice",
@@ -1330,7 +1402,18 @@
       "file_type": "code",
       "norm_label": "btnindice",
       "source_file": "js/app.js",
-      "source_location": "L300"
+      "source_location": "L359"
+    },
+    {
+      "id": "app_btnseguir",
+      "label": "btnSeguir",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "app.js",
+      "file_type": "code",
+      "norm_label": "btnseguir",
+      "source_file": "js/app.js",
+      "source_location": "L215"
     },
     {
       "id": "app_capa",
@@ -1341,7 +1424,7 @@
       "file_type": "code",
       "norm_label": "capa",
       "source_file": "js/app.js",
-      "source_location": "L18"
+      "source_location": "L20"
     },
     {
       "id": "app_captura",
@@ -1352,7 +1435,7 @@
       "file_type": "code",
       "norm_label": "captura",
       "source_file": "js/app.js",
-      "source_location": "L367"
+      "source_location": "L426"
     },
     {
       "id": "app_escena",
@@ -1363,7 +1446,7 @@
       "file_type": "code",
       "norm_label": "escena",
       "source_file": "js/app.js",
-      "source_location": "L22"
+      "source_location": "L24"
     },
     {
       "id": "app_estaciones_rm",
@@ -1374,7 +1457,7 @@
       "file_type": "code",
       "norm_label": "estaciones_rm",
       "source_file": "js/app.js",
-      "source_location": "L322"
+      "source_location": "L381"
     },
     {
       "id": "app_hab",
@@ -1385,7 +1468,18 @@
       "file_type": "code",
       "norm_label": "hab",
       "source_file": "js/app.js",
-      "source_location": "L18"
+      "source_location": "L20"
+    },
+    {
+      "id": "app_habscroll",
+      "label": "habScroll",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "app.js",
+      "file_type": "code",
+      "norm_label": "habscroll",
+      "source_file": "js/app.js",
+      "source_location": "L215"
     },
     {
       "id": "app_indice",
@@ -1396,7 +1490,7 @@
       "file_type": "code",
       "norm_label": "indice",
       "source_file": "js/app.js",
-      "source_location": "L300"
+      "source_location": "L359"
     },
     {
       "id": "app_llegada",
@@ -1407,7 +1501,18 @@
       "file_type": "code",
       "norm_label": "llegada",
       "source_file": "js/app.js",
-      "source_location": "L18"
+      "source_location": "L20"
+    },
+    {
+      "id": "app_sync",
+      "label": "sync",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "app.js",
+      "file_type": "code",
+      "norm_label": "sync",
+      "source_file": "js/app.js",
+      "source_location": "L216"
     },
     {
       "id": "app_ultimo",
@@ -1418,7 +1523,7 @@
       "file_type": "code",
       "norm_label": "ultimo",
       "source_file": "js/app.js",
-      "source_location": "L323"
+      "source_location": "L382"
     },
     {
       "id": "app_velo",
@@ -1429,7 +1534,29 @@
       "file_type": "code",
       "norm_label": "velo",
       "source_file": "js/app.js",
-      "source_location": "L18"
+      "source_location": "L20"
+    },
+    {
+      "id": "tiempos",
+      "label": "tiempos.js",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "app.js",
+      "file_type": "code",
+      "norm_label": "tiempos.js",
+      "source_file": "js/tiempos.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "tiempos_tiempos",
+      "label": "TIEMPOS",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "app.js",
+      "file_type": "code",
+      "norm_label": "tiempos",
+      "source_file": "js/tiempos.js",
+      "source_location": "L2"
     },
     {
       "id": "audio",
@@ -1546,7 +1673,7 @@
       "label": "datos.js",
       "_origin": "ast",
       "community": 2,
-      "community_name": "escena.js",
+      "community_name": "letras.js",
       "file_type": "code",
       "norm_label": "datos.js",
       "source_file": "js/datos.js",
@@ -1557,18 +1684,51 @@
       "label": "CANCIONES",
       "_origin": "ast",
       "community": 2,
-      "community_name": "escena.js",
+      "community_name": "letras.js",
       "file_type": "code",
       "norm_label": "canciones",
       "source_file": "js/datos.js",
       "source_location": "L3"
     },
     {
+      "id": "letras",
+      "label": "letras.js",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "letras.js",
+      "file_type": "code",
+      "norm_label": "letras.js",
+      "source_file": "js/letras.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "letras_dudas",
+      "label": "DUDAS",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "letras.js",
+      "file_type": "code",
+      "norm_label": "dudas",
+      "source_file": "js/letras.js",
+      "source_location": "L72"
+    },
+    {
+      "id": "letras_ediciones",
+      "label": "EDICIONES",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "letras.js",
+      "file_type": "code",
+      "norm_label": "ediciones",
+      "source_file": "js/letras.js",
+      "source_location": "L8"
+    },
+    {
       "id": "escena",
       "label": "escena.js",
       "_origin": "ast",
-      "community": 2,
-      "community_name": "escena.js",
+      "community": 3,
+      "community_name": "crearEscena",
       "file_type": "code",
       "norm_label": "escena.js",
       "source_file": "js/escena.js",
@@ -1578,8 +1738,8 @@
       "id": "escena_b",
       "label": "B",
       "_origin": "ast",
-      "community": 2,
-      "community_name": "escena.js",
+      "community": 3,
+      "community_name": "crearEscena",
       "file_type": "code",
       "norm_label": "b",
       "source_file": "js/escena.js",
@@ -1589,8 +1749,8 @@
       "id": "escena_movil",
       "label": "MOVIL",
       "_origin": "ast",
-      "community": 2,
-      "community_name": "escena.js",
+      "community": 3,
+      "community_name": "crearEscena",
       "file_type": "code",
       "norm_label": "movil",
       "source_file": "js/escena.js",
@@ -1622,8 +1782,8 @@
       "id": "ref_three",
       "label": "ref_three",
       "_origin": "semantic",
-      "community": 2,
-      "community_name": "escena.js",
+      "community": 3,
+      "community_name": "crearEscena",
       "external": true,
       "file_type": "concept",
       "norm_label": "ref_three",
@@ -1641,7 +1801,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L175",
+      "source_location": "L177",
       "weight": 1.0
     },
     {
@@ -1653,7 +1813,31 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L180",
+      "source_location": "L182",
+      "weight": 1.0
+    },
+    {
+      "source": "app_actualizarletra",
+      "target": "app_lineaactiva",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/app.js",
+      "source_location": "L245",
+      "weight": 1.0
+    },
+    {
+      "source": "app_actualizarletra",
+      "target": "app_centrar",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/app.js",
+      "source_location": "L251",
       "weight": 1.0
     },
     {
@@ -1665,7 +1849,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L270",
+      "source_location": "L329",
       "weight": 1.0
     },
     {
@@ -1677,7 +1861,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L270",
+      "source_location": "L329",
       "weight": 1.0
     },
     {
@@ -1689,7 +1873,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L271",
+      "source_location": "L330",
       "weight": 1.0
     },
     {
@@ -1701,7 +1885,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L275",
+      "source_location": "L334",
       "weight": 1.0
     },
     {
@@ -1713,7 +1897,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L185",
+      "source_location": "L187",
       "weight": 1.0
     },
     {
@@ -1725,7 +1909,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L188",
+      "source_location": "L190",
       "weight": 1.0
     },
     {
@@ -1737,7 +1921,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L57",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -1749,7 +1933,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L138",
+      "source_location": "L140",
       "weight": 1.0
     },
     {
@@ -1761,7 +1945,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L139",
+      "source_location": "L141",
       "weight": 1.0
     },
     {
@@ -1773,7 +1957,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L142",
+      "source_location": "L144",
       "weight": 1.0
     },
     {
@@ -1785,7 +1969,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L153",
+      "source_location": "L155",
       "weight": 1.0
     },
     {
@@ -1797,7 +1981,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L154",
+      "source_location": "L156",
       "weight": 1.0
     },
     {
@@ -1809,7 +1993,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L74",
+      "source_location": "L76",
       "weight": 1.0
     },
     {
@@ -1821,7 +2005,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L75",
+      "source_location": "L77",
+      "weight": 1.0
+    },
+    {
+      "source": "app_pintarhabitacion",
+      "target": "app_pintarletra",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/app.js",
+      "source_location": "L164",
       "weight": 1.0
     },
     {
@@ -1833,7 +2029,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L164",
+      "source_location": "L166",
+      "weight": 1.0
+    },
+    {
+      "source": "app_pintarletra",
+      "target": "letras_lineaspresentacion",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/app.js",
+      "source_location": "L219",
       "weight": 1.0
     },
     {
@@ -1845,7 +2053,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L254",
+      "source_location": "L313",
       "weight": 1.0
     },
     {
@@ -1857,7 +2065,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L262",
+      "source_location": "L321",
       "weight": 1.0
     },
     {
@@ -1869,7 +2077,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L267",
+      "source_location": "L326",
       "weight": 1.0
     },
     {
@@ -1881,7 +2089,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L344",
+      "source_location": "L403",
+      "weight": 1.0
+    },
+    {
+      "source": "app_tick",
+      "target": "app_actualizarletra",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/app.js",
+      "source_location": "L405",
       "weight": 1.0
     },
     {
@@ -1893,7 +2113,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L346",
+      "source_location": "L405",
       "weight": 1.0
     },
     {
@@ -1905,7 +2125,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L349",
+      "source_location": "L408",
       "weight": 1.0
     },
     {
@@ -1917,7 +2137,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L363",
+      "source_location": "L422",
       "weight": 1.0
     },
     {
@@ -1929,7 +2149,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L364",
+      "source_location": "L423",
       "weight": 1.0
     },
     {
@@ -2817,18 +3037,6 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "app",
-      "target": "app_fmt",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "js/app.js",
       "source_location": "L13",
       "weight": 1.0
     },
@@ -2841,7 +3049,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L135",
+      "source_location": "L137",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_fmt",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/app.js",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -2853,7 +3073,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L183",
+      "source_location": "L185",
       "weight": 1.0
     },
     {
@@ -2865,7 +3085,43 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L193",
+      "source_location": "L195",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_lineaactiva",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/app.js",
+      "source_location": "L231",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_centrar",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/app.js",
+      "source_location": "L237",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_manual",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/app.js",
+      "source_location": "L254",
       "weight": 1.0
     },
     {
@@ -2877,7 +3133,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L211",
+      "source_location": "L270",
       "weight": 1.0
     },
     {
@@ -2889,7 +3145,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L253",
+      "source_location": "L312",
       "weight": 1.0
     },
     {
@@ -2901,7 +3157,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L264",
+      "source_location": "L323",
       "weight": 1.0
     },
     {
@@ -2913,7 +3169,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L269",
+      "source_location": "L328",
       "weight": 1.0
     },
     {
@@ -2925,7 +3181,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L308",
+      "source_location": "L367",
       "weight": 1.0
     },
     {
@@ -2937,19 +3193,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L65",
-      "weight": 1.0
-    },
-    {
-      "source": "app",
-      "target": "app_cl",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "js/app.js",
-      "source_location": "L7",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -2961,7 +3205,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L72",
+      "source_location": "L74",
       "weight": 1.0
     },
     {
@@ -2973,7 +3217,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L86",
+      "source_location": "L88",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_cl",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/app.js",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -3073,6 +3329,30 @@
       "weight": 1.0
     },
     {
+      "source": "app",
+      "target": "letras_lineaspresentacion",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "js/app.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "tiempos_tiempos",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "js/app.js",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
       "source": "audio",
       "target": "datos_canciones",
       "relation": "imports",
@@ -3094,6 +3374,18 @@
       "context": "import",
       "source_file": "js/escena.js",
       "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "letras",
+      "target": "datos_canciones",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "js/letras.js",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -3145,6 +3437,30 @@
       "weight": 1.0
     },
     {
+      "source": "app",
+      "target": "letras",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "js/app.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "tiempos",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "js/app.js",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
       "source": "audio",
       "target": "datos",
       "relation": "imports_from",
@@ -3181,14 +3497,15 @@
       "weight": 1.0
     },
     {
-      "source": "app",
-      "target": "app_leer",
-      "relation": "contains",
+      "source": "letras",
+      "target": "datos",
+      "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "js/app.js",
-      "source_location": "L12",
+      "context": "import",
+      "source_file": "js/letras.js",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -3199,7 +3516,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L134",
+      "source_location": "L136",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_leer",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/app.js",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -3210,7 +3538,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L156",
+      "source_location": "L158",
       "weight": 1.0
     },
     {
@@ -3221,7 +3549,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L173",
+      "source_location": "L175",
       "weight": 1.0
     },
     {
@@ -3232,7 +3560,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L18",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -3243,7 +3571,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L18",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -3254,7 +3582,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L18",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -3265,7 +3593,51 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L18",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_btnseguir",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/app.js",
+      "source_location": "L215",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_habscroll",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/app.js",
+      "source_location": "L215",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_sync",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/app.js",
+      "source_location": "L216",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_pintarletra",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/app.js",
+      "source_location": "L217",
       "weight": 1.0
     },
     {
@@ -3276,7 +3648,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L22",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_actualizarletra",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/app.js",
+      "source_location": "L243",
       "weight": 1.0
     },
     {
@@ -3287,7 +3670,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L242",
+      "source_location": "L301",
       "weight": 1.0
     },
     {
@@ -3298,7 +3681,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L252",
+      "source_location": "L311",
       "weight": 1.0
     },
     {
@@ -3309,7 +3692,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L300",
+      "source_location": "L359",
       "weight": 1.0
     },
     {
@@ -3320,7 +3703,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L300",
+      "source_location": "L359",
       "weight": 1.0
     },
     {
@@ -3331,7 +3714,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L322",
+      "source_location": "L381",
       "weight": 1.0
     },
     {
@@ -3342,7 +3725,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L323",
+      "source_location": "L382",
       "weight": 1.0
     },
     {
@@ -3353,18 +3736,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L324",
-      "weight": 1.0
-    },
-    {
-      "source": "app",
-      "target": "app_captura",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/app.js",
-      "source_location": "L367",
+      "source_location": "L383",
       "weight": 1.0
     },
     {
@@ -3375,7 +3747,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L39",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_captura",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/app.js",
+      "source_location": "L426",
       "weight": 1.0
     },
     {
@@ -3386,7 +3769,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L42",
+      "source_location": "L44",
       "weight": 1.0
     },
     {
@@ -3397,7 +3780,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L52",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -3408,7 +3791,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L70",
+      "source_location": "L72",
       "weight": 1.0
     },
     {
@@ -3419,7 +3802,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/app.js",
-      "source_location": "L71",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -4292,6 +4675,50 @@
       "weight": 1.0
     },
     {
+      "source": "letras",
+      "target": "letras_dudas",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/letras.js",
+      "source_location": "L72",
+      "weight": 1.0
+    },
+    {
+      "source": "letras",
+      "target": "letras_ediciones",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/letras.js",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "letras",
+      "target": "letras_lineaspresentacion",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/letras.js",
+      "source_location": "L83",
+      "weight": 1.0
+    },
+    {
+      "source": "tiempos",
+      "target": "tiempos_tiempos",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/tiempos.js",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
       "source": "app",
       "target": "app_pintarplay",
       "relation": "indirect_call",
@@ -4300,19 +4727,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "js/app.js",
-      "source_location": "L218",
-      "weight": 1.0
-    },
-    {
-      "source": "app",
-      "target": "app_tick",
-      "relation": "indirect_call",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "source_file": "js/app.js",
-      "source_location": "L368",
+      "source_location": "L277",
       "weight": 1.0
     },
     {
@@ -4324,7 +4739,19 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "js/app.js",
-      "source_location": "L37",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "app",
+      "target": "app_tick",
+      "relation": "indirect_call",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "source_file": "js/app.js",
+      "source_location": "L427",
       "weight": 1.0
     },
     {
@@ -4437,5 +4864,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f3006e01a10d917ceb0be242bc68ca4661031f16"
+  "built_at_commit": "6f2c41646636ed78243c5240423314f2f6ffb2c4"
 }

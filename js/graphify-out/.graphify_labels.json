@@ -1,11 +1,10 @@
 {
   "0": "app.js",
   "1": "audio.js",
-  "2": "escena.js",
+  "2": "letras.js",
   "3": "crearEscena",
   "4": "entrarCancion",
   "5": "habitaciones.js",
-  "6": "actualizar",
   "7": "rampa",
   "8": "entrar",
   "9": "pararPre",
@@ -13,6 +12,5 @@
   "11": "cadenaReverb",
   "12": "pintarHabitacion",
   "13": "tick",
-  "14": "alternarMudo",
-  "15": "contorno"
+  "14": "alternarMudo"
 }
