@@ -120,3 +120,24 @@ Las inciertas se concentran en repeticiones («No voy a decir…», «Todololo»
 **No validado.** Exactitud auditiva de los tiempos (nada se ha escuchado): **todas** las líneas son alineamiento automático; las 47 inciertas son prioridad de revisión. Teléfono físico.
 
 **Siguiente paso.** Revisión a oído del artista (empezando por las inciertas) y corrección de tiempos en `tools/alineamiento/NN.json` → `node tools/tiempos.mjs`.
+
+**Corrección de cifras (2026-10-17).** Recontado desde `tools/alineamiento/*.json` sin repetir el alineamiento: **240 líneas con texto = 193 `auto` + 47 `incierto`**. La tabla anterior suma 47 inciertas y es correcta; el error estaba en el mensaje del commit 1fac70f («147 líneas auto»): son 193. Ninguna línea está revisada a oído.
+
+## 2026-10-17 · Acabado visual: fachada, puerta 1 y habitación 1 (rama `feat/acabado-visual`, desde `feat/letras`)
+
+**Decisiones.**
+- Piedra envejecida en el sombreador (`envejecer` en `js/escena.js`, ruido 3D en coordenadas de mundo): humedad y suciedad que suben del suelo, chorreones verticales, musgo en la base y variación tonal amplia. Sin texturas nuevas ni coste extra notable en teléfono.
+- Fachada: cornisa bajo el gablete, imposta, alféizares, labio del zócalo; pernios, bisagras y aro de hierro en las hojas del portal.
+- Paisaje con intención: 8 árboles secos en 3D cerca del camino (proyectan sombra), 1500 matas de hierba (700 en teléfono) en bordes del camino, verja y zócalo, 70 rocas; bosques de fondo con dos semillas, espejados y desplazados para que no se repitan.
+- Puerta 1 (muestra): pernios en relieve, bisagras, clave en el arco, umbral de piedra, farol de hierro en la columna con luz cálida; abre hacia la nave hasta quedar contra el derrame. Rótulos de todas las puertas como placa de bronce unida al pie de su puerta (títulos sin cambios).
+- Habitación 1 (`js/sala-mar.js`): cámara de piedra del mismo edificio que se abre por un arco apuntado a un mar celeste; silla vacía de espaldas mirando al agua (ausencia); seis cuerdas que cruzan el espacio y se tensan con la canción (ataduras); el sol baja y se pierde bajo el horizonte con el progreso del tema. Mar y cielo con sombreadores propios.
+- Continuidad: la puerta 1 es un **portal**: la sala se dibuja con la pose real de la cámara trasladada al espacio de la sala; al cruzar el umbral se dibuja la sala directamente desde esa misma pose (sin destello ni fondo genérico). En la habitación 1 la sala 3D queda detrás de la letra; las demás habitaciones conservan su atmósfera 2D hasta extender el acabado.
+- Robustez: `terminarEntrada()` deja la cámara dentro de la habitación si la entrada se completó por el temporizador de respaldo (pantalla bloqueada o pestaña oculta). La instrumental se retira al ritmo de la entrada (más rápido con movimiento reducido).
+
+**Pruebas (navegador, emulación 1440×900 y 375×812).** Capturas comparables antes/después en `capturas/12-antes-despues-escritorio.jpg` y `capturas/13-antes-despues-habitacion1-movil.jpg` (mismas posiciones de cámara). `correrNueve()` 9/9; `correrLetra('01')` 13/13 con `?rm` (en modo normal fallan 2 comprobaciones de posición por la animación de desplazamiento en la pestaña de pruebas, igual que antes); `correr()` 22/22; `correrVolumen()` 17/17. Detectado y corregido en las pruebas: con movimiento reducido la instrumental seguía sonando al abrir la habitación (fundido de 1,8 s frente a entrada de 0,5 s).
+
+**Limitaciones reales.** Las texturas siguen siendo procedurales (la sillería mantiene un patrón regular visible de cerca); las matas de hierba son tarjetas planas que de lejos leen como setos oscuros; sin oclusión ambiental de pantalla. No probado en teléfono físico: el portal añade un render extra mientras la puerta 1 está abierta (a 0,6 de resolución). No se ha escuchado nada.
+
+**Recursos que elevarían el acabado** (especificación; no se usan provisionales como definitivos): texturas PBR escaneadas 2K (sillería de basalto o caliza oscura con juntas irregulares; piedra de umbral desgastada; madera vieja de roble; hierro forjado oxidado), modelos glTF ligeros (< 5 k triángulos) de matorral seco y hiedra para la fachada, y la portada en alta resolución (≥ 3000 px) para el tímpano.
+
+**Siguiente paso.** Revisión del artista de fachada, puerta 1 y habitación 1; si aprueba, extender herrajes y portal a las otras ocho puertas y crear sus salas.
