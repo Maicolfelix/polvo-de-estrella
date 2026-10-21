@@ -29,7 +29,6 @@ const escena = crearEscena({
   alCargar: () => {
     cargado = true;
     $('#carga').classList.add('lista');
-    $('#conSonido').disabled = $('#sinSonido').disabled = false;
   },
   alRayo: (f, d, dentro) => { if (modo === 'nave') A.trueno(f, d, dentro); },
 });
@@ -155,6 +154,7 @@ async function entrar(i) {
   if (A.activo) A.rafaga(RM ? 1 : 2.6, RM ? .35 : 1);
   A.entrarCancion(i, RM ? .25 : 1.15);          // sin sonido: solo carga, no suena
   atmos.poner(i); atmos.dibujar(1 / 60, 0, RM);   // la habitación queda preparada antes de abrir la puerta
+  if (i !== 0) { pintarHabitacion(i, false); mostrarHueco(i); }   // asoma por el hueco de la puerta mientras se abre
   await escena.entrar(i, $('#atmos'));
   abrirHabitacion(i);
 }
@@ -176,10 +176,32 @@ function pintarHabitacion(i, fundido) {
   hab.classList.add('cambiando');
   setTimeout(() => { aplicar(); hab.classList.remove('cambiando'); }, 450);
 }
+// La habitación 2D se muestra en la página recortada con la forma del hueco de la puerta (calculada en cada
+// fotograma por la escena) y aparece a medida que la puerta se abre y la cámara se alinea con ella. Al cruzar,
+// el recorte cubre la pantalla y desaparece. Igual en cualquier dispositivo: es el mismo lienzo de la habitación.
+let huecoDe = -1;
+function mostrarHueco(i) {
+  clearTimeout(mostrarHueco.t);
+  huecoDe = i; hab.hidden = false;
+  hab.classList.add('hueco', 'visible'); hab.classList.remove('listo');
+  recortarHueco();
+}
+function quitarHueco() {
+  huecoDe = -1; hab.classList.remove('hueco'); hab.style.clipPath = ''; hab.style.opacity = '';
+}
+function recortarHueco() {
+  if (huecoDe < 0) return;
+  const h = escena.huecoPantalla(huecoDe, innerWidth, innerHeight);
+  if (!h) { hab.style.clipPath = ''; hab.style.opacity = 1; return; }   // la cámara ya cruza el hueco
+  hab.style.clipPath = `polygon(${h.pts.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(',')})`;
+  const ve = Math.min(1, Math.max(0, (h.abierto - .04) / .4)) * Math.min(1, Math.max(0, (h.alin - .55) / .3));
+  hab.style.opacity = ve.toFixed(3);
+}
 function abrirHabitacion(i) {
   escena.terminarEntrada();
   actual = i;
-  pintarHabitacion(i, false);
+  if (i !== 0) { quitarHueco(); hab.classList.add('visible'); }   // el recorte ya llenaba la pantalla: sin fundido
+  else pintarHabitacion(i, false);
   hab.hidden = false;
   document.body.classList.add('en-habitacion');
   requestAnimationFrame(() => hab.classList.add('visible'));
@@ -211,10 +233,14 @@ function volver() {
   escena.salir(i);
   escena.reponerPolvo();
   botones[i].classList.add('visitada');
-  hab.classList.remove('visible', 'listo');
   document.body.classList.remove('en-habitacion');
   capa.inert = llegada.inert = false;
-  setTimeout(() => { hab.hidden = true; modo = 'nave'; botones[i].focus({ preventScroll: true }); }, RM ? 420 : 900);
+  if (i !== 0) {
+    // la habitación vuelve a encogerse al hueco de la puerta mientras la cámara retrocede, y se apaga al cerrarse
+    mostrarHueco(i);
+    mostrarHueco.t = setTimeout(() => { if (huecoDe === i && modo !== 'entrando' && modo !== 'habitacion') { quitarHueco(); hab.classList.remove('visible'); hab.hidden = true; } }, RM ? 500 : 2600);
+  } else hab.classList.remove('visible', 'listo');
+  setTimeout(() => { if (i === 0) hab.hidden = true; modo = 'nave'; botones[i].focus({ preventScroll: true }); }, RM ? 420 : 900);
 }
 
 /* ---------- letra sincronizada ---------- */
@@ -319,6 +345,7 @@ A.setVolumen(vol / 100);
 const silenciado = () => !A.activo || mudo || vol === 0;
 function pintarSonido() {
   const off = silenciado(), r = $('#vol');
+  $('#avisoSonido').classList.toggle('ido', A.activo);
   for (const b of [$('#btnSonido'), $('#mudo')]) b.classList.toggle('silencio', off);
   $('#btnSonido').setAttribute('aria-pressed', !off);
   $('#txtSonido').textContent = off ? 'Sin sonido' : 'Sonido';
@@ -334,11 +361,11 @@ function ponerVol(v) {
   guardar('pde-vol', v); guardar('pde-vol-ultimo', ultimoVol);
 }
 async function alternarMudo(forzar) {
-  if (!A.activo) { await A.activar(); mudo = false; A.setMudo(false); if (vol === 0) ponerVol(ultimoVol); pintarSonido(); return; }
+  if (!A.activo) { await A.activar(); mudo = false; A.setMudo(false); guardar('pde-mudo', '0'); if (vol === 0) ponerVol(ultimoVol); pintarSonido(); return; }
   const callar = forzar ?? !silenciado();
   if (callar) mudo = true;
   else { mudo = false; if (vol === 0) ponerVol(ultimoVol); }   // …y al reactivar vuelve al último nivel
-  A.setMudo(mudo);
+  A.setMudo(mudo); guardar('pde-mudo', mudo ? '1' : '0');
   if (mudo && escuchando != null) pararPre();
   pintarSonido();
 }
@@ -351,15 +378,43 @@ $('#vol').addEventListener('input', async e => {
 });
 $('#btnSonido').addEventListener('click', () => alternarMudo());
 $('#mudo').addEventListener('click', () => alternarMudo());
-$('#conSonido').addEventListener('click', async () => {
-  await A.activar(); mudo = false; A.setMudo(false);
-  $('#acciones').classList.add('ido'); pintarSonido(); guardar('pde-sonido', '1');
-  if (scrollY < H * .2) scrollTo({ top: H * .55, behavior: RM ? 'auto' : 'smooth' });
-});
-$('#sinSonido').addEventListener('click', () => {
-  $('#acciones').classList.add('ido'); pintarSonido(); guardar('pde-sonido', '0');
-  if (scrollY < H * .2) scrollTo({ top: H * .55, behavior: RM ? 'auto' : 'smooth' });
-});
+// Sin elegir: el ambiente (viento, lluvia, truenos) arranca con el primer gesto real en cualquier parte, porque
+// los navegadores no dejan sonar antes. Si la persona lo silenció en otra visita, se respeta.
+// Los botones de sonido gestionan su propio primer toque (si no, el gesto activaría y el botón silenciaría).
+const MANDOS_SONIDO = '#btnSonido, #mudo, #vol';
+async function despertarSonido(e) {
+  if (!e.isTrusted) return;
+  pedirGiro();                                   // iOS solo da el giroscopio tras un gesto
+  if (A.activo || e.target.closest?.(MANDOS_SONIDO)) return;
+  for (const ev of ['pointerdown', 'keydown', 'touchend']) removeEventListener(ev, despertarSonido, true);
+  await A.activar();
+  mudo = leer('pde-mudo') === '1'; A.setMudo(mudo); pintarSonido();
+}
+for (const ev of ['pointerdown', 'keydown', 'touchend']) addEventListener(ev, despertarSonido, true);
+
+/* ---------- mirar alrededor: ratón en el ordenador, giro del teléfono ---------- */
+// La vista gira un poco hacia donde apunta el ratón o hacia donde se inclina el teléfono. Sobre una puerta,
+// la vista se queda quieta (si no, la puerta se movería bajo el cursor).
+const mira = { x: 0, y: 0, base: null };
+addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse' || e.target.closest?.('.puerta')) return;
+  mira.x = e.clientX / innerWidth * 2 - 1; mira.y = e.clientY / innerHeight * 2 - 1;
+}, { passive: true });
+document.addEventListener('mouseleave', () => { mira.x = mira.y = 0; });
+function alGirar(e) {
+  if (e.beta == null) return;
+  const vertical = innerHeight >= innerWidth, a = vertical ? e.gamma : e.beta, b = vertical ? e.beta : -e.gamma;
+  if (!mira.base) mira.base = [a, b];
+  mira.x = Math.max(-1, Math.min(1, (a - mira.base[0]) / 28)); mira.y = Math.max(-1, Math.min(1, (b - mira.base[1]) / 28));
+}
+let giroPedido = false;
+function pedirGiro() {
+  if (giroPedido || !window.DeviceOrientationEvent || HOVER) return;
+  giroPedido = true;
+  const pide = DeviceOrientationEvent.requestPermission;
+  (pide ? pide.call(DeviceOrientationEvent) : Promise.resolve('granted')).then(r => { if (r === 'granted') addEventListener('deviceorientation', alGirar); }).catch(() => {});
+}
+addEventListener('orientationchange', () => { mira.base = null; });
 pintarSonido();
 
 
@@ -414,6 +469,8 @@ function tick(now) {
   } else if (salaMar && (sala30 = !sala30)) { escena.actualizarSala(dt * 2, progreso()); escena.render(); }   // detrás de la letra basta con 30 fps
   if (modo !== 'nave') { if (!salaMar) atmos.dibujar(dt, progreso(), RM); actualizarLetra(); }
 
+  recortarHueco();
+  escena.mirar(modo === 'nave' && !RM ? mira.x : 0, modo === 'nave' && !RM ? mira.y : 0);   // en las transiciones, la vista al frente
   // interfaz según el recorrido
   const a = cl(u / .55);
   llegada.style.opacity = (1 - a).toFixed(3);
@@ -435,7 +492,7 @@ function tick(now) {
   if (escuchando != null && Math.abs(uObjetivo - uPre) > .35) pararPre();
   if (CAPTURA) setTimeout(() => tick(performance.now()), 33); else requestAnimationFrame(tick);
 }
-requestAnimationFrame(tick);
+if (CAPTURA) setTimeout(() => tick(performance.now()), 0); else requestAnimationFrame(tick);   // en ?captura arranca aunque la pestaña no se pinte
 
 // para pruebas desde la consola
 window.__pde = { escena, A, atmos, entrar, volver, cambiar, actualizarLetra, estado: () => ({ modo, actual, escuchando, u: uSuave }) };

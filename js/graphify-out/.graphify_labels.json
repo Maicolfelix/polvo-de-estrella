@@ -5,11 +5,15 @@
   "3": "crearEscena",
   "4": "entrarCancion",
   "5": "habitaciones.js",
-  "6": "escena.js",
+  "6": "crearSalaMar",
   "7": "rampa",
   "8": "entrar",
   "9": "pararPre",
+  "10": "escena.js",
+  "11": "actualizar",
   "12": "pintarHabitacion",
   "13": "tick",
-  "14": "alternarMudo"
+  "14": "alternarMudo",
+  "15": "arco",
+  "16": "despertarSonido"
 }
