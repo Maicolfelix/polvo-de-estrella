@@ -52,7 +52,7 @@ body.en-habitacion .marca{opacity:0!important}
 /* la capilla queda a la vista en el centro: portada y título en una columna a la izquierda */
 #llegada{position:fixed;inset:0;z-index:10;display:grid;grid-template-columns:auto;align-content:center;justify-content:start;justify-items:start;gap:1.6rem;padding:80px var(--borde) 90px clamp(24px,6vw,104px);
   background:linear-gradient(90deg,rgba(6,4,5,.86),rgba(6,4,5,.6) 26%,rgba(6,4,5,0) 52%);will-change:opacity}
-#llegada .llegada-portada,#llegada .artista,#llegada h1,#llegada .llegada-sub,#llegada .aviso-sonido,#llegada .carga{transform:translateY(var(--sube,0))}
+#llegada .llegada-portada,#llegada .artista,#llegada h1,#llegada .llegada-sub,#llegada .carga{transform:translateY(var(--sube,0))}
 .llegada-portada{width:min(30vh,22vw);aspect-ratio:426/416;box-shadow:0 50px 120px -30px #000,0 0 0 1px rgba(239,232,222,.08);overflow:hidden;position:relative}
 .llegada-portada img{display:block;width:100%;height:100%;object-fit:cover}
 .llegada-portada::after{content:"";position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 44%,rgba(255,255,255,.14) 50%,transparent 56%);mix-blend-mode:screen;animation:barrido 10s ease-in-out infinite}
@@ -61,10 +61,16 @@ body.en-habitacion .marca{opacity:0!important}
 .artista{margin:0 0 1rem;font:500 .74rem/1 var(--sans);letter-spacing:.44em;color:var(--oro)}
 h1{margin:0;font:300 italic clamp(3rem,6.4vw,5.6rem)/.95 var(--serif);letter-spacing:-.01em}
 .llegada-sub{margin:1.1rem 0 2rem;color:var(--hueso-2);font-size:.98rem;line-height:1.6}
-/* el aviso solo aparece si el navegador no dejó arrancar el sonido solo */
-.aviso-sonido{margin:0;font-size:.74rem;letter-spacing:.14em;color:var(--hueso-3);transition:opacity .6s;opacity:0}
-.aviso-sonido.pendiente{opacity:1}
-.aviso-sonido.pendiente.ido{opacity:0}
+/* toque para entrar: capa transparente sobre la llegada; el texto late suave donde iba «Desliza» */
+.entrar-toque{position:fixed;inset:0;z-index:45;display:flex;align-items:flex-end;justify-content:center;padding:0 var(--borde) calc(58px + env(safe-area-inset-bottom));
+  background:transparent;border:0;cursor:pointer;color:var(--hueso);-webkit-tap-highlight-color:transparent;transition:opacity .5s;touch-action:none}
+.entrar-toque[hidden]{display:none}
+.entrar-toque.ido{opacity:0;pointer-events:none}
+.entrar-texto{font:500 .8rem/1 var(--sans);letter-spacing:.34em;padding:1rem 1.6rem 1rem 1.94rem;border:1px solid rgba(239,232,222,.3);border-radius:999px;background:rgba(6,4,5,.45);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:latir 2.4s ease-in-out infinite}
+@keyframes latir{0%,100%{opacity:.6;box-shadow:0 0 0 0 rgba(179,32,42,0)}50%{opacity:1;box-shadow:0 0 28px 2px rgba(179,32,42,.35)}}
+body.esperando .desliza{opacity:0}
+.rm .entrar-texto{animation:none}
 .carga{display:flex;align-items:center;gap:.8rem;margin-top:1.4rem;font-size:.72rem;letter-spacing:.16em;color:var(--hueso-3);transition:opacity .6s}
 .carga-barra{width:120px;height:1px;background:var(--linea);overflow:hidden}
 .carga-barra i{display:block;height:100%;width:0;background:var(--oro);transition:width .3s}
@@ -134,7 +140,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
   .artista{grid-column:2;align-self:end;margin:0}
   #titulo-album{grid-column:2;grid-row:2}
   .llegada-portada{grid-row:1/3}
-  .llegada-sub,.aviso-sonido,.carga{grid-column:1/-1}
+  .llegada-sub,.carga{grid-column:1/-1}
   h1{font-size:clamp(2.2rem,10vw,3rem)}
   .llegada-sub{margin:.9rem 0 1.5rem}
   .reproductor{grid-template-columns:auto 1fr auto;gap:.3rem .6rem;padding-top:1.8rem}

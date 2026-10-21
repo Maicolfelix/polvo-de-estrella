@@ -286,3 +286,16 @@ Con la escala adaptativa a 0,85 (1224×765) la nave también llegó a 72 fps. Lo
 **Carga.** Todos los módulos se piden a la vez (`modulepreload`; antes se descubrían en cadena); los sombreadores se compilan con `compileAsync` (sin congelar la página donde el navegador lo permite); mapas de rugosidad a 512 px y mapas algo más comprimidos (texturas 2,2 → 1,6 MB); portada en WebP (335 → 39 KB; el PNG original se conserva). Total de la carga inicial en local: ~2,4 MB (antes ~3 MB); todos los módulos llegan en 0,45 s. Sin medir en una red móvil real.
 
 **Pruebas (navegador integrado, 375×812).** Ambiente, transiciones, pausa y volumen en una tanda: 71/71. Sin teléfono físico.
+
+## 2026-10-22 · Siempre con sonido: ambiente grabado y «Toca para entrar» (rama `feat/acabado-visual`)
+
+**Pedido del artista.** Seguía entrando sin sonido; quiere que la experiencia siempre suene, con el mismo ambiente de lluvia.
+
+**Causas.** (1) En el teléfono la persona solo desplaza, y desplazar no cuenta como gesto para el audio: se podía recorrer todo sin un solo toque válido. (2) En iPhone, el sonido hecho solo con Web Audio se calla con el interruptor de silencio.
+
+**Cambios.**
+- Ambiente grabado: `tools/ambiente.py` genera `audio/ambiente.m4a` (bucle de 48 s sin costura: lluvia suave de ruido rosa, gotas y viento con oleadas; −20 dBFS RMS; 572 KB). Suena por un elemento `<audio>` conectado a la mezcla (mismo control de nivel, silencio y cesión ante la canción). Un elemento sonando hace que en iPhone se oiga todo aunque esté el interruptor de silencio; además se pide `navigator.audioSession.type = 'playback'` donde existe. Se pausa con la pestaña oculta y vuelve al regresar. El viento del movimiento y los truenos siguen sintetizados.
+- «Toca para entrar»: si al cargar el navegador no deja sonar solo, la llegada muestra una píldora que late («Toca para entrar» / «Haz clic para entrar») sobre una capa que cubre la pantalla, y no deja desplazar hasta tocar. Ese toque arranca el ambiente. Si el navegador sí deja sonar, no aparece nada.
+- `?sinautoplay` fuerza el caso bloqueado para probar.
+
+**Pruebas (navegador integrado).** Caso bloqueado (escritorio y 375×812): aparece la capa, desplazamiento bloqueado; un clic/toque real la quita y suena (`lluvia` 0,495, elemento sonando). Caso permitido: suena solo, sin capa. `correrAmbiente()` 11/11, `correrTransiciones()` 21/21, `correrVolumen()` 17/17, `correrSinSonido()` 8/8 (actualizada para la capa). `correr()` 21/22: la pulsación larga se corta porque el panel de pruebas oculta la pestaña (`document.hidden`), y con la pestaña oculta la preescucha se detiene a propósito; no es regresión. Sin teléfono físico: el interruptor de silencio de iPhone no se puede comprobar aquí.

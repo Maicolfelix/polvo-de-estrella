@@ -41,7 +41,6 @@
     <p class="artista">MAVO</p>
     <h1 id="titulo-album">Polvo de estrella</h1>
     <p class="llegada-sub">Nueve puertas. Detrás de cada una, una canción.</p>
-    <p class="aviso-sonido" id="avisoSonido">Toca o haz clic en cualquier lugar para oír el ambiente</p>
     <div class="carga" id="carga" aria-live="polite"><span class="carga-barra"><i id="cargaBarra"></i></span><span id="cargaTxt">Preparando el lugar</span></div>
   </div>
   <div class="desliza" aria-hidden="true">Desliza</div>
@@ -78,6 +77,8 @@
 </main>
 
 <div id="recorrido" aria-hidden="true"></div>
+<!-- solo si el navegador no deja sonar solo: un toque para entrar (así el primer gesto es uno que sí desbloquea el sonido) -->
+<button class="entrar-toque" id="entrarToque" hidden><span class="entrar-texto">Toca para entrar</span></button>
 <script type="module" src="js/app.js"></script>
 </body>
 </html>

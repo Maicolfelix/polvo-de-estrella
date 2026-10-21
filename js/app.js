@@ -343,7 +343,6 @@ A.setVolumen(vol / 100);
 const silenciado = () => !A.activo || mudo || vol === 0;
 function pintarSonido() {
   const off = silenciado(), r = $('#vol');
-  $('#avisoSonido').classList.toggle('ido', A.activo);
   $('#mudo').classList.toggle('silencio', off);
   $('#mudo').setAttribute('aria-pressed', off);
   $('#mudo').setAttribute('aria-label', off ? 'Activar sonido' : 'Silenciar');
@@ -392,8 +391,22 @@ async function despertarSonido(e) {
 }
 for (const ev of GESTOS) addEventListener(ev, despertarSonido, true);
 try { localStorage.removeItem('pde-mudo'); } catch {}   // ya no se recuerda el silencio entre visitas
-$('#avisoSonido').textContent = HOVER ? 'Haz clic en cualquier lugar para oír el ambiente' : 'Toca la pantalla para oír el ambiente';
-A.intentarActivar().then(ok => { if (ok) { mudo = false; A.setMudo(false); } pintarSonido(); $('#avisoSonido').classList.toggle('pendiente', !A.activo); });
+// Si el navegador no deja sonar solo (todos los teléfonos y muchos ordenadores), la llegada pide un toque para
+// entrar y no deja desplazar hasta entonces: desplazar no cuenta como gesto para el audio y la persona se quedaría
+// sin sonido toda la visita. Con ese toque arranca todo el ambiente.
+const capaToque = $('#entrarToque');
+$('.entrar-texto').textContent = HOVER ? 'Haz clic para entrar' : 'Toca para entrar';
+function entrarConToque() {
+  capaToque.classList.add('ido'); document.body.classList.remove('bloqueado', 'esperando');
+  setTimeout(() => { capaToque.hidden = true; }, 500);
+}
+capaToque.addEventListener('click', entrarConToque);   // el sonido lo arranca despertarSonido en el mismo gesto
+const sinAutoplay = new URLSearchParams(location.search).has('sinautoplay');   // para probar el caso bloqueado
+(sinAutoplay ? Promise.resolve(false) : A.intentarActivar()).then(ok => {
+  if (ok) { mudo = false; A.setMudo(false); pintarSonido(); return; }
+  if (A.activo) return;   // un gesto llegó antes
+  scrollTo(0, 0); capaToque.hidden = false; document.body.classList.add('bloqueado', 'esperando');
+});
 
 /* ---------- mirar alrededor: ratón en el ordenador, giro del teléfono ---------- */
 // La vista gira un poco hacia donde apunta el ratón o hacia donde se inclina el teléfono. Sobre una puerta,
