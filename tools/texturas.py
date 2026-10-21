@@ -243,7 +243,48 @@ def hierba(nombre='hierba', w=256, h=256, briznas=70, semilla=91):
         a = np.where(m, 1, a); col = np.where(m[..., None], c, col)
     guardar(nombre, np.dstack([srgb(col * 2.2), a]), png=True)
 
+# ---------- tierra agrietada (plaza de la llegada) ----------
+def voronoi(n, puntos, semilla, dx=0, dy=0):
+    r = np.random.default_rng(semilla)
+    P = r.uniform(0, n, (puntos, 2))
+    y, x = np.mgrid[0:n, 0:n].astype(np.float32)
+    x = x + dx; y = y + dy                                        # dominio deformado: bordes irregulares
+    f1 = np.full((n, n), 1e9, np.float32); f2 = f1.copy(); ident = np.zeros((n, n), np.int32)
+    for i, (px, py) in enumerate(P):
+        dxa = np.abs(x - px); dxa = np.minimum(dxa, n - dxa)
+        dya = np.abs(y - py); dya = np.minimum(dya, n - dya)
+        dd = np.sqrt(dxa ** 2 + dya ** 2)
+        nuevo = dd < f1
+        f2 = np.where(nuevo, f1, np.minimum(f2, dd)); f1 = np.where(nuevo, dd, f1)
+        ident = np.where(nuevo, i, ident)
+    return f1, f2 - f1, ident
+
+def grieta(n=1024, nombre='grieta'):
+    r = np.random.default_rng(41)
+    det = fbm(n, 2.0, 42); fino = fbm(n, 1.2, 43); manchas = fbm(n, 2.6, 44)
+    w1 = (fbm(n, 1.9, 45) - .5) * 60; w2 = (fbm(n, 1.9, 46) - .5) * 60     # deforma las celdas: grietas irregulares
+    f1, b1, id1 = voronoi(n, 70, 47, w1, w2)
+    _, b2, _ = voronoi(n, 360, 48, w1 * .6 + (fino - .5) * 10, w2 * .6)
+    grande = b1 < 3 + det * 6 * (manchas > .35)
+    peque = (b2 < 1.2 + fino * 1.4) & (fbm(n, 1.6, 49) > .45)        # grietas finas solo en parte de las placas
+    # cada placa se abomba y se curva en los bordes, como barro seco
+    abombado = np.clip(b1 / 40, 0, 1) ** .45
+    alto = abombado * .7 + det * .25 + fino * .08 - peque * .18
+    alto = np.where(grande, -.15 + det * .05, alto)
+    tint = r.uniform(.78, 1.2, (70, 1))[id1]
+    base = np.array([.055, .044, .038])
+    col = base * tint * (.62 + .7 * det[..., None]) * (.85 + .3 * fino[..., None])
+    col *= 1 - .35 * np.clip((manchas[..., None] - .6) * 3, 0, 1)           # humedad oscura
+    col = np.where(peque[..., None], col * .55, col)
+    col = col * (1 + .5 * np.clip((abombado[..., None] - .85) * 4, 0, 1) * (1 - grande[..., None]))  # bordes secos más claros
+    col = np.where(grande[..., None], np.array([.012, .009, .008]), col)
+    rug = np.where(grande, 1., .78 + .15 * fino)
+    guardar(nombre + '_col', srgb(col * 2.2))
+    guardar(nombre + '_nor', normal(alto, 9))
+    guardar(nombre + '_rug', np.dstack([rug] * 3))
+
 if __name__ == '__main__':
+    if __import__('sys').argv[1:] == ['grieta']: grieta(); raise SystemExit
     hierba(); arboles('arboles_lejos2', 73, num=52, hmin=.25, hmax=.6); arboles('arboles_cerca2', 74, num=15, hmin=.6, hmax=1.0); print('hierba y bosques extra', flush=True)
     if __import__('sys').argv[1:] == ['extra']: raise SystemExit
     tierra(); print('tierra', flush=True)

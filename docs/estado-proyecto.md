@@ -141,3 +141,51 @@ Las inciertas se concentran en repeticiones («No voy a decir…», «Todololo»
 **Recursos que elevarían el acabado** (especificación; no se usan provisionales como definitivos): texturas PBR escaneadas 2K (sillería de basalto o caliza oscura con juntas irregulares; piedra de umbral desgastada; madera vieja de roble; hierro forjado oxidado), modelos glTF ligeros (< 5 k triángulos) de matorral seco y hiedra para la fachada, y la portada en alta resolución (≥ 3000 px) para el tímpano.
 
 **Siguiente paso.** Revisión del artista de fachada, puerta 1 y habitación 1; si aprueba, extender herrajes y portal a las otras ocho puertas y crear sus salas.
+
+## 2026-10-21 · Entrada reconstruida, fluidez, transiciones y sin instrumental (rama `feat/acabado-visual`)
+
+**Rama.** El encargo pedía una rama nueva; al proponerla, el artista eligió seguir en la rama actual (`feat/acabado-visual`, sobre `b8474d9`). `main` y la página publicada siguen sin cambios.
+
+**Diagnóstico (medido, no supuesto).** Equipo de pruebas: GTX 1650 (ANGLE/D3D11), Chrome 152, pantalla de 144 Hz, vista 1440×900 con devicePixelRatio 1,25. Métodos en `tools/medir-rendimiento.js`: `medir()` = coste por fotograma con espera a la GPU (incluye ~6 ms de sincronización); `fluidez()` / `fluidezEntrada()` = intervalo real entre fotogramas de `requestAnimationFrame` con la pestaña visible.
+- Todo el coste era de **relleno de píxeles** en la GPU (la CPU gastaba 0,3–3,5 ms). La nave: 82 ms solo la pasada principal a 1440×900.
+- Culpables, quitándolos uno a uno: el sombreador de envejecimiento (16 ruidos por píxel, ~47 ms en la nave), 11 luces puntuales activas en cada píxel (~24 ms), tres luces direccionales calculadas dentro de la nave aunque valían 0 (~10 ms), mapa de entorno en piedra/madera/suelo, resplandor de posproceso (en la llegada, la diferencia entre 72 y 48 fps), sombras dibujadas en cada fotograma, 1500 matas de hierba con transparencia, el cielo y el exterior dibujados detrás de los muros, y la resolución hasta 1,75×.
+- Tirones: la primera apertura de la puerta 1 compilaba la sala del mar (fotograma de 1,6 s); en las puertas 2–9 el lienzo 2D se subía a la GPU en cada fotograma.
+- Transiciones (fotogramas intermedios en `capturas/15-transiciones-antes.jpg`): en 2–9 la cámara entraba en una caja de piedra plana, la habitación era un rectángulo negro y el final quedaba negro; la puerta 1 saltaba de golpe a la sala; al entrar desde la nave podía asomar la atmósfera de la habitación anterior (fundido entre habitaciones).
+
+**Estrategia visual elegida: 3D estilizado compuesto como un cuadro**, no imágenes planas por capas. Motivos: (1) no dispongo de arte ilustrado del nivel de la referencia ni puedo producirlo, y recortar la referencia en capas dejaría huecos al moverlas y se pixelaría al acercarse a la puerta; (2) la puerta, la escalinata y el cruce del umbral necesitan profundidad real para que la transición sea coherente; (3) el coste no estaba en la geometría sino en la luz y los sombreadores, así que se podía tener más objetos y más fluidez a la vez. La referencia orienta paleta, composición y objetos; la portada oficial sigue siendo la de destellos blancos (llegada y tímpano).
+
+**Llegada (`js/escena.js`, `js/primer-plano.js`, `tools/texturas.py`).**
+- Tres planos: delante, corona dorada caída, rosas (cabezas en copa con capullo y pétalos vueltos), pétalos, rollos de hierro y zarzas (ataduras), diez destellos minerales que centellean; en medio, la plaza de barro agrietado (`tex/grieta_*`, nueva), dos hileras de tumbas y cruces que bordean el camino y la escalinata; al fondo, la capilla entera con estrella dorada en el óculo y campanario corto con cruz, pinos oscuros pegados a ella y cielo carmesí con rayos más frecuentes.
+- Cámara: recorrido corto y bajo (de 44 m a la escalinata) en vez de 82 m de llanura vacía. En vertical la capilla ocupa la mitad superior y portada, título y botones van abajo; en escritorio van en una columna a la izquierda. Verja solo a los lados.
+- Interpretación artística, sin texto ni interacción en los objetos (comentario en `js/primer-plano.js`): corona = creerse dueño del mundo y ser diminuto ante la tormenta; rosas = vínculos y fragilidad; destellos = polvo de estrella. No son hechos oficiales.
+
+**Fluidez.** Zonas exterior/nave que se ocultan cuando no se ven; 3 luces reales repartidas cada fotograma entre 19 «focos» (sin recompilar); luces de exterior apagadas al cruzar el portal, con los dos estados compilados al cargar; sombras estáticas (la de la sala solo cuando su sol o sus cuerdas cambian); ruido de envejecimiento solo para los efectos que cada material usa; entorno solo en lo que refleja; sin resplandor de posproceso (halos con sprites); resolución máx. 1× en escritorio y 1,25× en teléfono, y **escala adaptativa** (baja en pasos de 0,15 hasta 0,55 si el intervalo medio supera 23 ms; empieza a medir 2 s después de cargar y no oscila); sala del mar a 30 fps detrás de la letra; lienzo de habitación subido uno de cada dos fotogramas y a 1× píxel; sala precompilada y dibujada una vez al cargar.
+
+| Fluidez real (rAF, 1440×900, escala fija) | Antes (búfer 1800×1125) | Ahora, mismo búfer 1800×1125 | Ahora, búfer por defecto 1440×900 |
+|---|---|---|---|
+| Llegada | 29 fps (34,4 ms) | 48 fps | 72 fps |
+| Desplazamiento | 24 fps (41,6 ms) | 48 fps | 72 fps |
+| Umbral | 10 fps (97,2 ms) | 36 fps | 48 fps |
+| Nave | 10 fps (97,2 ms) | 36 fps | 48 fps |
+| Apertura puerta 1 (mediana / peor) | 27,8 ms / 1590 ms | — | 13,9 ms / 63 ms |
+| Apertura puerta 4 (mediana) | 132 ms | — | 13,7 ms |
+| Habitación 1 (mediana) | 27,9 ms | — | 6,9 ms |
+
+Con la escala adaptativa a 0,85 (1224×765) la nave también llegó a 72 fps. Los valores están cuantizados por la sincronía de 144 Hz (6,9 / 13,9 / 20,8 / 27,8 ms). Emulación 375×812 en este mismo PC: 143 fps (no representa un teléfono). **No medido en el PC del artista ni en teléfonos.**
+
+**Transiciones de las nueve puertas.** Todas las hojas se abren hacia la nave hasta el derrame del muro: el hueco queda libre. En 2–9, el hueco es un **portal alineado con la pantalla** que muestra la atmósfera de la canción ya preparada (el mismo lienzo que luego ocupa la pantalla); el sombreador deshace el tono ACES de la salida para que los colores coincidan. La cámara hace un solo movimiento (Bézier: se alinea con la puerta, acelera y frena en el umbral, 2,3 s); cuando el hueco llena la pantalla, la habitación 2D toma el relevo (diferencia media medida entre el último fotograma y la habitación: 0,00 sobre 255) y la letra y los controles aparecen 0,65 s después. La puerta 1 conserva el portal 3D a la sala del mar. Salida inversa: se parte del umbral (igual que la habitación que se desvanece), se retrocede entre las hojas y la puerta se cierra después. Sin cajas de piedra, sin rectángulos negros, sin destellos. Sin fundido de la habitación anterior al entrar desde la nave. Fotogramas: `capturas/16-transiciones-despues.jpg` (0–2,1 s cada 0,3 s, la habitación y la salida, en las nueve). Los pocos píxeles negros detectados en el centro durante la apertura son el fondo oscuro tras la rendija de la puerta antes de abrirse, no fotogramas vacíos.
+
+**Instrumental retirada (`js/audio.js`).** Sin elemento de audio, sin carga ni precarga, sin reverb, fundidos ni ducking de instrumental. `audio/instrumental.m4a` se conserva en su sitio, sin referencias. Ambiente = viento y truenos ya existentes: el viento cede a 0,3 ante la preescucha, calla al entrar en una habitación (la ráfaga del cruce sigue) y vuelve al salir. Silencio, volumen y «Sin sonido» sin cambios.
+
+**Pruebas (navegador integrado, 375×812 emulado salvo indicación).** `correrAmbiente()` 10/10 (la instrumental nunca se pide al servidor). `correr()` 22/22 (pausa). `correrVolumen()` 17/17. `correrTransiciones()` 21/21 con sonido y 21/21 en `?rm` sin sonido: nueve entradas y regresos (una transición por toque, letra oculta al empezar y visible al estabilizarse), 6 toques seguidos = 1 transición, dos toques en «Puertas» = un regreso, entrada sin fotogramas (escena congelada a mitad, como con la pantalla bloqueada) termina en la habitación con la cámara en su sitio. `correrNueve()` 9/9. `correrLetra('01')` 13/13 en `?rm`. `correrSinSonido()` 6/6. `node tools/validar-letras.mjs`: OK. Letras, títulos, tiempos y audio sin cambios en git. Fotogramas de la entrada: `tools/fotogramas-entrada.js`.
+
+**Limitaciones reales.** Todo es geometría y texturas generadas por código: la escena se acerca a la referencia en paleta y composición, pero no tiene su detalle ilustrado (piedra con grietas finas, rosas pintadas, textura de grabado). Los cambios de pestaña reales no se pueden simular en la prueba: se cubrieron congelando la escena. Sin teléfono físico ni PC del artista. Las habitaciones 2–9 siguen siendo atmósferas 2D (no se rediseñaron). Nada escuchado. La imagen de referencia no se ha subido al repositorio.
+
+**Recursos que elevarían el acabado** (no puedo producirlos; no se usan sustitutos como definitivos):
+1. *Cielo pintado* (equirectangular 8192×4096, PNG): «Cielo nocturno de tormenta, masas de nubes carmesí iluminadas desde abajo sobre negro profundo, rayos ramificados blancos, salpicaduras de tinta negra, textura de grabado fino, sin edificios, sin árboles, sin horizonte terrestre, proyección equirectangular». Sustituiría el sombreador del cielo (y costaría menos).
+2. *Pinos en capas* (3 PNG con alfa, 4096×1024): «Siluetas de abetos negros a contraluz de un cielo rojo, tres franjas de distancia por separado, bordes nítidos, sin suelo, fondo transparente». Sustituyen `tex/arboles_*`.
+3. *Modelos glTF ligeros* (< 15 k triángulos cada uno, PBR 2K): corona de oro gastada con gemas rojas; rosa roja oscura abierta con tallo y hojas (3 variantes); diamante talla brillante; cruz celta de piedra y lápida desgastada. Sustituyen las piezas de `js/primer-plano.js`.
+4. *Texturas PBR escaneadas CC0* 2K (Poly Haven o similar): sillería de piedra oscura, barro seco agrietado, madera vieja de puerta, hierro forjado oxidado.
+5. Portada en alta resolución (≥ 3000 px) para el tímpano.
+
+**Siguiente paso.** Que el artista lo abra en su PC (enlace local) y en su teléfono; si la llegada y las transiciones le convencen, decidir si se encargan los recursos anteriores y, después, fusionar en `main`.

@@ -208,15 +208,16 @@ export function crearAtmosfera(canvas) {
   const estados = [];
   const off = document.createElement('canvas'), og = off.getContext('2d');
   function medir() {
-    const k = Math.min(devicePixelRatio || 1, 1.5);
+    const k = Math.min(devicePixelRatio || 1, 1);   // atmósfera suave: más resolución no se nota y cuesta en cada fotograma
     w = canvas.width = off.width = Math.round(innerWidth * k);
     h = canvas.height = off.height = Math.round(innerHeight * k);
   }
   addEventListener('resize', medir); medir();
   return {
-    poner(i) {
+    // fundir solo al cambiar de canción dentro de una habitación; al entrar desde la nave no debe asomar la anterior
+    poner(i, fundir = false) {
       if (i === actual) return;
-      anterior = actual; actual = i; mezcla = anterior < 0 ? 1 : 0;
+      anterior = actual; actual = i; mezcla = fundir && anterior >= 0 ? 0 : 1;
       estados[i] = ATMOSFERAS[i].iniciar();
     },
     dibujar(dt, p, rm) {

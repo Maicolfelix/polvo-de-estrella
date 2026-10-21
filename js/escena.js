@@ -2,11 +2,11 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { CANCIONES } from './datos.js';
 import { crearSalaMar } from './sala-mar.js';
+import { crearPrimerPlano } from './primer-plano.js';
 
 const V2 = THREE.Vector2, V3 = THREE.Vector3;
 const cl = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -96,16 +96,14 @@ float h3(vec3 p){ return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.545
 float n3(vec3 p){ vec3 i = floor(p), q = fract(p); q = q*q*(3.-2.*q);
   return mix(mix(mix(h3(i), h3(i+vec3(1,0,0)), q.x), mix(h3(i+vec3(0,1,0)), h3(i+vec3(1,1,0)), q.x), q.y),
              mix(mix(h3(i+vec3(0,0,1)), h3(i+vec3(1,0,1)), q.x), mix(h3(i+vec3(0,1,1)), h3(i+vec3(1,1,1)), q.x), q.y), q.z); }
-float fbm3(vec3 p){ float v = 0., a = .5; for (int i = 0; i < 4; i++) { v += a * n3(p); p *= 2.03; a *= .5; } return v; }`)
+float fbm3(vec3 p){ return n3(p) * .62 + n3(p * 2.03 + 7.1) * .38; }`)
       .replace('#include <map_fragment>', `#include <map_fragment>
 { float y = vMundo.y - ${f(base)};
-  float sube = ${alto > 0 ? `1. - smoothstep(0., ${f(alto)}, y + (fbm3(vMundo * 1.3) - .5) * .9)` : '0.'};
-  float vet = smoothstep(.56, .86, fbm3(vec3(vMundo.x * 2.4, vMundo.y * .16, vMundo.z * 2.4)));
-  float mus = smoothstep(.6, .82, fbm3(vMundo * .8 + 3.1)) * max(sube, ${alto > 0 ? '0.' : '1.'});
-  diffuseColor.rgb *= (1. - ${f(macro)} * .5) + ${f(macro)} * fbm3(vMundo * .11);
-  diffuseColor.rgb *= 1. - ${f(fuerza)} * sube - ${f(vetas)} * vet;
-  diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.03, .042, .024), mus * ${f(musgo)});
-}`)
+  ${alto > 0 ? `float sube = 1. - smoothstep(0., ${f(alto)}, y + (fbm3(vMundo * 1.3) - .5) * .9);` : 'float sube = 0.;'}
+  ${macro ? `diffuseColor.rgb *= (1. - ${f(macro)} * .5) + ${f(macro)} * n3(vMundo * .11);` : ''}
+  ${vetas ? `diffuseColor.rgb *= 1. - ${f(fuerza)} * sube - ${f(vetas)} * smoothstep(.56, .86, n3(vec3(vMundo.x * 2.4, vMundo.y * .16, vMundo.z * 2.4)));` : `diffuseColor.rgb *= 1. - ${f(fuerza)} * sube;`}
+  ${musgo ? `diffuseColor.rgb = mix(diffuseColor.rgb, vec3(.03, .042, .024), smoothstep(.58, .78, n3(vMundo * .8 + 3.1)) * max(sube, ${alto > 0 ? '0.' : '1.'}) * ${f(musgo)});` : ''}
+}`)  // solo se calcula el ruido de los efectos que el material usa
       .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
 roughnessFactor *= ${alto > 0 ? `mix(1., .6, 1. - smoothstep(0., ${f(alto * .6)}, vMundo.y - ${f(base)}))` : '1.'};`);
   };
@@ -113,22 +111,31 @@ roughnessFactor *= ${alto > 0 ? `mix(1., .6, 1. - smoothstep(0., ${f(alto * .6)}
   mat.needsUpdate = true;
 }
 
-export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
+export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, alRayo }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, MOVIL ? 1.4 : 1.75));
+  // El coste es casi todo de relleno (medido: la nave a 1440×900 tardaba 82 ms en una GTX 1650):
+  // resolución limitada y ajustada en marcha (ver `calidad`), sombras estáticas y pocas luces.
+  const PR_MAX = Math.min(devicePixelRatio, MOVIL ? 1.25 : 1);
+  renderer.setPixelRatio(PR_MAX);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.15;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.shadowMap.autoUpdate = false;     // todo lo que proyecta sombra está quieto: se dibujan una vez
   const scene = new THREE.Scene();
-  const FOG = new THREE.Color(0x1d1215);
-  scene.fog = new THREE.FogExp2(FOG, .0115);
+  const FOG = new THREE.Color(0x1a0a0c);
+  scene.fog = new THREE.FogExp2(FOG, .0105);
+  // zonas: el exterior y la nave se ocultan cuando la cámara no puede verlos (ahorra el sobredibujado)
+  const ext = new THREE.Group(), int = new THREE.Group();
+  scene.add(ext, int);
+  let destino = ext;
+  const add = (...o) => destino.add(...o);
   scene.background = FOG;
   const camera = new THREE.PerspectiveCamera(50, 1, .05, 1200);
 
   const manager = new THREE.LoadingManager();
   manager.onProgress = (_, l, t) => alProgreso?.(l / t);
-  manager.onLoad = () => alCargar?.();
+  // (manager.onLoad se asigna tras crear las luces: precompila ambos estados antes de avisar)
   const loader = new THREE.TextureLoader(manager);
   const ANISO = Math.min(8, renderer.capabilities.getMaxAnisotropy());
   const cache = {};
@@ -147,30 +154,31 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     piedra: pbr('piedra', { normal: 1.5 }),
     muro: pbr('piedra', { normal: 1.3, color: 0xc4bcb6 }),
     suelo: pbr('suelo', { normal: 1.1, env: .3 }),
-    tierra: pbr('tierra', { normal: 1, env: .12 }),
+    tierra: pbr('grieta', { normal: 1.3, env: .15, color: 0xe6ddd2 }),          // barro seco agrietado de la plaza
     pizarra: pbr('pizarra', { normal: 1.2, env: .6 }),
     marmol: pbr('marmol', { normal: .35, env: 1 }),
     hierro: new THREE.MeshStandardMaterial({ color: 0x16130f, metalness: .9, roughness: .42, envMapIntensity: .8 }),
     madera: new THREE.MeshStandardMaterial({ map: tex('puerta_col', true), normalMap: tex('puerta_nor'), roughnessMap: tex('puerta_rug'), metalnessMap: tex('puerta_met'), metalness: 1, roughness: 1, envMapIntensity: .6, normalScale: new V2(1.4, 1.4) }),
     vidrio: new THREE.MeshStandardMaterial({ color: 0x050304, roughness: .2, metalness: 0, emissive: 0x6a1812, emissiveIntensity: .55 }),
     vidrioCalido: new THREE.MeshStandardMaterial({ color: 0x050304, roughness: .2, emissive: 0xc06a2a, emissiveIntensity: .9 }),
+    oro: new THREE.MeshStandardMaterial({ color: 0xd9a441, metalness: 1, roughness: .3, envMapIntensity: 1.6, emissive: 0x2a1404, emissiveIntensity: .5 }),
   };
 
   // Envejecimiento en coordenadas de mundo: suciedad y humedad que suben del suelo, chorreones,
   // musgo en la base y variación tonal amplia para que ninguna superficie se vea uniforme.
   envejecer(M.piedra, { base: 0, alto: 3.4, fuerza: .62, vetas: .5, musgo: .45, macro: .75 });
   envejecer(M.muro, { base: B, alto: 1.1, fuerza: .22, vetas: .14, musgo: 0, macro: .25 });
-  envejecer(M.tierra, { base: 0, alto: 0, fuerza: 0, vetas: 0, musgo: 0, macro: .55 });
+  envejecer(M.tierra, { base: 0, alto: 0, fuerza: 0, vetas: 0, musgo: 0, macro: .7 });
   envejecer(M.suelo, { base: 0, alto: 0, fuerza: 0, vetas: 0, musgo: .5, macro: .3 });
 
   // ---------- lotes: todo lo estático de un material se fusiona en una sola malla ----------
   const lotes = new Map();
-  const poner = (mat, g, tile = 3) => { if (!lotes.has(mat)) lotes.set(mat, []); lotes.get(mat).push(uvMundo(g, tile)); };
+  const poner = (mat, g, tile = 3) => { const k = [mat, destino]; const c = [...lotes.keys()].find(([a, b]) => a === mat && b === destino) || k; if (!lotes.has(c)) lotes.set(c, []); lotes.get(c).push(uvMundo(g, tile)); };
   function cerrarLotes() {
-    for (const [mat, gs] of lotes) {
+    for (const [[mat, grupo], gs] of lotes) {
       const m = new THREE.Mesh(mergeGeometries(gs, false), mat);
       m.castShadow = m.receiveShadow = true;
-      scene.add(m);
+      grupo.add(m);
     }
     lotes.clear();
   }
@@ -178,11 +186,8 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
   const aLado = (g, x, z) => g.rotateY(Math.PI / 2).translate(x, B, z);
 
   /* ===================== EXTERIOR ===================== */
-  // suelo, plaza y camino
-  poner(M.tierra, new THREE.PlaneGeometry(600, 600, 1, 1).rotateX(-Math.PI / 2), 9);
-  poner(M.suelo, new THREE.PlaneGeometry(3.6, 66).rotateX(-Math.PI / 2).translate(0, .012, 37.1), 3);
-  poner(M.suelo, new THREE.PlaneGeometry(17, 9).rotateX(-Math.PI / 2).translate(0, .011, 8.5), 3);
-  for (const s of [-1, 1]) poner(M.piedra, caja(.2, .1, 61, s * 1.9, .05, 43.5), 1.5);
+  // suelo: barro agrietado hasta la escalinata (sin camino pavimentado: los escalones guían)
+  poner(M.tierra, new THREE.PlaneGeometry(600, 600, 1, 1).rotateX(-Math.PI / 2), 4.2);
   // zócalo y escalinata
   poner(M.piedra, caja(17.6, B, 26.4, 0, B / 2, -11.6), 2.4);
   for (let i = 0; i < 6; i++) {
@@ -203,10 +208,10 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
   }
   const ojo = new THREE.Shape().absarc(0, 0, 1.78, 0, Math.PI * 2, false); ojo.holes.push(new THREE.Path().absarc(0, 0, 1.45, 0, Math.PI * 2, true));
   poner(M.piedra, extruir(ojo, .26).translate(0, B + 13.1, 0), 1);
-  for (let k = 0; k < 8; k++) poner(M.piedra, new THREE.BoxGeometry(.09, 2.9, .12).rotateZ(k * Math.PI / 8).translate(0, B + 13.1, -.2), 1);
-  const ojoIn = new THREE.Shape().absarc(0, 0, .5, 0, Math.PI * 2, false); ojoIn.holes.push(new THREE.Path().absarc(0, 0, .38, 0, Math.PI * 2, true));
-  poner(M.piedra, extruir(ojoIn, .14).translate(0, B + 13.1, -.24), 1);
   poner(M.vidrio, new THREE.CircleGeometry(1.46, 40).translate(0, B + 13.1, -.45), 1);
+  // estrella dorada en el óculo (el destino se reconoce desde lejos)
+  { const e = new THREE.Shape(); for (let k = 0; k <= 10; k++) { const a = Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? .5 : 1.25; e[k ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r); }
+    poner(M.oro, new THREE.ExtrudeGeometry(e, { depth: .14, bevelEnabled: true, bevelSize: .05, bevelThickness: .05, bevelSegments: 1 }).translate(0, B + 13.1, -.22), 1); }
   // pórtico saliente con arquivoltas escalonadas: la entrada se hunde 2,3 m en la piedra
   const porche = new THREE.Shape([new V2(-4, 0), new V2(4, 0), new V2(4, 8.2), new V2(0, 11.2), new V2(-4, 8.2)]);
   porche.holes.push(new THREE.Path(contorno(0, PORTAL, .001).map(p => new V2(p.x, Math.max(p.y, .001)))));
@@ -257,44 +262,46 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
   trasero.holes.push(new THREE.Path(contorno(0, P9)));
   const LAN9 = { w: .42, s: 2.9, R: .55 };
   for (const x of [-2.25, 2.25]) trasero.holes.push(new THREE.Path(contorno(x, LAN9, 3.7)));
-  poner(M.piedra, extruir(trasero, .9).translate(0, B, -24), 3.2);
+  destino = int; poner(M.piedra, extruir(trasero, .9).translate(0, B, -24), 3.2); destino = ext;   // solo se ve desde la nave
   // tejado de pizarra
   const aT = Math.atan2(6.6, 7.6), lT = Math.hypot(6.6, 7.6) + .3;
   for (const s of [-1, 1]) poner(M.pizarra, new THREE.BoxGeometry(lT, .3, 25.2).rotateZ(s * -aT).translate(s * 3.8, B + 14.35, -12.2), 2);
   poner(M.piedra, new THREE.BoxGeometry(.4, .4, 25.2).rotateZ(Math.PI / 4).translate(0, B + 17.65, -12.2), 1);
   for (const s of [-1, 1]) poner(M.piedra, new THREE.BoxGeometry(lT - .2, .42, .55).rotateZ(s * -aT).translate(s * 3.75, B + 14.35, .05), 1.4);
   // torre y aguja
-  poner(M.piedra, caja(3.6, 10.6, 3.6, 0, B + 15.8, -3.2), 3);
-  poner(M.piedra, caja(4.2, .42, 4.2, 0, B + 21.3, -3.2), 1.4);
-  poner(M.pizarra, new THREE.ConeGeometry(2.6, 8.6, 4).rotateY(Math.PI / 4).translate(0, B + 21.5 + 4.3, -3.2), 2);
-  for (const [dx, dz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) poner(M.piedra, new THREE.ConeGeometry(.32, 1.9, 4).rotateY(Math.PI / 4).translate(dx * 1.9, B + 22.45, -3.2 + dz * 1.9), 1);
+  // campanario corto sobre el tejado, como en la referencia: tejado apuntado y cruz de hierro
+  poner(M.piedra, caja(3.2, 7.6, 3.2, 0, B + 17.8, -3.2), 2.4);
+  poner(M.piedra, caja(3.7, .38, 3.7, 0, B + 21.75, -3.2), 1.4);
+  poner(M.pizarra, new THREE.ConeGeometry(2.45, 4.6, 4).rotateY(Math.PI / 4).translate(0, B + 21.95 + 2.3, -3.2), 2);
+  poner(M.hierro, caja(.12, 1.5, .12, 0, B + 26.9, -3.2), 1); poner(M.hierro, caja(.8, .12, .12, 0, B + 27.15, -3.2), 1);
   for (let k = 0; k < 4; k++) {
-    const g = extruir(anillo(0, { w: .58, s: 1.9, R: .76 }, { w: .44, s: 1.9, R: .6 }, 16.7), .18);
-    const vid = new THREE.ShapeGeometry(new THREE.Shape(contorno(0, { w: .44, s: 1.9, R: .6 }, 16.7)));
+    const g = extruir(anillo(0, { w: .5, s: 1.5, R: .66 }, { w: .38, s: 1.5, R: .52 }, 18.4), .18);
+    const vid = new THREE.ShapeGeometry(new THREE.Shape(contorno(0, { w: .38, s: 1.5, R: .52 }, 18.4)));
     const r = k * Math.PI / 2;
-    poner(M.piedra, g.translate(0, B, 1.8).rotateY(r).translate(0, 0, -3.2), 1);
-    poner(M.vidrio, vid.translate(0, B, 1.81).rotateY(r).translate(0, 0, -3.2), 1);
+    poner(M.piedra, g.translate(0, B, 1.6).rotateY(r).translate(0, 0, -3.2), 1);
+    poner(M.vidrio, vid.translate(0, B, 1.61).rotateY(r).translate(0, 0, -3.2), 1);
   }
   // verja de hierro con pilares de piedra a la entrada del recinto
+  // verja del cementerio solo a los lados: el frente queda libre hasta la escalinata
   for (const s of [-1, 1]) {
-    poner(M.piedra, caja(37.4, .5, .42, s * 21.3, .25, 17), 1.5);
-    poner(M.piedra, caja(.72, 2.7, .72, s * 2.4, 1.35, 17), 1.5);
-    poner(M.piedra, caja(.9, .22, .9, s * 2.4, 2.81, 17), 1);
-    poner(M.piedra, new THREE.ConeGeometry(.3, .55, 4).rotateY(Math.PI / 4).translate(s * 2.4, 3.2, 17), 1);
-    for (const x of [8, 14, 20, 26, 32, 38]) { poner(M.piedra, caja(.5, 1.9, .5, s * x, .95, 17), 1.5); }
-    poner(M.hierro, caja(37, .05, .05, s * 21.3, 1.55, 17), 1);
-    poner(M.hierro, caja(37, .05, .05, s * 21.3, .75, 17), 1);
+    poner(M.piedra, caja(31, .5, .42, s * 24.5, .25, 17), 1.5);
+    poner(M.piedra, caja(.72, 2.7, .72, s * 9, 1.35, 17), 1.5);
+    poner(M.piedra, caja(.9, .22, .9, s * 9, 2.81, 17), 1);
+    poner(M.piedra, new THREE.ConeGeometry(.3, .55, 4).rotateY(Math.PI / 4).translate(s * 9, 3.2, 17), 1);
+    for (const x of [15, 21, 27, 33, 39]) { poner(M.piedra, caja(.5, 1.9, .5, s * x, .95, 17), 1.5); }
+    poner(M.hierro, caja(30.6, .05, .05, s * 24.5, 1.55, 17), 1);
+    poner(M.hierro, caja(30.6, .05, .05, s * 24.5, .75, 17), 1);
   }
   const barras = new THREE.InstancedMesh(new THREE.BoxGeometry(.028, 1.55, .028), M.hierro, 470);
   const puntas = new THREE.InstancedMesh(new THREE.ConeGeometry(.04, .16, 4), M.hierro, 470);
   { const m = new THREE.Matrix4(); let k = 0;
-    for (const s of [-1, 1]) for (let x = 2.85; x < 40 && k < 470; x += .16, k++) {
+    for (const s of [-1, 1]) for (let x = 9.45; x < 40 && k < 470; x += .16, k++) {
       m.makeTranslation(s * x, .5 + .775, 17); barras.setMatrixAt(k, m);
       m.makeTranslation(s * x, .5 + 1.55 + .08, 17); puntas.setMatrixAt(k, m);
     }
     barras.count = puntas.count = k; }
   barras.castShadow = puntas.castShadow = true;
-  scene.add(barras, puntas);
+  add(barras, puntas);
   // molduras: cornisa bajo el gablete, imposta a la altura de las lancetas, alféizares y labio del zócalo
   poner(M.piedra, caja(14.6, .3, .42, 0, B + 11.02, .14), 1.2);
   for (const s of [-1, 1]) {
@@ -302,6 +309,13 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     poner(M.piedra, caja(1.5, .16, .4, s * 5.45, B + 4.52, .14), 1);
   }
   poner(M.piedra, caja(17.9, .14, 26.7, 0, B - .07, -11.6), 1.5);
+  const haloTex = texturaRadial([[0, 'rgba(255,255,255,.9)'], [.25, 'rgba(255,255,255,.3)'], [1, 'rgba(255,255,255,0)']], 128);
+  const halo = (x, y, z, tam, color) => { const h = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color, transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false, fog: false })); h.position.set(x, y, z); h.scale.setScalar(tam); add(h); return h; };
+  // Luces puntuales: cada una es un «foco» candidato; solo POOL luces reales existen y se asignan
+  // en cada fotograma a los focos que más aportan cerca de la cámara (el número de luces nunca cambia,
+  // así que no hay recompilaciones). Antes había 11 luces activas en cada píxel.
+  const focos = [];
+  const foco = (x, y, z, color, distancia, intensidad = 0) => { const f = { p: new V3(x, y, z), c: new THREE.Color(color), d: distancia, i: intensidad }; focos.push(f); return f; };
   // faroles a los lados de la escalinata
   const faroles = [];
   for (const s of [-1, 1]) {
@@ -309,10 +323,10 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     poner(M.hierro, caja(.42, .06, .42, s * 4.7, 2.4, 4.7), 1);
     poner(M.hierro, new THREE.ConeGeometry(.3, .25, 4).rotateY(Math.PI / 4).translate(s * 4.7, 2.98, 4.7), 1);
     const vid = new THREE.Mesh(new THREE.BoxGeometry(.3, .44, .3), M.vidrioCalido);
-    vid.position.set(s * 4.7, 2.66, 4.7); scene.add(vid);
+    vid.position.set(s * 4.7, 2.66, 4.7); add(vid);
     for (const [dx, dz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) poner(M.hierro, caja(.03, .5, .03, s * 4.7 + dx * .16, 2.66, 4.7 + dz * .16), 1);
-    const l = new THREE.PointLight(0xffa25a, 7, 13, 2); l.position.set(s * 4.7, 2.66, 4.7); scene.add(l);
-    faroles.push(l);
+    faroles.push(foco(s * 4.7, 2.66, 4.7, 0xffa25a, 13, 7));
+    halo(s * 4.7, 2.66, 4.7, 1.6, 0xffa25a);
   }
   // portal: tímpano con la portada del álbum, dintel y hojas de la puerta principal
   const TIMP = new THREE.Shape(arco(0, 3.7, UMBRAL.w, UMBRAL.R).map(p => new V2(p.x, Math.max(p.y, 4.02))));
@@ -321,31 +335,31 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     for (let i = 0; i < p.count; i++) uv.setXY(i, (p.getX(i) + UMBRAL.w) / (2 * UMBRAL.w), .2 + (p.getY(i) - 4.02) / ap * .62); }
   const portada = loader.load('img/portada.png'); portada.colorSpace = THREE.SRGBColorSpace; portada.anisotropy = ANISO;
   const matTimp = new THREE.MeshStandardMaterial({ map: portada, emissiveMap: portada, emissive: 0xffffff, emissiveIntensity: .32, roughness: .3, metalness: .25, envMapIntensity: 1.2 });
-  const timpano = new THREE.Mesh(gT.translate(0, B, -.62), matTimp); timpano.receiveShadow = true; scene.add(timpano);
+  const timpano = new THREE.Mesh(gT.translate(0, B, -.62), matTimp); timpano.receiveShadow = true; add(timpano);
   const hojasPortal = [];
   for (const s of [-1, 1]) {
     const piv = new THREE.Group(); piv.position.set(s * UMBRAL.w, B, -.83);
     const hoja = new THREE.Mesh(new THREE.BoxGeometry(UMBRAL.w, 3.7, .1).translate(-s * UMBRAL.w / 2, 1.85, 0), M.madera);
-    hoja.castShadow = hoja.receiveShadow = true; piv.add(hoja);
+    hoja.receiveShadow = true; piv.add(hoja);   // se mueve: no entra en la sombra estática
     for (const y of [.55, 1.85, 3.15]) {   // pernios de hierro y bisagras
       const banda = new THREE.Mesh(new THREE.BoxGeometry(UMBRAL.w * .92, .1, .03), M.hierro); banda.position.set(-s * UMBRAL.w * .47, y, .065); piv.add(banda);
       const pin = new THREE.Mesh(new THREE.CylinderGeometry(.035, .035, .16, 10), M.hierro); pin.position.set(0, y, .02); piv.add(pin);
     }
     const aro = new THREE.Mesh(new THREE.TorusGeometry(.09, .016, 8, 20), M.hierro); aro.position.set(-s * UMBRAL.w * .86, 1.5, .09); piv.add(aro);
-    scene.add(piv); hojasPortal.push([piv, s]);
+    add(piv); hojasPortal.push([piv, s]);
   }
-  const luzPortal = new THREE.PointLight(0xffb27a, 6, 16, 2); luzPortal.position.set(0, B + 2.5, -3.2); scene.add(luzPortal);
-  const luzPorche = new THREE.PointLight(0xff9a62, 2.5, 7, 2); luzPorche.position.set(0, B + 3, .2); scene.add(luzPorche);
+  const luzPortal = foco(0, B + 2.5, -3.2, 0xffb27a, 16, 6);
+  foco(0, B + 3, .2, 0xff9a62, 7, 2.5);   // porche
 
   // sombras de contacto al pie del zócalo y de la escalinata
   const grad = texturaGradiente();
   const matContacto = new THREE.MeshBasicMaterial({ map: grad, color: 0x000000, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
   matContacto.alphaMap = grad;
-  const tira = (w, x, z, rot) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, 2.2), matContacto); m.rotation.set(-Math.PI / 2, 0, rot); m.position.set(x, .02, z); scene.add(m); };
+  const tira = (w, x, z, rot) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, 2.2), matContacto); m.rotation.set(-Math.PI / 2, 0, rot); m.position.set(x, .02, z); add(m); };
   tira(26.4, 9.9, -11.6, -Math.PI / 2); tira(26.4, -9.9, -11.6, Math.PI / 2); tira(17.6, 0, -25.9, Math.PI);
-  for (const s of [-1, 1]) tira(2.5, s * 5.6, 3.1, s * -Math.PI / 2);
 
   /* ===================== INTERIOR ===================== */
+  destino = int;
   const LEN = Z0 - Z1;
   const PUERTA = { w: .74, s: 2.45, R: 1.0 };
   const MARCO = { w: .88, s: 2.45, R: 1.14 };
@@ -387,11 +401,11 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     poner(M.hierro, new THREE.CylinderGeometry(.015, .015, 7.8, 6).translate(0, B + 4.6 + 3.9, z), 1);
     poner(M.hierro, new THREE.TorusGeometry(.55, .025, 8, 40).rotateX(Math.PI / 2).translate(0, B + 4.6, z), 1);
     for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; poner(M.hierro, new THREE.CylinderGeometry(.008, .008, 1.1, 4).rotateZ(.46).rotateY(a).translate(Math.cos(a) * .27, B + 5.1, z - Math.sin(a) * .27), 1); }
-    return new V3(0, B + 4.6, z);
+    return foco(0, B + 4.6, z, 0xffd2aa, 12);
   });
   const bulbos = new THREE.InstancedMesh(new THREE.SphereGeometry(.05, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffd7a0 }), 24);
-  { const m = new THREE.Matrix4(); let k = 0; for (const p of lamparas) for (let a = 0; a < 6; a++) { m.makeTranslation(p.x + Math.cos(a * Math.PI / 3) * .55, p.y + .06, p.z + Math.sin(a * Math.PI / 3) * .55); bulbos.setMatrixAt(k++, m); } }
-  scene.add(bulbos);
+  { const m = new THREE.Matrix4(); let k = 0; for (const { p } of lamparas) for (let a = 0; a < 6; a++) { m.makeTranslation(p.x + Math.cos(a * Math.PI / 3) * .55, p.y + .06, p.z + Math.sin(a * Math.PI / 3) * .55); bulbos.setMatrixAt(k++, m); } }
+  add(bulbos);
 
   // ---------- las nueve puertas ----------
   const glowTex = texturaRadial([[0, 'rgba(255,255,255,1)'], [.35, 'rgba(255,255,255,.45)'], [1, 'rgba(255,255,255,0)']]);
@@ -401,7 +415,7 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     const marco = new THREE.Group();
     if (d.lado === 0) { marco.position.set(0, B, Z1 - .8); }
     else { marco.position.set(d.lado * (IW + .48), B, d.z); marco.rotation.y = d.lado < 0 ? Math.PI / 2 : -Math.PI / 2; }
-    scene.add(marco);
+    add(marco);
     // moldura de piedra en la cara de la nave
     const mold = d.lado === 0
       ? extruir(formaU(0, { w: 1.16, s: 2.9, R: 1.51 }, P9), .16).translate(0, B, Z1)
@@ -418,20 +432,19 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
       for (let k = 0; k < p.count; k++) uv.setXY(k, (p.getX(k) + dim.w) / (2 * dim.w), p.getY(k) / (dim.s + ap));
       g.translate(-s * dim.w, 0, 0);
       const piv = new THREE.Group(); piv.position.set(s * dim.w, 0, -.02);
-      const m = new THREE.Mesh(g, M.madera); m.castShadow = m.receiveShadow = true;
+      const m = new THREE.Mesh(g, M.madera); m.receiveShadow = true;
       const tirador = new THREE.Mesh(new THREE.TorusGeometry(.06, .012, 6, 18), M.hierro);
       tirador.position.set(-s * dim.w + -s * -.12, 1.15, .085); piv.add(m, tirador);
       marco.add(piv);
       return { piv, s };
     });
-    // habitación detrás (solo caras interiores) + resplandor de fondo
-    const matHab = new THREE.MeshStandardMaterial({ map: tex('piedra_col', true), color: luz.clone().lerp(new THREE.Color(0x141010), .86), roughness: .95, side: THREE.BackSide, emissive: luz, emissiveIntensity: .02 });
-    const anchoHab = dim.w * 2 + .9, altoHab = dim.s + ap + .4;
-    const hab = new THREE.Mesh(new THREE.BoxGeometry(anchoHab, altoHab, 1.8).translate(0, altoHab / 2, -.92), matHab);
-    marco.add(hab);
-    const fondo = new THREE.Mesh(new THREE.PlaneGeometry(anchoHab * .9, altoHab * .95), new THREE.MeshBasicMaterial({ map: glowTex, color: luz, transparent: true, opacity: .25, blending: THREE.AdditiveBlending, depthWrite: false }));
-    fondo.position.set(0, altoHab * .45, -1.78); marco.add(fondo);
-    if (d.i === 0) hab.visible = fondo.visible = false;   // la puerta 1 da a la sala del mar (portal)
+    // tras la puerta: un fondo oscuro con el resplandor de la canción (lo que asoma al entreabrirla);
+    // al entrar, el hueco pasa a mostrar la habitación preparada (portal, ver `portalHab`)
+    const altoHab = dim.s + ap;
+    const negro = new THREE.Mesh(new THREE.PlaneGeometry(dim.w * 2 + .1, altoHab + .1).translate(0, altoHab / 2, -.36), new THREE.MeshBasicMaterial({ color: 0x050304 }));
+    const fondo = new THREE.Mesh(new THREE.PlaneGeometry(dim.w * 2, altoHab).translate(0, altoHab * .48, -.3), new THREE.MeshBasicMaterial({ map: glowTex, color: luz, transparent: true, opacity: .25, blending: THREE.AdditiveBlending, depthWrite: false }));
+    marco.add(negro, fondo);
+    if (d.i === 0) negro.visible = fondo.visible = false;   // la puerta 1 da a la sala del mar (portal)
     // luz que se escapa por debajo y su reflejo en el mármol
     const rendija = new THREE.Mesh(new THREE.BoxGeometry(dim.w * 2 - .04, .012, .02), new THREE.MeshBasicMaterial({ color: luz }));
     rendija.position.set(0, .006, .03); marco.add(rendija);
@@ -453,13 +466,14 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
       const brazo = new THREE.Mesh(new THREE.BoxGeometry(.04, .04, .3), M.hierro); brazo.position.set(-1.1, 2.45, .88); marco.add(brazo);
       const caja = new THREE.Mesh(new THREE.BoxGeometry(.16, .24, .16), M.vidrioCalido); caja.position.set(-1.1, 2.3, 1.02); marco.add(caja);
       const techo = new THREE.Mesh(new THREE.ConeGeometry(.14, .12, 4).rotateY(Math.PI / 4), M.hierro); techo.position.set(-1.1, 2.48, 1.02); marco.add(techo);
-      const llama = new THREE.PointLight(0xffa860, 1.8, 4.5, 2); llama.position.set(-1.1, 2.3, 1.1); marco.add(llama);
+      marco.updateMatrixWorld(true);
+      const l = marco.localToWorld(new V3(-1.1, 2.3, 1.1)); foco(l.x, l.y, l.z, 0xffa860, 4.5, 1.8);   // llama del farol
+      const hl = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color: 0xffa860, transparent: true, opacity: .5, blending: THREE.AdditiveBlending, depthWrite: false, fog: false })); hl.position.set(-1.1, 2.3, 1.02); hl.scale.setScalar(.7); marco.add(hl);
     }
-    return { ...d, c, luz, marco, hojas, matHab, fondo, rendija, charco, ap, abierto: 0, objetivo: 0, brillo: 0, objetivoBrillo: 0 };
+    return { ...d, c, luz, marco, hojas, fondo, rendija, charco, ap, abierto: 0, objetivo: 0, brillo: 0, objetivoBrillo: 0, foco: foco(0, 0, 0, luz, 5) };
   });
 
-  cerrarLotes();
-
+  destino = ext;
   /* ===================== CIELO, NIEBLA, RAYOS, PARTÍCULAS ===================== */
   const cielo = new THREE.Mesh(new THREE.SphereGeometry(900, 48, 24), new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
@@ -468,20 +482,27 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     fragmentShader: `varying vec3 vD; uniform float uT,uF; uniform vec3 uD,uFog;
       float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
       float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
-      float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<6;i++){v+=a*n(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
+      float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
+      float fbm2(vec2 p){return n(p)*.6+n(p*2.03+vec2(1.7,9.2))*.4;}
       void main(){ vec3 d=normalize(vD); float y=d.y;
-        vec2 uv=d.xz/(max(y,0.)+.18)*.9+vec2(uT*.004,uT*.0015);
-        float c=fbm(uv); float c2=fbm(uv*2.3+c*1.7-vec2(uT*.006,0.));
-        float nube=smoothstep(.38,.9,c*.65+c2*.5);
-        vec3 alto=vec3(.022,.018,.026), horiz=vec3(.16,.055,.06);
-        vec3 col=mix(horiz,alto,smoothstep(-.02,.5,y));
-        col=mix(col, vec3(.045,.035,.045)+horiz*.35*(1.-smoothstep(0.,.35,y)), nube*.85);
+        // tormenta carmesí: masas de nube iluminadas en rojo desde abajo, huecos casi negros
+        vec2 uv=d.xz/(max(y,0.)+.2)*1.25+vec2(uT*.004,uT*.0015);
+        vec2 w=vec2(fbm2(uv*.6),fbm2(uv*.6+5.2));
+        float c=fbm(uv+w*1.6); float c2=fbm(uv*2.1+w*2.4-vec2(uT*.007,0.));
+        float nube=smoothstep(.3,.78,c*.7+c2*.45);
+        float borde=smoothstep(.52,.9,c2)*nube;
+        vec3 alto=vec3(.006,.002,.004), medio=vec3(.022,.004,.007), horiz=vec3(.1,.012,.016);   // entre nubes, casi negro
+        vec3 col=mix(horiz,medio,smoothstep(-.02,.22,y)); col=mix(col,alto,smoothstep(.2,.75,y));
+        vec3 rojo=vec3(.46,.035,.05)*(1.15-smoothstep(0.,.8,y)*.6);
+        col=mix(col, vec3(.01,.003,.005), nube*.9);
+        col+=rojo*borde*1.5+rojo*.22*nube*(1.-smoothstep(.0,.4,y));
         float fl=pow(max(dot(d,normalize(uD)),0.),5.);
-        col+=vec3(.85,.82,1.)*uF*fl*(.35+nube*1.3)+vec3(.3,.25,.35)*uF*.18;
-        col=mix(uFog*1.05,col,smoothstep(-.06,.12,y));
+        col+=vec3(.95,.8,.95)*uF*fl*(.35+nube*1.3)+vec3(.35,.12,.16)*uF*.2;
+        col=mix(uFog*1.1,col,smoothstep(-.06,.1,y));
         gl_FragColor=vec4(col,1.); }`,
   }));
-  scene.add(cielo);
+  cielo.renderOrder = 10;   // después de lo opaco: lo tapado no se calcula
+  add(cielo);
 
   const arbolesLejos = tex('arboles_lejos', true, 'png'), arbolesCerca = tex('arboles_cerca', true, 'png');
   arbolesLejos.wrapS = arbolesCerca.wrapS = THREE.RepeatWrapping;
@@ -490,16 +511,20 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
   const capaBosque = (t, w, h, x, z, ry, rep, off, espejo, tono) => {
     const t2 = t.clone(); t2.wrapS = THREE.RepeatWrapping; t2.repeat.set(rep * (espejo ? -1 : 1), 1); t2.offset.x = off; t2.needsUpdate = true;
     const mat = new THREE.MeshBasicMaterial({ map: t2, transparent: true, alphaTest: .05, depthWrite: false, color: tono, fog: true, side: THREE.DoubleSide });
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); m.position.set(x, h / 2 - .5, z); m.rotation.y = ry; scene.add(m);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); m.position.set(x, h / 2 - .5, z); m.rotation.y = ry; add(m);
   };
-  capaBosque(arbolesLejos, 460, 44, 0, -170, 0, 3, .13, false, 0x4a3c42);
-  capaBosque(lejos2, 420, 38, 20, -135, 0, 2.6, .41, true, 0x55464b);
-  capaBosque(arbolesLejos, 280, 40, -125, -15, Math.PI / 2.4, 2, .7, true, 0x4d3f45);
-  capaBosque(lejos2, 280, 36, 128, -5, -Math.PI / 2.4, 2.2, .2, false, 0x4d3f45);
-  capaBosque(arbolesCerca, 90, 26, -44, -50, .5, 1, .1, false, 0x5a4a50);
-  capaBosque(cerca2, 80, 24, 46, -56, -.45, 1, .55, true, 0x5a4a50);
-  capaBosque(cerca2, 70, 22, -60, 22, 1.2, 1, .3, false, 0x5a4a50);
-  capaBosque(arbolesCerca, 70, 22, 62, 26, -1.25, 1, .8, true, 0x5a4a50);
+  // pinos oscuros pegados a la capilla: la enmarcan contra el cielo
+  capaBosque(arbolesCerca, 70, 21, 0, -31, 0, 1.4, .35, false, 0x24161a);
+  capaBosque(cerca2, 46, 17, -27, -6, Math.PI / 3, 1, .1, true, 0x2c1b20);
+  capaBosque(arbolesCerca, 46, 17, 28, -4, -Math.PI / 3, 1, .6, false, 0x2c1b20);
+  capaBosque(arbolesLejos, 460, 44, 0, -170, 0, 3, .13, false, 0x3a2228);
+  capaBosque(lejos2, 420, 38, 20, -135, 0, 2.6, .41, true, 0x42282e);
+  capaBosque(arbolesLejos, 280, 40, -125, -15, Math.PI / 2.4, 2, .7, true, 0x3d2429);
+  capaBosque(lejos2, 280, 36, 128, -5, -Math.PI / 2.4, 2.2, .2, false, 0x3d2429);
+  capaBosque(arbolesCerca, 90, 26, -44, -50, .5, 1, .1, false, 0x331d22);
+  capaBosque(cerca2, 80, 24, 46, -56, -.45, 1, .55, true, 0x331d22);
+  capaBosque(cerca2, 70, 22, -60, 22, 1.2, 1, .3, false, 0x331d22);
+  capaBosque(arbolesCerca, 70, 22, 62, 26, -1.25, 1, .8, true, 0x331d22);
   // árboles secos en 3D cerca del camino: ramas que proyectan sombra con la luna
   { const geos = []; let semilla = 11;
     const rnd = () => (semilla = semilla * 16807 % 2147483647) / 2147483647;
@@ -512,40 +537,28 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
       for (let k = 0, n = 2 + (rnd() < .45); k < n; k++)
         ramas(fin, dir.clone().add(new V3(rnd() - .5, rnd() * .4, rnd() - .5).multiplyScalar(1.4)).normalize(), largo * (.6 + rnd() * .22), radio * .63, nivel - 1);
     };
-    for (const [x, z, h] of [[-10, 30, 4.2], [12.5, 38, 5], [-17, 49, 5.6], [15, 60, 4.6], [-12.5, 12, 4.8], [14, 6, 5.2], [-20, -8, 6], [19, -16, 5.4]]) {
+    for (const [x, z, h] of [[-13, 31, 5], [14.5, 27, 5.4], [-12.5, 12, 4.8], [14, 6, 5.2], [-20, -8, 6], [19, -16, 5.4]]) {
       ramas(new V3(x, 0, z), new V3((rnd() - .5) * .15, 1, (rnd() - .5) * .15).normalize(), h * .42, .2 + h * .02, MOVIL ? 4 : 5);
     }
     const arboles = new THREE.Mesh(mergeGeometries(geos.map(g => g.toNonIndexed()), false), new THREE.MeshStandardMaterial({ color: 0x15100e, roughness: .95, side: THREE.DoubleSide }));
-    arboles.castShadow = true; scene.add(arboles); }
-  // matas de hierba seca (tarjetas cruzadas instanciadas) y rocas a lo largo del camino, la verja y el zócalo
-  { const hierbaTex = tex('hierba', true, 'png'); hierbaTex.wrapS = hierbaTex.wrapT = THREE.ClampToEdgeWrapping;
-    const tarjeta = mergeGeometries([new THREE.PlaneGeometry(1, 1).translate(0, .5, 0), new THREE.PlaneGeometry(1, 1).translate(0, .5, 0).rotateY(Math.PI / 2)]);
-    const N = MOVIL ? 700 : 1500, mats = new THREE.InstancedMesh(tarjeta, new THREE.MeshStandardMaterial({ map: hierbaTex, alphaTest: .5, side: THREE.DoubleSide, roughness: 1, color: 0x9a8f6c }), N);
-    const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(); let semilla = 5;
+    arboles.castShadow = true; add(arboles); }
+  // rocas sueltas a los lados de la plaza (sin hierba en bloques: el suelo agrietado se lee mejor)
+  { const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(); let semilla = 5;
     const rnd = () => (semilla = semilla * 16807 % 2147483647) / 2147483647;
-    for (let k = 0; k < N; k++) {
-      const zona = rnd(); let x, z;
-      if (zona < .45) { const lado = rnd() < .5 ? -1 : 1; x = lado * (2.05 + rnd() * 2.4); z = 18 + rnd() * 52; }          // bordes del camino
-      else if (zona < .65) { x = (rnd() - .5) * 78; z = 16.3 + rnd() * 1.4; if (Math.abs(x) < 2.8) x += 6; }               // pie de la verja
-      else if (zona < .85) { const lado = rnd() < .5 ? -1 : 1; x = lado * (9.3 + rnd() * 1.6); z = -24 + rnd() * 27; }      // costados del zócalo
-      else { x = (rnd() - .5) * 60; z = -30 + rnd() * 100; if (Math.abs(x) < 10 && z < 18) x += 22 * Math.sign(x || 1); } // campo
-      const sc = .35 + rnd() * .75;
-      m4.compose(new V3(x, 0, z), q.setFromEuler(e.set(0, rnd() * Math.PI, 0)), new V3(sc * (.8 + rnd() * .5), sc, sc));
-      mats.setMatrixAt(k, m4);
-    }
-    mats.receiveShadow = true; scene.add(mats);
     const roca = new THREE.IcosahedronGeometry(.5, 1), pr = roca.attributes.position;
     for (let k = 0; k < pr.count; k++) { const v = new V3().fromBufferAttribute(pr, k); v.multiplyScalar(.75 + .5 * Math.abs(Math.sin(v.x * 7.1 + v.y * 3.3 + v.z * 5.7))); v.y *= .6; pr.setXYZ(k, v.x, v.y, v.z); }
     roca.computeVertexNormals();
-    const rocas = new THREE.InstancedMesh(roca, pbr('piedra', { normal: 1.2, color: 0x9c948e }), 70);
-    for (let k = 0; k < 70; k++) {
-      const lado = rnd() < .5 ? -1 : 1, x = k < 40 ? lado * (2.3 + rnd() * 5) : (rnd() - .5) * 70, z = k < 40 ? 19 + rnd() * 50 : -28 + rnd() * 90;
-      if (k >= 40 && Math.abs(x) < 10 && z < 18) continue;
+    const rocas = new THREE.InstancedMesh(roca, pbr('piedra', { normal: 1.2, color: 0x9c948e }), 46);
+    for (let k = 0; k < 46; k++) {
+      const lado = rnd() < .5 ? -1 : 1, x = k < 30 ? lado * (3 + rnd() * 9) : (rnd() - .5) * 70, z = k < 30 ? 6 + rnd() * 38 : -28 + rnd() * 70;
+      if (k >= 30 && Math.abs(x) < 10 && z < 18) continue;
       const sc = .25 + rnd() * .9;
       m4.compose(new V3(x, sc * .12, z), q.setFromEuler(e.set(rnd(), rnd() * 6, rnd())), new V3(sc, sc * (.6 + rnd() * .5), sc));
       rocas.setMatrixAt(k, m4);
     }
-    rocas.castShadow = rocas.receiveShadow = true; scene.add(rocas); }
+    rocas.castShadow = rocas.receiveShadow = true; add(rocas); }
+  const primerPlano = crearPrimerPlano({ add, poner, M, MOVIL });
+  cerrarLotes();
 
   const nieblaTex = tex('niebla'); nieblaTex.wrapS = nieblaTex.wrapT = THREE.RepeatWrapping;
   const capasNiebla = [];
@@ -560,13 +573,13 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
           gl_FragColor=vec4(uCol*(1.+uF*2.5),a*uOp); }`,
     });
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); m.position.set(x, y, z); m.rotation.y = ry; m.renderOrder = 2;
-    scene.add(m); capasNiebla.push({ mat, vel });
+    add(m); capasNiebla.push({ mat, vel });
   };
   capa(160, 9, 0, 3.2, -45, 0, .55, .004);
   capa(120, 7, 0, 2.4, -12, 0, .32, -.006);
   capa(90, 5, -18, 1.6, 10, .2, .35, .008);
   capa(90, 5, 18, 1.4, 26, -.15, .4, -.007);
-  capa(70, 4, 0, 1.2, 46, 0, .3, .01);
+  capa(70, 4, 0, 1.2, 52, 0, .3, .01);
   const sueloNiebla = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, fog: false,
     uniforms: { uMap: { value: nieblaTex }, uT: { value: 0 }, uCol: { value: new THREE.Color(0x3d2e33) } },
@@ -574,20 +587,24 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     fragmentShader: `varying vec2 vUv; uniform sampler2D uMap; uniform float uT; uniform vec3 uCol;
       void main(){ float a=texture2D(uMap,vUv*7.+vec2(uT,uT*.4)).r; float r=length(vUv-.5)*2.; gl_FragColor=vec4(uCol,a*.42*smoothstep(1.,.3,r)); }`,
   }));
-  sueloNiebla.rotation.x = -Math.PI / 2; sueloNiebla.position.set(0, .35, 20); sueloNiebla.renderOrder = 1; scene.add(sueloNiebla);
+  sueloNiebla.rotation.x = -Math.PI / 2; sueloNiebla.position.set(0, .35, 20); sueloNiebla.renderOrder = 1; add(sueloNiebla);
 
   // luces
-  const hemi = new THREE.HemisphereLight(0x46485a, 0x2c1515, .9); scene.add(hemi);
-  const luna = new THREE.DirectionalLight(0xa4b0d4, 1.25);
-  luna.position.set(-28, 42, 38); luna.target.position.set(0, 4, -8);
+  const hemi = new THREE.HemisphereLight(0x36323a, 0x120b0b, .9); scene.add(hemi);
+  const luna = new THREE.DirectionalLight(0xa4b0d4, 1.5);
+  luna.position.set(-28, 42, 58); luna.target.position.set(0, 2, 12);
   luna.castShadow = true;
   luna.shadow.mapSize.set(MOVIL ? 1024 : 2048, MOVIL ? 1024 : 2048);
-  Object.assign(luna.shadow.camera, { left: -34, right: 34, top: 34, bottom: -34, near: 1, far: 150 });
+  Object.assign(luna.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 170 });
   luna.shadow.bias = -.0004; luna.shadow.normalBias = .03;
   scene.add(luna, luna.target);
+  // contraluz carmesí del cielo detrás de la capilla: recorta aristas, cruces y pinos
+  const contra = new THREE.DirectionalLight(0xff4a3a, .18); contra.position.set(6, 7, -60); scene.add(contra);   // rasante y tenue: con más, el relieve del barro se teñía de rojo
   const relampago = new THREE.DirectionalLight(0xd4dcff, 0); relampago.position.set(30, 60, 30); scene.add(relampago);
-  const luzNave = [0, 1, 2].map(() => { const l = new THREE.PointLight(0xffd2aa, 0, 12, 2); scene.add(l); return l; });
-  const luzPuerta = [0, 1, 2].map(() => { const l = new THREE.PointLight(0xffffff, 0, 5, 2); scene.add(l); return l; });
+  // luz cálida sobre el primer plano (corona, rosas) mientras se está en la llegada
+  const focoLlegada = foco(.6, 3.2, 41.5, 0xffe2c4, 10, 0);   // casi neutra: el naranja teñía el barro de rojo
+  const POOL = 3;
+  const luces = Array.from({ length: POOL }, () => { const l = new THREE.PointLight(0xffffff, 0, 5, 2); scene.add(l); return l; });
 
   // entorno para reflejos sutiles (mármol, hierro, tímpano)
   { const pm = new THREE.PMREMGenerator(renderer), es = new THREE.Scene();
@@ -595,13 +612,18 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     // cielo de tormenta en miniatura: franja rojiza en el horizonte, cenit casi negro, un punto cálido (la puerta)
     for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2, m = new THREE.Mesh(new THREE.PlaneGeometry(8, 1.6), new THREE.MeshBasicMaterial({ color: 0x3a1214 })); m.position.set(Math.cos(a) * 9, .6, Math.sin(a) * 9); m.lookAt(0, .6, 0); es.add(m); }
     const m2 = new THREE.Mesh(new THREE.PlaneGeometry(2, 2.5), new THREE.MeshBasicMaterial({ color: 0x7a4020 })); m2.position.set(0, 1.5, -9); m2.lookAt(0, 1.5, 0); es.add(m2);
-    scene.environment = pm.fromScene(es, .04).texture; }
+    // tres puntos blancos altos: brillo en el oro y en los diamantes del primer plano
+    for (const [x, y, z] of [[-4, 7, 5], [5, 6, -3], [1, 8, -6]]) { const b = new THREE.Mesh(new THREE.PlaneGeometry(.5, .5), new THREE.MeshBasicMaterial({ color: 0xffffff })); b.position.set(x, y, z); b.lookAt(0, 0, 0); es.add(b); }
+    // solo lo que refleja (metal, oro, mármol, diamantes, tímpano) lleva mapa de entorno: en la piedra,
+    // la madera y el suelo apenas se notaba y costaba en cada píxel
+    const env = pm.fromScene(es, .04).texture;
+    scene.traverse(o => { const m = o.material; if (m?.isMeshStandardMaterial && (m.metalness > .2 || m === M.marmol)) m.envMap = env; }); }
 
   // rayo: textura dibujada en cada descarga
   const rayoCanvas = document.createElement('canvas'); rayoCanvas.width = 256; rayoCanvas.height = 1024;
   const rayoTex = new THREE.CanvasTexture(rayoCanvas); rayoTex.colorSpace = THREE.SRGBColorSpace;
   const rayoMesh = new THREE.Mesh(new THREE.PlaneGeometry(70, 280), new THREE.MeshBasicMaterial({ map: rayoTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, opacity: 0 }));
-  rayoMesh.renderOrder = -1; scene.add(rayoMesh);
+  rayoMesh.renderOrder = 11; add(rayoMesh);
   function dibujarRayo() {
     const x = rayoCanvas.getContext('2d'); x.clearRect(0, 0, 256, 1024);
     const ramas = [[[128 + (Math.random() - .5) * 60, 0]]];
@@ -624,25 +646,45 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     g.setAttribute('position', new THREE.BufferAttribute(p, 3));
     const m = new THREE.Points(g, new THREE.PointsMaterial({ map: mota, color, size: tam, transparent: true, opacity: op, depthWrite: false, blending: THREE.AdditiveBlending }));
     m.userData = { base, fase: Float32Array.from({ length: n }, () => Math.random() * 6.28), caja3 };
-    scene.add(m); return m;
+    add(m); return m;
   }
-  const polvoExt = particulas(MOVIL ? 380 : 750, [[-22, 22], [0, 9], [-6, 72]], 0xc8b8b8, .07, .45);
+  const polvoExt = particulas(MOVIL ? 300 : 600, [[-22, 22], [0, 9], [-6, 50]], 0xd8b8b0, .06, .45);
+  destino = int;
   const polvoInt = particulas(MOVIL ? 260 : 520, [[-3.6, 3.6], [B, B + 7], [-22.8, -1]], 0xffd2a0, .03, .55);
+  destino = ext;
+
+  // Dos estados de luz: fuera, luna (con sombra), contraluz y relámpago; dentro de la nave no existen
+  // (aunque estén a cero, cada píxel las calcula). Ambos estados se compilan al cargar: cruzar no tropieza.
+  const lucesFuera = [luna, contra, relampago];
+  let fuera = true;
+  const ponerFuera = v => { if (v !== fuera) { fuera = v; lucesFuera.forEach(l => l.visible = v); } };
+  function precompilar() {
+    const vis = [ext.visible, int.visible]; ext.visible = int.visible = true;
+    for (const v of [false, true]) { ponerFuera(v); renderer.compile(scene, camera); }
+    [ext.visible, int.visible] = vis;
+    // la sala del mar también (antes congelaba 1,6 s la primera apertura): se compila y se dibuja una vez
+    renderer.compile(sala.escena, sala.camara);
+    renderer.shadowMap.needsUpdate = sala.sombraSucia();
+    renderer.setRenderTarget(rtPortal); renderer.render(sala.escena, sala.camara); renderer.setRenderTarget(null);
+  }
+  manager.onLoad = () => { precompilar(); calidad.lista = performance.now() + 2000; alCargar?.(); };
 
   /* ===================== POSTPROCESO ===================== */
   const composer = new EffectComposer(renderer);
   const pasoEscena = new RenderPass(scene, camera);
   composer.addPass(pasoEscena);
-  const bloom = new UnrealBloomPass(new V2(256, 256), .55, .6, .82);
-  composer.addPass(bloom);
+  // sin resplandor de posproceso: costaba lo suficiente para bajar de 72 a 48 fps en la llegada (GTX 1650,
+  // 1440×900); los halos de faroles son sprites. La salida conserva ACES + sRGB (el portal lo necesita).
   composer.addPass(new OutputPass());
 
   /* ===================== CÁMARA ===================== */
+  // Llegada compuesta como un cuadro: la capilla entera al fondo, la corona y las rosas delante.
+  // Recorrido corto y bajo: del primer plano a la escalinata y al portal.
   const RUTA_P = new THREE.CatmullRomCurve3([
-    new V3(10, 5.6, 82), new V3(6, 3.8, 56), new V3(1.6, 2.7, 33), new V3(0, 2.3, 18), new V3(0, 2.5, 8.6),
+    new V3(0, 1.5, 44), new V3(0, 1.85, 32), new V3(0, 2.2, 20), new V3(0, 2.45, 10), new V3(0, 2.5, 6.4),
     new V3(0, B + 1.66, 3.4), new V3(0, B + 1.66, .2), new V3(0, B + 1.66, -1.9)], false, 'centripetal');
   const RUTA_T = new THREE.CatmullRomCurve3([
-    new V3(0, 9.5, 0), new V3(0, 8, 0), new V3(0, 6, 0), new V3(0, 4.6, 0), new V3(0, 3.6, -.8),
+    new V3(0, 7.4, 0), new V3(0, 6.8, 0), new V3(0, 5.6, 0), new V3(0, 4.4, 0), new V3(0, 3.6, -.8),
     new V3(0, B + 2.1, -4), new V3(0, B + 1.8, -9), new V3(0, B + 1.7, -13)], false, 'centripetal');
   const U_EXT = 4.6, U_NAVE = 4.95, PASO = .9;
   const U_FIN = U_NAVE + 8 * PASO;
@@ -656,8 +698,10 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
   }
   function poseScroll(u) {
     if (u <= U_EXT) {
-      const t = cl((u - .12) / (U_EXT - .12));
-      return [RUTA_P.getPointAt(t), RUTA_T.getPointAt(t)];
+      const t = cl((u - .12) / (U_EXT - .12)), mira = RUTA_T.getPointAt(t);
+      // en vertical la capilla ocupa la mitad superior: el título y los botones quedan sobre el primer plano
+      if (camera.aspect < 1) mira.y -= 4.2 * (1 - suave(0, .45, t));
+      return [RUTA_P.getPointAt(t), mira];
     }
     const [p0, t0] = [RUTA_P.getPointAt(1), RUTA_T.getPointAt(1)];
     const [p1, t1] = estacion(0);
@@ -670,67 +714,109 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
 
   /* ===================== ESTADO Y ANIMACIÓN ===================== */
   let tiempo = 0, uActual = 0, anim = null, mezcla = null, retenido = false; // retenido: la cámara se queda dentro de la habitación
-  let rayo = null, proximoRayo = 3.5;
+  let rayo = null, proximoRayo = 1.5;
   const cam = { p: new V3(), t: new V3() };
   const tmp = new V3();
   const fovBase = () => camera.aspect < 1 ? 64 : 50;
 
+  // calidad: la escala de resolución se ajusta en marcha según el tiempo real entre fotogramas.
+  // Si un nivel resulta lento se baja y ese nivel no se vuelve a superar (sin oscilaciones).
+  const calidad = { escala: 1, techo: 1, ema: 16.7, ultimo: 0, desde: 0, ancho: 1, alto: 1, fija: false, pr: () => PR_MAX * calidad.escala, aplicar: () => aplicarResolucion() };
+  function aplicarResolucion() {
+    const pr = PR_MAX * calidad.escala, { ancho: w, alto: h } = calidad;
+    renderer.setPixelRatio(pr); renderer.setSize(w, h, false);
+    composer.setPixelRatio(pr); composer.setSize(w, h);
+    renderer.getDrawingBufferSize(tamPortal);
+    rtPortal.setSize(Math.round(tamPortal.x * .6), Math.round(tamPortal.y * .6));
+    portal.material.uniforms.uRes.value.copy(tamPortal);
+    portalHab.material.uniforms.uRes.value.copy(tamPortal);
+    primerPlano.escalaPuntos(pr);
+  }
   function tamano(w, h) {
-    renderer.setSize(w, h, false);
-    composer.setSize(w, h);
+    calidad.ancho = w; calidad.alto = h;
     camera.aspect = w / h;
     camera.fov = fovBase();
     FACTOR_PUERTA = camera.aspect < 1 ? .97 : .8;
     camera.updateProjectionMatrix();
-    bloom.resolution.set(w / 2, h / 2);
-    renderer.getDrawingBufferSize(tamPortal);
-    rtPortal.setSize(Math.round(tamPortal.x * .6), Math.round(tamPortal.y * .6));
-    portal.material.uniforms.uRes.value.copy(tamPortal);
+    aplicarResolucion();
+  }
+  function medirFotograma() {
+    const ahora = performance.now(), dt = ahora - calidad.ultimo; calidad.ultimo = ahora;
+    // no se mide hasta 2 s después de cargar: la compilación de sombreadores no debe bajar la calidad
+    if (!adaptar || calidad.fija || !calidad.lista || ahora < calidad.lista || dt > 250) { calidad.desde = ahora; return; }   // pausa o pestaña oculta: no cuenta
+    calidad.ema += (dt - calidad.ema) * .06;
+    if (ahora - calidad.desde < 1500) return;
+    if (calidad.ema > 23 && calidad.escala > .55) { calidad.escala = Math.max(.55, calidad.escala - .15); calidad.techo = calidad.escala; }
+    else if (calidad.ema < 18 && calidad.escala < calidad.techo) calidad.escala = Math.min(calidad.techo, calidad.escala + .15);
+    else return;
+    calidad.desde = ahora; calidad.ema = 16.7; aplicarResolucion();
   }
 
   const mundo = (d, x, y, z) => d.marco.localToWorld(new V3(x, y, z));
 
-  // lienzo: la atmósfera 2D de la canción, proyectada en vivo en el fondo de esa habitación
-  // La ventana mide exactamente el campo visual de la cámara al final del avance:
-  // cuando la cámara se detiene, la ventana llena la pantalla y la habitación 2D la releva sin salto.
-  let ventana = null;
-  const DIST_VENTANA = .9;
+  // Habitaciones 2–9: el hueco de la puerta es un portal que muestra la atmósfera de la canción alineada con la
+  // pantalla (la misma imagen que dibuja el lienzo de la habitación). Cuando la cámara llega, el hueco llena la
+  // pantalla y la habitación 2D lo releva sin salto. El sombreador deshace el tono ACES de la salida para que
+  // los colores coincidan con los del lienzo.
+  let atmosTex = null, portalDe = null, cierre = null, subir = false;
+  const portalHab = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, fog: false,
+    uniforms: { tMap: { value: null }, uRes: { value: new V2(1, 1) }, uOp: { value: 0 }, uExp: { value: renderer.toneMappingExposure } },
+    vertexShader: 'void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }',
+    fragmentShader: `uniform sampler2D tMap; uniform vec2 uRes; uniform float uOp, uExp;
+      vec3 rrtInv(vec3 y){ // inversa de RRTAndODTFit de three.js
+        vec3 a = .983729 * y - 1., b = .432951 * y - .0245786, c = .238081 * y + .000090537;
+        return (-b - sqrt(max(b * b - 4. * a * c, 0.))) / (2. * a); }
+      void main(){
+        vec3 c = clamp(texture2D(tMap, gl_FragCoord.xy / uRes).rgb, 0., .985);
+        const mat3 OUTINV = mat3(.643038, .059269, .005962, .311187, .931436, .063929, .045775, .009295, .930118);
+        const mat3 ININV = mat3(1.764741, -.147028, -.036337, -.675778, 1.160252, -.162436, -.088963, -.013224, 1.198773);
+        vec3 v = ININV * rrtInv(OUTINV * c) * .6 / uExp;
+        gl_FragColor = vec4(max(v, 0.), uOp); }`,
+  }));
+  const finalEntrada = d => [mundo(d, 0, 1.62, d.i === 0 ? -.87 : .39), mundo(d, 0, 1.62, -4)];
+  function ponerPortal(d, lienzo) {
+    if (d.i === 0) return;
+    if (!atmosTex && lienzo) { atmosTex = new THREE.CanvasTexture(lienzo); atmosTex.colorSpace = THREE.SRGBColorSpace; portalHab.material.uniforms.tMap.value = atmosTex; }
+    if (!atmosTex || portalDe === d) return;
+    portalHab.geometry.dispose();
+    portalHab.geometry = new THREE.ShapeGeometry(new THREE.Shape(contorno(0, d.dim)), 24).translate(0, 0, -.06);
+    d.marco.add(portalHab); portalDe = d;
+  }
   function entrar(i, lienzo) {
     const d = puertas[i];
-    quitarVentana();
-    if (lienzo && d.i !== 0) {
-      const t = new THREE.CanvasTexture(lienzo); t.colorSpace = THREE.SRGBColorSpace;
-      const alto = 2 * DIST_VENTANA * Math.tan(THREE.MathUtils.degToRad(fovBase() + 9) / 2), ancho = alto * camera.aspect;
-      ventana = new THREE.Mesh(new THREE.PlaneGeometry(ancho, alto), new THREE.MeshBasicMaterial({ map: t, toneMapped: false, fog: false }));
-      ventana.position.set(0, 1.62, -1.77); d.marco.add(ventana);
-    }
+    ponerPortal(d, lienzo); cierre = null;
     const p0 = cam.p.clone(), t0 = cam.t.clone();
-    const pf = mundo(d, 0, 1.62, 2.1), tf = mundo(d, 0, 1.45, 0);
-    const pin = mundo(d, 0, 1.62, -1.77 + DIST_VENTANA), tin = mundo(d, 0, 1.62, -4);
+    const pf = mundo(d, 0, 1.62, 2.1), tf = mundo(d, 0, 1.55, 0);
+    const [pin, tin] = finalEntrada(d);
     return new Promise(res => {
-      const a = anim = { tipo: 'entrar', d, inicio: performance.now(), t: 0, dur: rm ? .55 : 2.5, p0, t0, pf, tf, pin, tin, res, avisado: false };
+      const a = anim = { tipo: 'entrar', d, inicio: performance.now(), t: 0, dur: rm ? .55 : 2.3, p0, t0, pf, tf, pin, tin, res, avisado: false };
       // respaldo: si el navegador deja de pintar (pantalla bloqueada, pestaña oculta) la interfaz no se queda a medias
-      setTimeout(() => { if (!a.avisado) { a.avisado = true; a.respaldo = true; res(); } }, a.dur * 800 + 400);
+      setTimeout(() => { if (!a.avisado) { a.avisado = true; a.respaldo = true; res(); } }, a.dur * 1000 + 400);
     });
   }
+  // salida: la cámara parte de donde terminó la entrada (el portal llena la pantalla, igual que la habitación
+  // que se desvanece encima) y retrocede a su sitio en la nave; la puerta se cierra después
   function salir(i) {
     const d = puertas[i];
-    quitarVentana();
-    d.abierto = 1; d.objetivo = 0;
-    cam.p.copy(mundo(d, 0, 1.62, 2.1)); cam.t.copy(mundo(d, 0, 1.45, 0));
+    ponerPortal(d);
+    d.abierto = d.objetivo = 1; d.objetivoBrillo = 1;
+    cierre = { d, en: performance.now() + (rm ? 300 : 900) };
+    const [pin, tin] = finalEntrada(d);
+    cam.p.copy(pin); cam.t.copy(tin);
     anim = null; retenido = false;
-    mezcla = { inicio: performance.now(), t: 0, dur: rm ? .01 : 1.6, p0: cam.p.clone(), t0: cam.t.clone() };
-    camera.fov = fovBase(); camera.updateProjectionMatrix();
+    mezcla = { inicio: performance.now(), t: 0, dur: rm ? .01 : 1.9, p0: pin, t0: tin, pc: mundo(d, 0, 1.62, 2.1), tc: mundo(d, 0, 1.55, 0), fov: rm ? 0 : 9 };
   }
-  // durante una habitación la cámara queda frente a la puerta abierta de esa canción
+  // durante una habitación la cámara queda en el umbral de la puerta abierta de esa canción
   function ponerEnPuerta(i) {
     puertas.forEach((q, k) => { q.abierto = q.objetivo = k === i ? 1 : 0; q.objetivoBrillo = k === i ? 1 : 0; });
-    retenido = true;
-    cam.p.copy(mundo(puertas[i], 0, 1.62, -1.77 + DIST_VENTANA)); cam.t.copy(mundo(puertas[i], 0, 1.62, -4));
+    retenido = true; cierre = null;
+    ponerPortal(puertas[i]);
+    const [pin, tin] = finalEntrada(puertas[i]); cam.p.copy(pin); cam.t.copy(tin);
   }
 
   // Cierra la entrada aunque no haya habido fotogramas (pantalla bloqueada, pestaña oculta):
-  // deja la cámara en la pose final dentro de la habitación y la puerta abierta.
+  // deja la cámara en la pose final y la puerta abierta.
   function terminarEntrada(forzar = false) {
     if (!anim || !(forzar || anim.respaldo)) return;
     const a = anim; anim = null; retenido = true;
@@ -740,10 +826,6 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     camera.position.copy(cam.p); camera.lookAt(cam.t);
     if (!a.avisado) { a.avisado = true; a.res(); }
   }
-  function quitarVentana() {
-    if (!ventana) return;
-    ventana.parent.remove(ventana); ventana.material.map.dispose(); ventana.material.dispose(); ventana.geometry.dispose(); ventana = null;
-  }
   function preescucha(i, on) {
     puertas.forEach((d, k) => { if (k === i) { d.objetivo = on ? .2 : 0; d.objetivoBrillo = on ? .9 : 0; } });
   }
@@ -751,7 +833,7 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
   function actualizarRayo(dt, dentro) {
     proximoRayo -= dt;
     if (proximoRayo <= 0) {
-      proximoRayo = 6 + Math.random() * 10;
+      proximoRayo = 3 + Math.random() * 6;
       const az = Math.atan2(cam.t.x - cam.p.x, cam.t.z - cam.p.z) + (Math.random() - .5) * 1.6;
       const dist = 260 + Math.random() * 200;
       rayo = { t: 0, dir: new V3(Math.sin(az), .35 + Math.random() * .2, Math.cos(az)).normalize(), az, dist, fuerza: .55 + Math.random() * .45 };
@@ -772,7 +854,7 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     relampago.intensity = dentro ? 0 : f * 2.4;
     if (rayo) relampago.position.copy(rayo.dir).multiplyScalar(60);
     M.vidrio.emissiveIntensity = .55 + f * (dentro ? 7 : 3);
-    hemi.intensity = (dentro ? .22 : .9) + f * (dentro ? .5 : .6);
+    hemi.intensity = (dentro ? .5 : .9) + f * (dentro ? .5 : .6);   // dentro, con menos luces puntuales, algo más de ambiente
     capasNiebla.forEach(c => c.mat.uniforms.uF.value = f);
     return f;
   }
@@ -795,30 +877,31 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
   }
   function reponerParticulas(pts) { const { base, caja3 } = pts.userData; for (let i = 0; i < base.length; i++) base[i] = caja3[i % 3][0] + Math.random() * (caja3[i % 3][1] - caja3[i % 3][0]); }
 
+  const bezier = (o, a, c, b, s) => o.copy(a).multiplyScalar((1 - s) ** 2).addScaledVector(c, 2 * (1 - s) * s).addScaledVector(b, s * s);
   function actualizar(dt, u, { usarScroll = true } = {}) {
     tiempo += dt; uActual = u;
+    const ahora = performance.now();
     // cámara
     if (anim) {
       // reloj real: la transición dura lo mismo aunque el dispositivo vaya lento
-      anim.t = (performance.now() - anim.inicio) / 1000; const k = cl(anim.t / anim.dur), T = anim.t, a = anim, d = a.d;
-      if (rm) {
-        d.objetivo = 1; d.objetivoBrillo = 1;
-        cam.p.copy(a.pf); cam.t.copy(a.tf);
-      } else {
-        const giro = eio(cl(T / .95));
-        cam.p.copy(a.p0).lerp(a.pf, giro); cam.t.copy(a.t0).lerp(a.tf, giro);
-        if (T > .35) { d.objetivo = 1; d.objetivoBrillo = 1; }
-        const avance = cl((T - .95) / (a.dur - .95)), e = avance * avance * (3 - 2 * avance) * .4 + avance * avance * .6;
-        if (avance > 0) { cam.p.copy(a.pf).lerp(a.pin, e); cam.t.copy(a.tf).lerp(a.tin, e); }
-        camera.fov = fovBase() + 9 * e; camera.updateProjectionMatrix();
+      anim.t = (ahora - anim.inicio) / 1000; const k = cl(anim.t / anim.dur), a = anim, d = a.d;
+      d.objetivo = 1; d.objetivoBrillo = 1;
+      if (rm) { cam.p.copy(a.pin); cam.t.copy(a.tin); }
+      else {
+        // un solo movimiento: arranca suave, se alinea con la puerta y frena en el umbral
+        const s2 = eio(k);
+        bezier(cam.p, a.p0, a.pf, a.pin, s2); bezier(cam.t, a.t0, a.tf, a.tin, s2);
+        camera.fov = fovBase() + 9 * suave(.45, 1, k); camera.updateProjectionMatrix();
       }
-      if (!a.avisado && k >= (rm ? .6 : .78)) { a.avisado = true; a.res(); }
+      if (!a.avisado && k >= (rm ? .6 : .9)) { a.avisado = true; a.res(); }
       if (k >= 1) { anim = null; retenido = true; }
     } else if (usarScroll && !retenido) {
       const [p, t] = poseScroll(u);
       if (mezcla) {
-        mezcla.t = (performance.now() - mezcla.inicio) / 1000; const f = eio(cl(mezcla.t / mezcla.dur));
-        cam.p.copy(mezcla.p0).lerp(p, f); cam.t.copy(mezcla.t0).lerp(t, f);
+        mezcla.t = (ahora - mezcla.inicio) / 1000; const f = eio(cl(mezcla.t / mezcla.dur));
+        if (mezcla.pc) { bezier(cam.p, mezcla.p0, mezcla.pc, p, f); bezier(cam.t, mezcla.t0, mezcla.tc, t, f); }
+        else { cam.p.copy(mezcla.p0).lerp(p, f); cam.t.copy(mezcla.t0).lerp(t, f); }
+        camera.fov = fovBase() + (mezcla.fov || 0) * (1 - f); camera.updateProjectionMatrix();
         if (f >= 1) mezcla = null;
       } else {
         // pequeña respiración de cámara en reposo, como sostenida a mano
@@ -828,41 +911,54 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     }
     camera.position.copy(cam.p); camera.lookAt(cam.t);
     const dentro = cam.p.z < -.6;
+    // zonas: lo que no puede verse desde aquí no se dibuja
+    ext.visible = cam.p.z > -7; int.visible = cam.p.z < 12;
+    ponerFuera(cam.p.z > -.6);
+    if (cierre && ahora > cierre.en) { cierre.d.objetivo = 0; cierre.d.objetivoBrillo = 0; cierre = null; }
 
     // portal: se abre al subir la escalinata
     const abrePortal = 1 - suave(1.4, 4.8, cam.p.z);
     hojasPortal.forEach(([piv, s]) => piv.rotation.y = s * abrePortal * 1.5); // hacia fuera: quedan dentro del pórtico
-    luzPortal.intensity = 5 + abrePortal * 9;
-    faroles.forEach((l, k) => l.intensity = 6.5 + Math.sin(tiempo * 9 + k * 2) * .35 + Math.sin(tiempo * 23 + k) * .25);
+    luzPortal.i = 5 + abrePortal * 5;
+    faroles.forEach((l, k) => l.i = dentro ? 0 : 6.5 + Math.sin(tiempo * 9 + k * 2) * .35 + Math.sin(tiempo * 23 + k) * .25);
+    focoLlegada.i = 3.6 * suave(20, 30, cam.p.z);
 
     const f = actualizarRayo(dt, dentro);
     cielo.material.uniforms.uT.value = rm ? 0 : tiempo;
     if (!rm) { capasNiebla.forEach(c => c.mat.uniforms.uT.value += c.vel * dt); sueloNiebla.material.uniforms.uT.value += dt * .004; }
-    luna.intensity = dentro ? 0 : 1.25;
+    // sin sombra propia, el contraluz entraría en la nave: se apaga antes de cruzar el portal
+    luna.intensity = dentro ? 0 : 1.5; contra.intensity = .18 * suave(.6, 3.2, cam.p.z);
+    if (ext.visible) primerPlano.actualizar(tiempo, rm);
 
-    // puertas: hojas, luz, habitación
+    // puertas: hojas, luz, portal
     for (const d of puertas) {
       const vel = anim && anim.d === d ? 1.25 : 2.2;
       d.abierto += (d.objetivo - d.abierto) * cl(dt * vel);
-      if (anim && anim.d === d) d.abierto = Math.max(d.abierto, rm ? cl(anim.t / .35) : eio(cl((anim.t - .35) / 1.1)));
+      if (anim && anim.d === d) d.abierto = Math.max(d.abierto, rm ? 1 : eio(cl((anim.t - .15) / 1.0)));
       d.brillo += (d.objetivoBrillo - d.brillo) * cl(dt * 2.5);
       const ang = cl(d.abierto) * 1.8;
-      // se abren hacia la habitación; la puerta 1 hacia la nave, hasta quedar contra el derrame del muro
-      d.hojas.forEach(({ piv, s }) => piv.rotation.y = d.i === 0 ? s * Math.min(ang, 1.52) : -s * ang);
-      d.matHab.emissiveIntensity = .012 + d.brillo * .018;
-      d.fondo.material.opacity = ventana && ventana.parent === d.marco ? 0 : .18 + d.brillo * .7;
+      // todas se abren hacia la nave, hasta quedar contra el derrame del muro: el hueco queda libre para la cámara
+      d.hojas.forEach(({ piv, s }) => piv.rotation.y = s * Math.min(ang, 1.52));
+      d.fondo.material.opacity = .18 + d.brillo * .7;
       d.charco.material.opacity = .16 + d.brillo * .35 + d.abierto * .3;
+      d.foco.p.copy(mundo(d, 0, .9, .7)); d.foco.i = dentro ? 1 + d.brillo * 2.4 + d.abierto * 1.2 : 0;
     }
-    // luces dinámicas: las tres lámparas y las tres puertas más cercanas a la cámara
-    const porDist = (a, b) => a.distanceToSquared(cam.p) - b.distanceToSquared(cam.p);
-    lamparas.slice().sort(porDist).forEach((p, k) => { if (k < 3) { luzNave[k].position.copy(p); luzNave[k].intensity = dentro || cam.p.z < 1.5 ? 8.5 : 0; } });
-    puertas.slice().sort((a, b) => porDist(a.marco.position, b.marco.position)).slice(0, 3).forEach((d, k) => {
-      const l = luzPuerta[k]; l.color.copy(d.luz); l.position.copy(mundo(d, 0, .9, .7));
-      l.intensity = dentro ? 1 + d.brillo * 2.4 + d.abierto * 1.2 : 0;
-    });
-    if (ventana) ventana.material.map.needsUpdate = true;
-    moverParticulas(polvoExt, dt, null);
-    moverParticulas(polvoInt, dt, anim && !rm && anim.t > .8 ? { p: mundo(anim.d, 0, 1.4, -1), k: 1.6 * cl((anim.t - .8) / 1.2) } : null);
+    lamparas.forEach(l => l.i = dentro || cam.p.z < 1.5 ? 12 : 0);
+    // el portal de la habitación aparece con la apertura; al cerrarse la puerta se retira
+    if (portalDe) {
+      const op = suave(.04, .45, portalDe.abierto);
+      portalHab.material.uniforms.uOp.value = op;
+      portalHab.visible = op > 0;
+      if (op > 0 && (subir = !subir)) atmosTex.needsUpdate = true;   // subir el lienzo cuesta: uno de cada dos fotogramas basta
+      if (op === 0 && !anim && !retenido && !mezcla) { portalDe.marco.remove(portalHab); portalDe = null; }
+    }
+    // el resplandor del posproceso cede al final de la entrada: el hueco debe verse igual que la habitación
+    // POOL luces reales para todos los focos: las que más aportan cerca de la cámara
+    for (const fo of focos) fo.peso = fo.i / (1 + fo.p.distanceToSquared(cam.p) / (fo.d * fo.d));
+    const orden = focos.filter(fo => fo.i > 0).sort((x, y) => y.peso - x.peso);
+    luces.forEach((l, k) => { const fo = orden[k]; if (!fo) { l.intensity = 0; return; } l.position.copy(fo.p); l.color.copy(fo.c); l.distance = fo.d; l.intensity = fo.i; });
+    if (ext.visible) moverParticulas(polvoExt, dt, null);
+    if (int.visible) moverParticulas(polvoInt, dt, anim && !rm && anim.t > .8 ? { p: mundo(anim.d, 0, 1.4, -1), k: 1.6 * cl((anim.t - .8) / 1.2) } : null);
     return f;
   }
 
@@ -887,17 +983,24 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
     sala.camara.projectionMatrix.copy(camera.projectionMatrix); sala.camara.projectionMatrixInverse.copy(camera.projectionMatrixInverse);
   }
   const enSala = () => { const l = d0.marco.worldToLocal(cam.p.clone()); return l.z < -.06 && Math.abs(l.x) < 1.5 && l.y > 0 && l.y < 4.5; };
+  // sombras estáticas: la principal se dibuja una vez; la de la sala solo cuando su sol o sus cuerdas cambian
+  let sombraPrincipal = true;
+  const sombraSala = () => { renderer.shadowMap.needsUpdate = sala.sombraSucia(); };
   function render() {
+    medirFotograma();
     if (enSala()) {
       camaraSala(); portal.visible = false;
       pasoEscena.scene = sala.escena; pasoEscena.camera = sala.camara;
+      sombraSala();
     } else {
       pasoEscena.scene = scene; pasoEscena.camera = camera;
       portal.visible = d0.abierto > .01 && cam.p.distanceTo(d0.marco.position) < 16;
       if (portal.visible) {
         sala.actualizar(1 / 60, progresoSala); camaraSala();
+        sombraSala();
         renderer.setRenderTarget(rtPortal); renderer.render(sala.escena, sala.camara); renderer.setRenderTarget(null);
       }
+      renderer.shadowMap.needsUpdate = sombraPrincipal; sombraPrincipal = false;
     }
     composer.render();
   }
@@ -925,7 +1028,7 @@ export function crearEscena({ canvas, rm, alProgreso, alCargar, alRayo }) {
 
   // ponytail: reinicia el polvo interior tras cada entrada en vez de simular su regreso
   return {
-    renderer, camera, scene, tamano, actualizar, render, entrar, salir, ponerEnPuerta, preescucha, rectPuertas, actualizarSala, terminarEntrada,
+    renderer, camera, scene, calidad, tamano, actualizar, render, entrar, salir, ponerEnPuerta, preescucha, rectPuertas, actualizarSala, terminarEntrada,
     uDePuerta, U_FIN, U_EXT, U_NAVE, PASO, reponerPolvo: () => reponerParticulas(polvoInt),
     cancelarMezcla: () => { mezcla = null; },
     depurar: () => ({ anim: anim && { t: +anim.t.toFixed(2), dur: anim.dur, avisado: anim.avisado }, mezcla: !!mezcla, cam: cam.p.toArray().map(v => +v.toFixed(2)) }),

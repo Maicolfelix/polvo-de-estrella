@@ -15,7 +15,7 @@ function toque(el) {
 // cuenta elementos <audio> que suenan de verdad (no en pausa y con ganancia audible)
 function sonando(A) {
   const n = A.niveles(), e = A.elementos;
-  return ['song', 'pre', 'inst'].filter(k => !e[k].paused && n[k] > .02);
+  return ['song', 'pre'].filter(k => !e[k].paused && n[k] > .02);   // ya no hay instrumental de fondo
 }
 
 export async function correr() {
@@ -64,7 +64,7 @@ export async function correr() {
   // 5. salir durante la carga: no debe empezar después
   toque($('#siguiente')); await w(100); toque($('#volver')); await modo('nave'); await w(2500);
   ok(P.estado().modo === 'nave' && s.paused, 'salir durante la carga: la canción no arranca después (' + sonando(A) + ')');
-  ok(sonando(A).join() === 'inst', 'al volver suena solo la instrumental');
+  ok(sonando(A).length === 0 && A.niveles().viento > 0, 'al volver no suena música; vuelve el viento (' + A.niveles().viento + ')');
 
   // 6. preescuchar → entrar → pausar → volver
   await irPuerta(2);
@@ -78,7 +78,7 @@ export async function correr() {
   toque($('#play')); await w(400);
   ok(sonando(A).length === 0, 'pausa tras preescucha: silencio total (' + sonando(A) + ')');
   toque($('#volver')); await modo('nave'); await w(2500);
-  ok(sonando(A).join() === 'inst', 'volver: solo instrumental');
+  ok(sonando(A).length === 0, 'volver: ninguna música, solo ambiente');
 
   // 7. mantener → arrastrar para cancelar → soltar
   const b2 = document.querySelectorAll('.puerta')[2];
@@ -105,7 +105,7 @@ export async function correrSinSonido() {
     toque(document.querySelectorAll('.puerta')[i]); await modo('habitacion');
     ok(P.estado().modo === 'habitacion' && A.elementos.song.paused && !A.activo, `sin sonido, habitación ${i + 1}: nada suena`);
     toque($('#volver')); await modo('nave'); await w(1500);
-    ok(A.elementos.inst.paused, 'sin sonido: la instrumental no arranca al volver');
+    ok(!A.elementos.inst && !A.contexto(), 'sin sonido: no hay instrumental ni contexto de audio al volver');
   }
   return L.join('\n');
 }
@@ -162,7 +162,7 @@ export async function correrVolumen() {
     ok(C.fuentes === 0, 'sin fuentes de audio nuevas (' + C.fuentes + ')');
     ok(localStorage.getItem('pde-vol') === '70', 'el volumen se guarda (pde-vol = ' + localStorage.getItem('pde-vol') + ')');
     toque($('#volver')); await modo('nave'); await w(2500);
-    ok(sonando(A).join() === 'inst', 'al volver: solo la instrumental');
+    ok(sonando(A).length === 0, 'al volver: ninguna música, solo ambiente');
   } finally { proto.createMediaElementSource = of; }
   return L.join('\n');
 }
@@ -212,7 +212,7 @@ export async function correrLetra(n = '01') {
   const n2 = String(+n % 9 + 1).padStart(2, '0');
   ok($('#hab-titulo').textContent && activa() <= 0 && $('#seguir').hidden, `cambiar a ${n2}: estado anterior eliminado`);
   toque($('#volver')); await modo('nave'); await w(500);
-  ok(sonando(A).join() === 'inst', 'volver: se cancela el seguimiento y suena solo la instrumental');
+  ok(sonando(A).length === 0, 'volver: se cancela el seguimiento y no queda música sonando');
   return L.join('\n');
 }
 
@@ -238,5 +238,77 @@ export async function correrNueve() {
     toque($('#play')); await w(300);
   }
   toque($('#volver')); await modo('nave');
+  return L.join('\n');
+}
+
+// Ambiente sin instrumental. Requiere sonido activado por un clic real.
+// La instrumental no se pide nunca; el viento cede ante la preescucha, calla en la habitación y vuelve al salir.
+export async function correrAmbiente() {
+  const P = window.__pde, A = P.A, L = [];
+  const ok = (cond, txt) => L.push((cond ? 'OK   ' : 'FALLA') + ' ' + txt);
+  const pedida = () => performance.getEntriesByType('resource').some(e => /instrumental/.test(e.name));
+  ok(!pedida(), 'la instrumental no se ha pedido al servidor');
+  ok(!('inst' in A.elementos), 'no existe elemento de audio para la instrumental');
+  scrollTo(0, innerHeight * P.escena.uDePuerta(3)); await w(3000);
+  const vNave = A.niveles().viento;
+  ok(vNave > 0, 'en la nave suena el viento (' + vNave + ')');
+  const b = document.querySelectorAll('.puerta')[3], r = b.getBoundingClientRect(), o = { pointerType: 'touch', clientX: r.x + r.width / 2, clientY: r.y + r.height / 2, bubbles: true, pointerId: 5 };
+  b.dispatchEvent(new PointerEvent('pointerdown', o)); await w(1800);
+  const vPre = A.niveles().viento;
+  ok(A.niveles().pre > .5 && vPre < vNave * .6, `preescucha: el viento cede (${vNave} → ${vPre})`);
+  b.dispatchEvent(new PointerEvent('pointerup', o)); b.click(); await w(2000);
+  ok(A.niveles().viento > vPre, 'al soltar: el viento vuelve (' + A.niveles().viento + ')');
+  toque(b); await modo('habitacion'); await w(1500);
+  ok(A.niveles().viento < .002 && sonando(A).join() === 'song', 'habitación: solo la canción, viento en silencio (' + A.niveles().viento + ')');
+  toque($('#volver')); await modo('nave'); await w(2500);
+  ok(sonando(A).length === 0 && A.niveles().viento > 0, 'al volver: solo ambiente (' + A.niveles().viento + ')');
+  toque($('#btnSonido')); await w(400);
+  ok(A.niveles().master === 0, 'silencio: también calla el viento (master ' + A.niveles().master + ')');
+  toque($('#btnSonido')); await w(400);
+  ok(A.niveles().master === 1, 'reactivar: vuelve el ambiente');
+  ok(!pedida(), 'tras todo el recorrido la instrumental sigue sin pedirse');
+  return L.join('\n');
+}
+
+// Transiciones de las nueve puertas: entrada y regreso por cada una, pulsaciones repetidas, entrada sin fotogramas
+// (pantalla bloqueada o pestaña oculta) y la interfaz de la habitación solo cuando está estable.
+export async function correrTransiciones() {
+  const P = window.__pde, A = P.A, E = P.escena, L = [];
+  const ok = (cond, txt) => L.push((cond ? 'OK   ' : 'FALLA') + ' ' + txt);
+  const puerta = i => document.querySelectorAll('.puerta')[i];
+  const ir = async i => { scrollTo(0, innerHeight * E.uDePuerta(i)); await w(2500); };
+  let llamadas = 0; const orig = E.entrar; E.entrar = (...a) => { llamadas++; return orig(...a); };
+  try {
+    // 1. entrar y volver por las nueve puertas
+    for (let i = 0; i < 9; i++) {
+      await ir(i);
+      llamadas = 0; toque(puerta(i)); await w(250);
+      const op0 = +getComputedStyle($('#habScroll')).opacity;
+      await modo('habitacion'); await w(600);
+      const op1 = +getComputedStyle($('#habScroll')).opacity;
+      const fuente = A.niveles()?.fuentes.song ?? A.elementos.song.src.split('/').pop();
+      ok(P.estado().actual === i && llamadas === 1 && fuente === String(i + 1).padStart(2, '0') + '.m4a' && op0 === 0 && op1 === 1,
+        `puerta ${i + 1}: una transición, canción ${fuente}, letra oculta al empezar (${op0}) y visible al estabilizarse (${op1})`);
+      toque($('#volver')); await modo('nave'); await w(1500);
+      ok(P.estado().modo === 'nave' && E.depurar().mezcla === false && A.elementos.song.paused, `puerta ${i + 1}: regreso completo a la nave`);
+    }
+    // 2. pulsaciones repetidas durante la entrada
+    await ir(4); llamadas = 0;
+    for (let k = 0; k < 6; k++) { toque(puerta(4)); await w(60); }
+    await modo('habitacion');
+    ok(llamadas === 1 && P.estado().actual === 4, `6 toques seguidos: ${llamadas} transición`);
+    toque($('#volver')); toque($('#volver')); await modo('nave'); await w(1500);
+    ok(P.estado().modo === 'nave', 'dos toques en «Puertas»: un solo regreso');
+    // 3. entrada sin fotogramas: la escena deja de actualizarse a mitad (como con la pantalla bloqueada)
+    await ir(6);
+    const act = E.actualizar; let congelada = false;
+    E.actualizar = (...a) => congelada ? 0 : act(...a);
+    toque(puerta(6)); await w(500); congelada = true; await w(3500);
+    const modoSin = P.estado().modo, camSin = E.depurar().cam;
+    congelada = false; E.actualizar = act; await w(800);
+    const camCon = E.depurar().cam, mov = Math.hypot(...camSin.map((v, k) => v - camCon[k]));
+    ok(modoSin === 'habitacion' && E.depurar().anim === null && mov < .05, `sin fotogramas: la habitación se abre igual y la cámara queda en su sitio al volver a pintar (desplazamiento ${mov.toFixed(3)} m)`);
+    toque($('#volver')); await modo('nave');
+  } finally { E.entrar = orig; }
   return L.join('\n');
 }

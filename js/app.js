@@ -10,6 +10,8 @@ const cl = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches || new URLSearchParams(location.search).has('rm');
 document.documentElement.classList.toggle('rm', RM);
 const HOVER = matchMedia('(hover: hover) and (pointer: fine)').matches;
+// ?captura: bucle por temporizador para poder capturar la página aunque el navegador no pinte la pestaña
+const CAPTURA = new URLSearchParams(location.search).has('captura');
 const guardar = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
 const leer = k => { try { return localStorage.getItem(k); } catch { return null; } };
 const fmt = s => isFinite(s) ? `${s / 60 | 0}:${String(s % 60 | 0).padStart(2, '0')}` : '0:00';
@@ -22,7 +24,7 @@ const { song } = A.elementos;
 
 /* ---------- escena ---------- */
 const escena = crearEscena({
-  canvas: $('#gl'), rm: RM,
+  canvas: $('#gl'), rm: RM, adaptar: !CAPTURA,
   alProgreso: p => { $('#cargaBarra').style.width = Math.round(p * 100) + '%'; $('#cargaTxt').textContent = `Preparando el lugar · ${Math.round(p * 100)}%`; },
   alCargar: () => {
     cargado = true;
@@ -152,7 +154,7 @@ async function entrar(i) {
   $('#ayuda').style.opacity = 0;
   if (A.activo) A.rafaga(RM ? 1 : 2.6, RM ? .35 : 1);
   A.entrarCancion(i, RM ? .25 : 1.15);          // sin sonido: solo carga, no suena
-  atmos.poner(i); atmos.dibujar(1 / 60, 0, RM);
+  atmos.poner(i); atmos.dibujar(1 / 60, 0, RM);   // la habitación queda preparada antes de abrir la puerta
   await escena.entrar(i, $('#atmos'));
   abrirHabitacion(i);
 }
@@ -167,7 +169,7 @@ function pintarHabitacion(i, fundido) {
     $('#seek').value = 0; pintarRango($('#seek'));
     $('#tiempo').textContent = '0:00';
   };
-  atmos.poner(i);
+  atmos.poner(i, fundido);
   hab.classList.toggle('con-sala', i === 0);   // la habitación 1 se ve a través de la escena 3D
   document.querySelectorAll('#listaIndice button').forEach((b, k) => b.setAttribute('aria-current', k === i));
   if (!fundido) return aplicar();
@@ -183,7 +185,10 @@ function abrirHabitacion(i) {
   requestAnimationFrame(() => hab.classList.add('visible'));
   $('#hab-titulo').focus({ preventScroll: true });
   pintarPlay();
-  setTimeout(() => { if (modo === 'entrando') { escena.terminarEntrada(true); modo = 'habitacion'; A.viento(0, 400, 1); } }, RM ? 420 : 1150);
+  // la letra y los controles llegan cuando la habitación ya está estable
+  clearTimeout(abrirHabitacion.t);
+  abrirHabitacion.t = setTimeout(() => { if (modo !== 'nave' && modo !== 'saliendo') hab.classList.add('listo'); }, RM ? 150 : 650);
+  setTimeout(() => { if (modo === 'entrando') { escena.terminarEntrada(true); modo = 'habitacion'; A.viento(0, 400, 1); } }, RM ? 420 : 750);
 }
 function cambiar(i) {
   i = (i + 9) % 9;
@@ -206,10 +211,10 @@ function volver() {
   escena.salir(i);
   escena.reponerPolvo();
   botones[i].classList.add('visitada');
-  hab.classList.remove('visible');
+  hab.classList.remove('visible', 'listo');
   document.body.classList.remove('en-habitacion');
   capa.inert = llegada.inert = false;
-  setTimeout(() => { hab.hidden = true; modo = 'nave'; botones[i].focus({ preventScroll: true }); }, RM ? 420 : 1150);
+  setTimeout(() => { hab.hidden = true; modo = 'nave'; botones[i].focus({ preventScroll: true }); }, RM ? 420 : 900);
 }
 
 /* ---------- letra sincronizada ---------- */
@@ -329,7 +334,7 @@ function ponerVol(v) {
   guardar('pde-vol', v); guardar('pde-vol-ultimo', ultimoVol);
 }
 async function alternarMudo(forzar) {
-  if (!A.activo) { await A.activar(); mudo = false; A.setMudo(false); if (vol === 0) ponerVol(ultimoVol); if (modo === 'nave') A.ambiente(true, 3); pintarSonido(); return; }
+  if (!A.activo) { await A.activar(); mudo = false; A.setMudo(false); if (vol === 0) ponerVol(ultimoVol); pintarSonido(); return; }
   const callar = forzar ?? !silenciado();
   if (callar) mudo = true;
   else { mudo = false; if (vol === 0) ponerVol(ultimoVol); }   // …y al reactivar vuelve al último nivel
@@ -339,7 +344,7 @@ async function alternarMudo(forzar) {
 }
 $('#vol').addEventListener('input', async e => {
   const v = +e.target.value;
-  if (v > 0 && !A.activo) { await A.activar(); if (modo === 'nave') A.ambiente(true, 3); }
+  if (v > 0 && !A.activo) { await A.activar(); }
   ponerVol(v);
   if (v > 0 && mudo) { mudo = false; A.setMudo(false); }      // subir la barra reactiva el sonido (no la reproducción)
   pintarSonido();
@@ -347,7 +352,7 @@ $('#vol').addEventListener('input', async e => {
 $('#btnSonido').addEventListener('click', () => alternarMudo());
 $('#mudo').addEventListener('click', () => alternarMudo());
 $('#conSonido').addEventListener('click', async () => {
-  await A.activar(); mudo = false; A.setMudo(false); A.ambiente(true, 3.5);
+  await A.activar(); mudo = false; A.setMudo(false);
   $('#acciones').classList.add('ido'); pintarSonido(); guardar('pde-sonido', '1');
   if (scrollY < H * .2) scrollTo({ top: H * .55, behavior: RM ? 'auto' : 'smooth' });
 });
@@ -382,7 +387,7 @@ addEventListener('keydown', e => {
 
 /* ---------- bucle ---------- */
 const ESTACIONES_RM = [0, 1.7, 3.5, 4.3, ...CANCIONES.map((_, i) => escena.uDePuerta(i))];
-let uObjetivo = 0, uSuave = 0, uRM = 0, uRMdestino = 0, uPrevio = 0, ultimo = performance.now();
+let sala30 = false, uObjetivo = 0, uSuave = 0, uRM = 0, uRMdestino = 0, uPrevio = 0, ultimo = performance.now();
 const ayuda = $('#ayuda');
 ayuda.textContent = HOVER ? 'Deja el cursor sobre una puerta para escuchar · Haz clic para entrar' : 'Mantén pulsada una puerta para escuchar · Tócala para entrar';
 
@@ -406,7 +411,7 @@ function tick(now) {
     if (salaMar) escena.actualizarSala(dt, progreso());
     escena.render();
     colocarPuertas();
-  } else if (salaMar) { escena.actualizarSala(dt, progreso()); escena.render(); }
+  } else if (salaMar && (sala30 = !sala30)) { escena.actualizarSala(dt * 2, progreso()); escena.render(); }   // detrás de la letra basta con 30 fps
   if (modo !== 'nave') { if (!salaMar) atmos.dibujar(dt, progreso(), RM); actualizarLetra(); }
 
   // interfaz según el recorrido
@@ -427,12 +432,10 @@ function tick(now) {
   if (escuchando != null && Math.abs(uObjetivo - uPre) > .35) pararPre();
   if (CAPTURA) setTimeout(() => tick(performance.now()), 33); else requestAnimationFrame(tick);
 }
-// ?captura: bucle por temporizador para poder capturar la página aunque el navegador no pinte la pestaña
-const CAPTURA = new URLSearchParams(location.search).has('captura');
 requestAnimationFrame(tick);
 
 // para pruebas desde la consola
-window.__pde = { escena, A, entrar, volver, cambiar, actualizarLetra, estado: () => ({ modo, actual, escuchando, u: uSuave }) };
+window.__pde = { escena, A, atmos, entrar, volver, cambiar, actualizarLetra, estado: () => ({ modo, actual, escuchando, u: uSuave }) };
 // revisión local: renderiza un punto del recorrido y lo envía a tools/receptor-capturas.mjs
 if (CAPTURA) {
   const enviar = (n, lienzo) => fetch('http://127.0.0.1:8766/?n=' + n, { method: 'POST', body: lienzo.toDataURL('image/jpeg', .9) }).then(r => r.text());

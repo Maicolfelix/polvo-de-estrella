@@ -70,16 +70,17 @@ export function crearSalaMar({ tex, rm }) {
     [new V3(-1.3, 2.9, -FONDO), new V3(-1.5, .55, -FONDO - 2.45), .5, matCuerda],
     [new V3(1.25, 3.0, -FONDO), new V3(1.6, .55, -FONDO - 2.45), .5, matCuerda],
   ].map(([a, b, comba, mat]) => { const m = new THREE.Mesh(new THREE.BufferGeometry(), mat); m.castShadow = true; escena.add(m); return { a, b, comba, m }; });
-  let tensionPintada = -1;
+  let tensionPintada = -1, sucia = true;
   function tensar(p) {
     const t = rm ? 0 : Math.round(p * 40) / 40;    // se rehace 40 veces por canción como máximo
-    if (t === tensionPintada) return; tensionPintada = t;
+    if (t === tensionPintada) return false; tensionPintada = t; sucia = true;
     for (const c of CUERDAS) {
       const comba = c.comba * (1 - .82 * t), pts = [];
       for (let k = 0; k <= 24; k++) { const u = k / 24; pts.push(c.a.clone().lerp(c.b, u).add(new V3(0, -comba * 4 * u * (1 - u), 0))); }
       c.m.geometry.dispose();
       c.m.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 48, .022, 6, false);
     }
+    return true;
   }
 
   // mar y cielo (sombreadores propios, mismo sol para los dos)
@@ -127,12 +128,12 @@ export function crearSalaMar({ tex, rm }) {
     const e = .12 - .17 * p;                      // el sol baja hasta perderse bajo el horizonte
     sol.set(Math.sin(.18), e, -1).normalize();
     uni.uT.value = t; uni.uP.value = p;
-    luzSol.position.copy(sol).multiplyScalar(40).add(new V3(0, 0, -3));
+    // la luz (y su sombra) solo se mueve a la vez que las cuerdas: la sombra no se redibuja en cada fotograma
+    if (tensar(p)) luzSol.position.copy(sol).multiplyScalar(40).add(new V3(0, 0, -3));
     luzSol.intensity = 1.8 * Math.max(0, Math.min(1, (e + .05) / .12));
     cielo.intensity = .75 - .35 * p;
     escena.fog.color.setRGB(.24 - .1 * p, .44 - .2 * p, .58 - .3 * p);
-    tensar(p);
   }
   actualizar(0, 0);
-  return { escena, camara, actualizar };
+  return { escena, camara, actualizar, sombraSucia: () => { const s = sucia; sucia = false; return s; } };
 }

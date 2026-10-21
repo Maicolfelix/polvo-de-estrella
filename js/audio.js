@@ -1,49 +1,19 @@
-// Motor de sonido. Tres fuentes musicales que nunca se pisan:
-//   instrumental (con reverb ambiental), preescucha (detrás de la puerta) y canción (master intacto).
-// Más un viento sintetizado que acompaña el movimiento.
+// Motor de sonido. Dos fuentes musicales que nunca se pisan: preescucha (detrás de la puerta) y canción
+// (master intacto). Sin música de fondo: el ambiente es solo viento sintetizado y truenos lejanos.
 import { CANCIONES } from './datos.js';
 
-const inst = new Audio(); inst.loop = true; inst.preload = 'auto';
 const pre = new Audio(); pre.loop = true; pre.preload = 'auto';
 const song = new Audio(); song.preload = 'metadata';
-export const elementos = { inst, pre, song };
+export const elementos = { pre, song };
 
-// Reverb del ambiente. Valores ajustados midiendo picos/RMS con un render offline (ver verificarReverb).
-export const REVERB = { seco: .86, humedo: .45, duracion: 2.6, predelay: .024, pasaAltos: 240, pasaBajos: 6200 };
-export const NIVEL = { inst: .3, instDuck: .08, pre: 1, viento: .16, trueno: .5 }; // inst .3 ≈ −4,4 dB respecto a antes: fondo discreto
+// viento: 1 en la nave; cede ante la preescucha y calla dentro de una habitación (la canción manda)
+export const NIVEL = { pre: 1, viento: .16, trueno: .5, vientoPre: .3 };
 
-let ctx, master, instG, preG, songG, vientoG, vientoF, cancionPre = -1, cancionSong = -1;
-let tokPre = 0, tokSong = 0, tokAmb = 0; // cada pausa diferida solo actúa si nadie volvió a usar esa fuente
+let ctx, master, preG, songG, vientoG, vientoF, cancionPre = -1, cancionSong = -1;
+let tokPre = 0, tokSong = 0; // cada pausa diferida solo actúa si nadie volvió a usar esa fuente
+let cedeViento = 1, ultimoViento = [0, 420];
 export let activo = false;
 let mudo = false;
-
-function impulso(c, { duracion, predelay }) {
-  const sr = c.sampleRate, n = Math.floor(sr * (duracion + predelay)), ir = c.createBuffer(2, n, sr);
-  const p0 = Math.floor(predelay * sr), tau = duracion / 6.9; // -60 dB al final
-  for (let ch = 0; ch < 2; ch++) {
-    const d = ir.getChannelData(ch);
-    let lp = 0;
-    for (let i = p0; i < n; i++) {
-      const t = (i - p0) / sr;
-      const a = .25 + .65 * Math.min(1, t / duracion);       // se oscurece al decaer
-      lp = lp * a + (Math.random() * 2 - 1) * (1 - a);
-      d[i] = lp * Math.exp(-t / tau) * 2.2;
-    }
-    // reflexiones tempranas, distintas por canal para dar anchura sin borrar el centro
-    for (const [ms, g] of [[7, .5], [13, .38], [21, .3], [29, .22], [41, .16]]) d[p0 + Math.floor((ms + ch * 2.3) * sr / 1000)] += g * (ch ? -1 : 1);
-  }
-  return ir;
-}
-
-function cadenaReverb(c, entrada, salida, R = REVERB) {
-  const seco = c.createGain(); seco.gain.value = R.seco;
-  const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = R.pasaAltos; hp.Q.value = .5;
-  const conv = c.createConvolver(); conv.buffer = impulso(c, R);
-  const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = R.pasaBajos; lp.Q.value = .5;
-  const hum = c.createGain(); hum.gain.value = R.humedo;
-  entrada.connect(seco).connect(salida);
-  entrada.connect(hp).connect(conv).connect(lp).connect(hum).connect(salida);
-}
 
 // ---- volumen de la canción: una sola ganancia, sin efectos ----
 // 0..1 (100 % = nivel del master, sin amplificar). El silencio general (master) tiene prioridad.
@@ -63,9 +33,6 @@ function crear() {
   document.addEventListener('pointerdown', reanudar, true);
   document.addEventListener('keydown', reanudar, true);
   master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
-  inst.src = 'audio/instrumental.m4a';
-  instG = ctx.createGain(); instG.gain.value = 0; instG.connect(master);
-  cadenaReverb(ctx, ctx.createMediaElementSource(inst), instG);
   // Preescucha "al otro lado de la puerta": agudos algo atenuados + sala corta; la voz sigue clara.
   const sPre = ctx.createMediaElementSource(pre);
   const shelf = ctx.createBiquadFilter(); shelf.type = 'highshelf'; shelf.frequency.value = 3400; shelf.gain.value = -6;
@@ -115,9 +82,9 @@ export const contexto = () => ctx;
 // estado de la mezcla (para verificación)
 export const niveles = () => ctx && ({
   master: master.gain.value, cancion: volG.gain.value,   // sin redondeo: el silencio debe ser 0 exacto
-  inst: +instG.gain.value.toFixed(3), pre: +preG.gain.value.toFixed(3),
+  pre: +preG.gain.value.toFixed(3),
   song: +songG.gain.value.toFixed(3), viento: +vientoG.gain.value.toFixed(3),
-  sonando: { inst: !inst.paused, pre: !pre.paused, song: !song.paused },
+  sonando: { pre: !pre.paused, song: !song.paused },
   fuentes: { pre: pre.src.split('/').pop(), song: song.src.split('/').pop() },
 });
 // el volumen del reproductor es el de la canción (100 % = nivel base, sin amplificar); el silencio general manda
@@ -140,14 +107,6 @@ export const estaMudo = () => mudo || !activo;
 const fuentePre = i => `audio/${CANCIONES[i].n}-pre.m4a`;
 const fuenteSong = i => `audio/${CANCIONES[i].n}.m4a`;
 
-// ---- ambiente (nave / exterior) ----
-export function ambiente(on, seg = 2.5) {
-  if (!ctx) return;
-  const yo = ++tokAmb;
-  if (on) { inst.play().catch(() => {}); rampa(instG, NIVEL.inst, seg); }
-  else { rampa(instG, 0, seg); setTimeout(() => { if (yo === tokAmb) inst.pause(); }, seg * 1000 + 600); }
-}
-
 // ---- preescucha ----
 export function prepararPre(i) {               // llamada dentro del gesto en táctil
   if (!ctx) return;
@@ -155,11 +114,11 @@ export function prepararPre(i) {               // llamada dentro del gesto en t�
   if (cancionPre !== i) { cancionPre = i; pre.src = fuentePre(i); }
   if (pre.paused) pre.play().catch(() => {});
 }
-export function abrirPre() { tokPre++; tokAmb++; rampa(preG, NIVEL.pre, .7); rampa(instG, NIVEL.instDuck, .9); }
+export function abrirPre() { tokPre++; rampa(preG, NIVEL.pre, .7); ceder(NIVEL.vientoPre, .9); }
 export function cerrarPre(volverAmbiente = true) {
   if (!ctx) return;
   rampa(preG, 0, .55);
-  if (volverAmbiente) { tokAmb++; rampa(instG, NIVEL.inst, 1.4); }
+  if (volverAmbiente) ceder(1, 1.4);
   const yo = ++tokPre;
   setTimeout(() => { if (yo === tokPre) pre.pause(); }, 900);
 }
@@ -210,6 +169,7 @@ export function playPausa() { quiere ? pausar() : reproducir(); }
 
 export function entrarCancion(i, retraso = .9) {
   enHabitacion = true; tokCambio++; cambiando = false;
+  cedeViento = 0;                            // la ráfaga de la entrada sigue; después el viento no vuelve hasta salir
   detenerPreYa();
   cargarCancion(i);
   song.currentTime = 0;
@@ -218,7 +178,6 @@ export function entrarCancion(i, retraso = .9) {
   silenciarYa(songG);
   song.play().catch(() => {});
   subir(songG, 1.4, retraso);
-  ambiente(false, Math.max(.45, retraso * 1.6));   // la instrumental se va al ritmo de la entrada (más rápido con movimiento reducido)
 }
 export function cambiarCancion(i) {
   const yo = ++tokCambio;
@@ -241,15 +200,17 @@ export function salirCancion() {
   if (!ctx) { song.pause(); return; }
   rampa(songG, 0, .5);                       // cola breve de 0,5 s, luego parada real
   setTimeout(() => { if (!quiere) song.pause(); }, 550);
-  ambiente(true, 3.2);
+  ceder(1, 2.5);                             // al volver solo regresa el ambiente
 }
 
 // ---- viento ----
 export function viento(nivel, frec = 420, seg = .25) {
   if (!ctx) return;
-  rampa(vientoG, Math.min(1, nivel) * NIVEL.viento, seg);
+  ultimoViento = [nivel, frec];
+  rampa(vientoG, Math.min(1, nivel) * NIVEL.viento * cedeViento, seg);
   vientoF.frequency.setTargetAtTime(frec, ctx.currentTime, seg / 3);
 }
+function ceder(k, seg) { cedeViento = k; if (ctx) viento(ultimoViento[0], ultimoViento[1], seg); }
 // ráfaga coordinada con la apertura: sube con el avance de cámara y se va antes de que entre la voz
 export function rafaga(dur = 2.2, k = 1) {
   if (!ctx) return;
@@ -281,22 +242,4 @@ export function trueno(fuerza, dist, dentro) {
 export function silencioTotal() { // al ocultar la pestaña durante una preescucha
   if (!ctx) return;
   tokPre++; rampa(preG, 0, .1); pre.pause();
-}
-
-// Mide la reverb sin tocar nada audible: render offline de 40 s del instrumental.
-export async function verificarReverb(R = REVERB) {
-  const datos = await (await fetch('audio/instrumental.m4a')).arrayBuffer();
-  const tmp = new OfflineAudioContext(2, 44100, 44100);
-  const buf = await tmp.decodeAudioData(datos);
-  const medir = async conReverb => {
-    const o = new OfflineAudioContext(2, 44100 * 40, 44100);
-    const s = o.createBufferSource(); s.buffer = buf;
-    if (conReverb) cadenaReverb(o, s, o.destination, R); else s.connect(o.destination);
-    s.start(0, 30);
-    const r = await o.startRendering();
-    let pico = 0, sum = 0; const L = r.getChannelData(0), Rr = r.getChannelData(1);
-    for (let i = 0; i < L.length; i++) { const v = Math.max(Math.abs(L[i]), Math.abs(Rr[i])); if (v > pico) pico = v; sum += L[i] * L[i]; }
-    return { picoDb: +(20 * Math.log10(pico)).toFixed(2), rmsDb: +(10 * Math.log10(sum / L.length)).toFixed(2) };
-  };
-  return { seco: await medir(false), conReverb: await medir(true), niveles: NIVEL, reverb: R };
 }
