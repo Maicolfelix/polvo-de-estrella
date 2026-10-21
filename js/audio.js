@@ -7,11 +7,11 @@ const song = new Audio(); song.preload = 'metadata';
 export const elementos = { pre, song };
 
 // viento: 1 en la nave; cede ante la preescucha y calla dentro de una habitación (la canción manda)
-export const NIVEL = { pre: 1, viento: .16, trueno: .5, vientoPre: .3 };
+export const NIVEL = { pre: 1, viento: .16, trueno: .5, vientoPre: .3, lluvia: .09 };   // lluvia: el ruido rosa filtrado suena más bajo que el blanco a igual ganancia
 
 let ctx, master, preG, songG, vientoG, vientoF, cancionPre = -1, cancionSong = -1;
 let tokPre = 0, tokSong = 0; // cada pausa diferida solo actúa si nadie volvió a usar esa fuente
-let cedeViento = 1, ultimoViento = [0, 420];
+let cedeViento = 1, ultimoViento = [0, 420], lluviaG = null, ultimaLluvia = 0;
 export let activo = false;
 let mudo = false;
 
@@ -53,6 +53,22 @@ function crear() {
   vientoF = ctx.createBiquadFilter(); vientoF.type = 'bandpass'; vientoF.frequency.value = 420; vientoF.Q.value = .6;
   vientoG = ctx.createGain(); vientoG.gain.value = 0;
   src.connect(vientoF).connect(vientoG).connect(master); src.start();
+  // lluvia suave: rumor de ruido rosa muy filtrado (sin el siseo del ruido blanco) y un repiqueteo de gotas
+  // sueltas, cada una un golpecito breve y apagado a distinto volumen. Su nivel lo pone la nave.
+  const nl = ctx.sampleRate * 4, bl = ctx.createBuffer(2, nl, ctx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = bl.getChannelData(ch); let b0 = 0, b1 = 0, b2 = 0;
+    for (let i = 0; i < nl; i++) { const w = Math.random() * 2 - 1; b0 = .997 * b0 + w * .029; b1 = .985 * b1 + w * .032; b2 = .95 * b2 + w * .048; d[i] = (b0 + b1 + b2) * .55; }
+    for (let k = 0; k < 220; k++) {   // gotas
+      const i0 = Math.random() * (nl - 2000) | 0, amp = .04 + Math.random() * Math.random() * .22, dur = 300 + Math.random() * 900, f = 1800 + Math.random() * 2400;
+      for (let j = 0; j < dur; j++) d[i0 + j] += Math.sin(j * f / ctx.sampleRate * 6.283) * amp * Math.exp(-j / (dur * .18));
+    }
+  }
+  const sl = ctx.createBufferSource(); sl.buffer = bl; sl.loop = true;
+  const hpL = ctx.createBiquadFilter(); hpL.type = 'highpass'; hpL.frequency.value = 220; hpL.Q.value = .4;
+  const lpL = ctx.createBiquadFilter(); lpL.type = 'lowpass'; lpL.frequency.value = 2600; lpL.Q.value = .3;
+  lluviaG = ctx.createGain(); lluviaG.gain.value = 0;
+  sl.connect(hpL).connect(lpL).connect(lluviaG).connect(master); sl.start();
 }
 
 function rampa(g, v, seg = .5, cuando = 0) {
@@ -83,7 +99,7 @@ export const contexto = () => ctx;
 export const niveles = () => ctx && ({
   master: master.gain.value, cancion: volG.gain.value,   // sin redondeo: el silencio debe ser 0 exacto
   pre: +preG.gain.value.toFixed(3),
-  song: +songG.gain.value.toFixed(3), viento: +vientoG.gain.value.toFixed(3),
+  song: +songG.gain.value.toFixed(3), viento: +vientoG.gain.value.toFixed(3), lluvia: +lluviaG.gain.value.toFixed(3),
   sonando: { pre: !pre.paused, song: !song.paused },
   fuentes: { pre: pre.src.split('/').pop(), song: song.src.split('/').pop() },
 });
@@ -170,6 +186,7 @@ export function playPausa() { quiere ? pausar() : reproducir(); }
 export function entrarCancion(i, retraso = .9) {
   enHabitacion = true; tokCambio++; cambiando = false;
   cedeViento = 0;                            // la ráfaga de la entrada sigue; después el viento no vuelve hasta salir
+  if (lluviaG) rampa(lluviaG, 0, Math.max(.4, retraso));
   detenerPreYa();
   cargarCancion(i);
   song.currentTime = 0;
@@ -210,7 +227,13 @@ export function viento(nivel, frec = 420, seg = .25) {
   rampa(vientoG, Math.min(1, nivel) * NIVEL.viento * cedeViento, seg);
   vientoF.frequency.setTargetAtTime(frec, ctx.currentTime, seg / 3);
 }
-function ceder(k, seg) { cedeViento = k; if (ctx) viento(ultimoViento[0], ultimoViento[1], seg); }
+function ceder(k, seg) { cedeViento = k; if (ctx) { viento(ultimoViento[0], ultimoViento[1], seg); lluvia(ultimaLluvia, seg); } }
+// lluvia: 0..1; cede igual que el viento (preescucha, habitación)
+export function lluvia(nivel, seg = .5) {
+  if (!ctx) return;
+  ultimaLluvia = nivel;
+  rampa(lluviaG, Math.min(1, nivel) * NIVEL.lluvia * cedeViento, seg);
+}
 // ráfaga coordinada con la apertura: sube con el avance de cámara y se va antes de que entre la voz
 export function rafaga(dur = 2.2, k = 1) {
   if (!ctx) return;

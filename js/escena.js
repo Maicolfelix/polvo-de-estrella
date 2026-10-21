@@ -162,12 +162,42 @@ const CIELO_GLSL = `uniform float uT,uF,uFugaP; uniform vec3 uD,uFog,uFugaA,uFug
 //   con la misma fase que el punto del tallo donde está, para que flor y tallo no se separen.
 export const VIENTO = { value: 0 };
 export const RAFAGA = { value: 0 };   // 0..1: ventisca de vez en cuando (las plantas se doblan y se agitan más)
+// Suelo mojado por la lluvia: más oscuro y brillante en las zonas encharcadas, con ondas de gotas que
+// se abren y se apagan (perturban la normal; se ven en los brillos de la luna y de las luces).
+export const LLUVIA_T = { value: 0 };
+export function mojar(mat) {
+  const prev = mat.onBeforeCompile;
+  mat.onBeforeCompile = (sh, r) => {
+    prev?.(sh, r);
+    sh.uniforms.uLluviaT = LLUVIA_T;
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', `#include <common>
+        uniform float uLluviaT;
+        float hm(vec2 p){ return fract(sin(dot(p, vec2(41.3, 289.1))) * 43758.5453); }
+        float nm(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f); return mix(mix(hm(i), hm(i + vec2(1, 0)), f.x), mix(hm(i + vec2(0, 1)), hm(i + vec2(1, 1)), f.x), f.y); }`)
+      .replace('#include <map_fragment>', `#include <map_fragment>
+        float charcos = smoothstep(.42, .68, nm(vMundo.xz * .32 + 11.)) * .85 + .15;   // ruido 2D: más barato
+        diffuseColor.rgb *= 1. - .32 * charcos;`)
+      .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+        roughnessFactor *= mix(1., .28, charcos);`)
+      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+        if (length(vViewPosition) < 12.) { vec2 g = vMundo.xz * 2.6, id = floor(g), f = fract(g) - .5;   // las ondas solo se distinguen de cerca
+          float ph = fract(hm(id) + uLluviaT * .85);
+          float rr = length(f + (vec2(hm(id + 2.), hm(id + 5.)) - .5) * .5);
+          float onda = sin((rr - ph * .42) * 70.) * (1. - ph) * (1. - smoothstep(ph * .42, ph * .42 + .06, rr)) * step(.02, rr);
+          normal = normalize(normal + (viewMatrix * vec4(f.x, 0., f.y, 0.)).xyz * onda * .6 * charcos); }`);
+  };
+  const k = mat.customProgramCacheKey;
+  mat.customProgramCacheKey = () => k.call(mat) + '-mojado';
+  mat.needsUpdate = true;
+}
+
 export function mecer(mat, modo, amp) {
   const prev = mat.onBeforeCompile;
   mat.onBeforeCompile = (sh, r) => {
     prev?.(sh, r);
-    sh.uniforms.uViento = VIENTO; sh.uniforms.uRafaga = RAFAGA;
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uViento, uRafaga;');
+    sh.uniforms.uViento = VIENTO; sh.uniforms.uRafaga = RAFAGA; sh.uniforms.uLluviaT = LLUVIA_T;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uViento, uRafaga, uLluviaT;');
     if (modo === 'tarjeta') sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
       transformed.x += ((sin(uViento * .8 + position.x * .07) * .7 + sin(uViento * 1.9 + position.x * .21) * .3) * (1. + uRafaga * 1.6) + uRafaga * 1.4) * ${amp.toFixed(3)} * uv.y * uv.y;`);
     else sh.vertexShader = sh.vertexShader.replace('#include <project_vertex>', `
@@ -182,6 +212,9 @@ export function mecer(mat, modo, amp) {
       float rafaga = .65 + .35 * sin(uViento * .37 + ancla.x * .05);
       vec2 agita = vec2(sin(uViento * 1.6 + ancla.x * .35 + ancla.z * .25), cos(uViento * 1.2 + ancla.x * .3 - ancla.z * .2) * .6) * (1. + uRafaga * 2.2);
       mvPosition.xz += (agita + vec2(uRafaga * 2.4, -uRafaga * .5)) * ${amp.toFixed(3)} * alto * alto * rafaga;   // en la ventisca, además, se doblan hacia un lado
+      // gotas que golpean: la flor se hunde un poco y rebota (cada una a su ritmo; la fase depende del ancla)
+      float golpe = fract(uLluviaT * .5 + fract(sin(dot(floor(ancla.xz * 6.), vec2(12.9898, 78.233))) * 43758.5453));
+      mvPosition.y -= .022 * exp(-golpe * 9.) * cos(golpe * 46.) * alto;
       mvPosition = modelViewMatrix * mvPosition;
       gl_Position = projectionMatrix * mvPosition;`);
   };
@@ -277,6 +310,11 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
           float borde = 1. - smoothstep(.55, 1., r + (n(vW.xz * 1.7) - .5) * .7);
           if (borde < .01) discard;
           vec2 o = vec2(n(vW.xz * 6. + uT * .8), n(vW.xz * 6. - uT * .7 + 3.)) - .5;
+          // gotas sobre el charco: anillos que se abren y se apagan
+          { vec2 g = vW.xz * 3.2, id = floor(g), f = fract(g) - .5; float ph = fract(h(id) + uT * 1.1);
+            float rr = length(f + (vec2(h(id + 2.), h(id + 5.)) - .5) * .5);
+            float an = sin((rr - ph * .45) * 80.) * (1. - ph) * (1. - smoothstep(ph * .45, ph * .45 + .05, rr));
+            o += f * an * 1.8; }
           vec3 nrm = normalize(vec3(o.x * .12, 1., o.y * .12));
           vec3 v = normalize(vW - cameraPosition), rf = reflect(v, nrm); rf.y = max(rf.y, .02);
           float fres = .25 + .75 * pow(1. - max(dot(-v, nrm), 0.), 4.);
@@ -290,6 +328,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   envejecer(M.piedra, { base: 0, alto: 3.4, fuerza: .62, vetas: .5, musgo: .45, macro: .75 });
   envejecer(M.muro, { base: B, alto: 1.1, fuerza: .22, vetas: .14, musgo: 0, macro: .25 });
   envejecer(M.tierra, { base: 0, alto: 0, fuerza: 0, vetas: 0, musgo: 0, macro: .7 });
+  mojar(M.tierra);   // la lluvia lo moja
   envejecer(M.suelo, { base: 0, alto: 0, fuerza: 0, vetas: 0, musgo: .5, macro: .3 });
 
   // ---------- lotes: todo lo estático de un material se fusiona en una sola malla ----------
@@ -840,6 +879,53 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     add(m); return m;
   }
   const polvoExt = particulas(MOVIL ? 300 : 600, [[-22, 22], [0, 9], [-6, 50]], 0xd8b8b0, .06, .45);
+
+  // Lluvia ligera: trazos que caen en una caja que acompaña a la cámara (todo en el sombreador: la CPU solo
+  // pasa el tiempo). Se inclina con el viento y más con la ventisca, se ilumina con los relámpagos y no
+  // entra en la capilla. Debajo, salpicaduras en el suelo que se abren y se apagan.
+  const CAJA = new V3(34, 20, 34), uLluvia = { uT: { value: 0 }, uCam: { value: new V3() }, uCaja: { value: CAJA }, uR: RAFAGA, uF: uCielo.uF };
+  const FUERA = `float dentroCapilla(vec3 p){ return (abs(p.x) < 11.6 && p.z < 1.7 && p.z > -25.5 && p.y < 24.) || (abs(p.x) < 5.5 && p.z < 4.4 && p.z > 1.) ? 1. : 0.; }
+    vec3 envolver(vec3 b, vec3 v){ return mod(b + v - uCam + uCaja * .5, uCaja) + uCam - uCaja * .5; }`;
+  const lluvia = (() => {
+    const n = MOVIL ? 1400 : 2600, pos = new Float32Array(n * 6), lado = new Float32Array(n * 2);
+    for (let i = 0; i < n; i++) { const x = Math.random() * CAJA.x, y = Math.random() * CAJA.y, z = Math.random() * CAJA.z; pos.set([x, y, z, x, y, z], i * 6); lado[i * 2 + 1] = 1; }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('lado', new THREE.BufferAttribute(lado, 1));
+    const m = new THREE.LineSegments(g, new THREE.ShaderMaterial({
+      uniforms: uLluvia, transparent: true, depthWrite: false, fog: false,
+      vertexShader: `uniform float uT, uR; uniform vec3 uCam, uCaja; attribute float lado; varying float vA, vX; ${FUERA}
+        void main(){
+          vec3 vel = vec3(1.1 + uR * 7., -10.5, .35);
+          vec3 p = envolver(position, vel * uT);
+          p -= normalize(vel) * lado * (.32 + uR * .2);
+          vX = dentroCapilla(p) + step(p.y, .02);
+          float d = distance(p, uCam); vA = (1. - lado * .85) * smoothstep(19., 3., d) * smoothstep(.4, 1.6, d);
+          gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.); }`,
+      fragmentShader: `uniform float uF; varying float vA, vX;
+        void main(){ if (vX > .5) discard; gl_FragColor = vec4(vec3(.72, .62, .66) * (1. + uF * 3.), vA * (.32 + uF * .4)); }`,
+    }));
+    m.frustumCulled = false; m.renderOrder = 4; add(m); return m;
+  })();
+  const salpicaduras = (() => {
+    const n = MOVIL ? 500 : 1100, pos = new Float32Array(n * 3), fase = new Float32Array(n);
+    for (let i = 0; i < n; i++) { pos.set([Math.random() * CAJA.x, .02, Math.random() * CAJA.z], i * 3); fase[i] = Math.random() * 40; }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('fase', new THREE.BufferAttribute(fase, 1));
+    const m = new THREE.Points(g, new THREE.ShaderMaterial({
+      uniforms: { ...uLluvia, uEsc: { value: 1 } }, transparent: true, depthWrite: false, fog: false,
+      vertexShader: `uniform float uT, uEsc; uniform vec3 uCam, uCaja; attribute float fase; varying float vVida, vX; ${FUERA}
+        float h1(float x){ return fract(sin(x * 91.7) * 43758.5); }
+        void main(){
+          float c = uT * 3. + fase, ciclo = floor(c); vVida = fract(c);
+          vec3 b = position + vec3(h1(ciclo + fase) * 7., 0., h1(ciclo * 1.3 + fase) * 7.);   // cada gota cae en otro sitio
+          vec3 p = envolver(vec3(b.x, 0., b.z), vec3(0.)); p.y = .025;
+          vX = dentroCapilla(p) + step(16., distance(p, uCam));
+          vec4 mv = viewMatrix * vec4(p, 1.); gl_PointSize = uEsc * (4. + 12. * vVida) / -mv.z * 6.; gl_Position = projectionMatrix * mv; }`,
+      fragmentShader: `uniform float uF; varying float vVida, vX;
+        void main(){ if (vX > .5) discard; vec2 q = gl_PointCoord - .5; q.y *= 2.2; float r = length(q) * 2.;
+          float anillo = smoothstep(.75, .95, r) * (1. - smoothstep(.95, 1., r)) + (1. - smoothstep(0., .35, r)) * step(vVida, .18);
+          gl_FragColor = vec4(vec3(.7, .62, .66) * (1. + uF * 2.), anillo * (1. - vVida) * (1. - vVida) * .2); }`,   // sutiles: se intuyen, no se cuentan
+    }));
+    m.frustumCulled = false; m.renderOrder = 4; add(m); return m;
+  })();
   destino = int;
   const polvoInt = particulas(MOVIL ? 260 : 520, [[-3.6, 3.6], [B, B + 7], [-22.8, -1]], 0xffd2a0, .03, .55);
   destino = ext;
@@ -921,7 +1007,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     rtPortal.setSize(Math.round(tamPortal.x * .6), Math.round(tamPortal.y * .6));
     portal.material.uniforms.uRes.value.copy(tamPortal);
     portalHab.material.uniforms.uRes.value.copy(tamPortal);
-    primerPlano.escalaPuntos(pr);
+    primerPlano.escalaPuntos(pr); salpicaduras.material.uniforms.uEsc.value = pr;
   }
   function tamano(w, h) {
     calidad.ancho = w; calidad.alto = h;
@@ -1169,6 +1255,9 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     if (luzFondo.i > 0) orden.unshift(luzFondo);   // la puerta del fondo siempre con luz real: de lejos debe verse iluminada, no pintada
     luces.forEach((l, k) => { const fo = orden[k]; if (!fo) { l.intensity = 0; return; } l.position.copy(fo.p); l.color.copy(fo.c); l.distance = fo.d; l.intensity = fo.i; });
     if (ext.visible) moverParticulas(polvoExt, dt, null);
+    if (!rm) { uLluvia.uT.value += dt; LLUVIA_T.value += dt; }
+    uLluvia.uCam.value.copy(cam.p);
+    lluvia.visible = salpicaduras.visible = !rm && cam.p.z > -.5;   // con movimiento reducido no llueve (el suelo sigue mojado)
     if (int.visible) moverParticulas(polvoInt, dt, anim && !rm && anim.t > .8 ? { p: mundo(anim.d, 0, 1.4, -1), k: 1.6 * cl((anim.t - .8) / 1.2) } : null);
     return f;
   }

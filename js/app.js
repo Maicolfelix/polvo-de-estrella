@@ -429,6 +429,7 @@ function tick(now) {
     const fuera = u < escena.U_EXT - .2, k = Math.min(1, vel * 1.6);
     const R = escena.rafaga();   // ventisca: el viento sube y se vuelve más agudo con ella
     A.viento(fuera ? .35 + k * .65 + R * .9 : .1 + k * .35 + R * .35, (fuera ? 380 + k * 300 : 300 + k * 200) + R * 650, .4);
+    A.lluvia(fuera ? .9 + R * .5 : .35, .6);   // dentro se oye sobre el tejado, más apagada
   }
   // si la puerta escuchada se aleja por desplazamiento, la preescucha se cierra
   if (escuchando != null && Math.abs(uObjetivo - uPre) > .35) pararPre();

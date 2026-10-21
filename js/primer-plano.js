@@ -4,7 +4,7 @@
 // Interpretación artística (no es un significado oficial): la corona de quien se creyó dueño del mundo,
 // pequeña ante la tormenta; las rosas, los vínculos y su fragilidad; los destellos, el polvo de estrella.
 // Geometría fusionada o instanciada, pocos materiales. Se mueve con el viento en el sombreador (rosas, hojas,
-// tallos); en la CPU solo el centelleo y unos pocos pétalos que el viento arrastra por el suelo.
+// tallos); en la CPU solo unos pocos pétalos que el viento arrastra por el suelo.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { mecer } from './escena.js';
@@ -15,24 +15,60 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
   let semilla = 23;
   const rnd = () => (semilla = semilla * 16807 % 2147483647) / 2147483647;
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), tmpV = new V3(), uno = new V3(1, 1, 1);
+  // agua: gotas que brillan con el entorno (sobre la corona, las rosas y las hojas)
+  const matAgua = new THREE.MeshStandardMaterial({ color: 0xd8d0d4, roughness: .02, metalness: 0, transparent: true, opacity: .32, envMapIntensity: 3 });
+  matAgua.userData.refleja = true;
   const fijo = (g, mat, sombra = true) => { const m = new THREE.Mesh(g, mat); m.castShadow = sombra; m.receiveShadow = true; add(m); return m; };
 
   /* ---------- corona ---------- */
-  { const partes = [], gemas = [];
-    const perfil = [[.4, 0], [.445, 0], [.455, .03], [.435, .055], [.435, .19], [.455, .215], [.445, .245], [.4, .245], [.395, .12]].map(([x, y]) => new V2(x, y));
-    partes.push(new THREE.LatheGeometry(perfil, 40));
-    const punta = new THREE.Shape([new V2(-.11, 0), new V2(.11, 0), new V2(.03, .2), new V2(0, .32), new V2(-.03, .2)]);
+  // Aro con molduras y dos hileras de perlas, ocho puntas curvadas sobre el aro (flor de lis y lanza
+  // alternas), cabujones de rubí engastados en bisel y oro gastado: rayado, con suciedad en los huecos y
+  // gotas de lluvia encima.
+  const oroGastado = (() => {
+    const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d');
+    x.fillStyle = '#c99a3c'; x.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 900; i++) { x.fillStyle = `rgba(${Math.random() < .5 ? '60,38,12' : '235,200,120'},${Math.random() * .12})`; x.beginPath(); x.arc(Math.random() * 256, Math.random() * 256, 2 + Math.random() * 10, 0, 6.3); x.fill(); }
+    x.strokeStyle = 'rgba(255,230,170,.35)'; x.lineWidth = .7;
+    for (let i = 0; i < 70; i++) { const px = Math.random() * 256, py = Math.random() * 256, a = Math.random() * 6.3, l = 6 + Math.random() * 30; x.beginPath(); x.moveTo(px, py); x.lineTo(px + Math.cos(a) * l, py + Math.sin(a) * l); x.stroke(); }   // rayas
+    const col = new THREE.CanvasTexture(c); col.colorSpace = THREE.SRGBColorSpace; col.wrapS = col.wrapT = THREE.RepeatWrapping;
+    const r = document.createElement('canvas'); r.width = r.height = 128; const y = r.getContext('2d');
+    y.fillStyle = '#4d4d4d'; y.fillRect(0, 0, 128, 128);
+    for (let i = 0; i < 400; i++) { y.fillStyle = `rgba(${Math.random() < .5 ? '20,20,20' : '160,160,160'},${Math.random() * .3})`; y.fillRect(Math.random() * 128, Math.random() * 128, 1 + Math.random() * 6, 1 + Math.random() * 2); }
+    const rug = new THREE.CanvasTexture(r); rug.wrapS = rug.wrapT = THREE.RepeatWrapping;
+    return new THREE.MeshStandardMaterial({ map: col, roughnessMap: rug, roughness: 1, metalness: 1, envMapIntensity: 1.8, color: 0xfff0d0, emissive: 0x1a0c02, emissiveIntensity: .4 });
+  })();
+  { const R = .43, partes = [], gemas = [], biseles = [], gotas = [];
+    // aro: base ensanchada, dos acanaladuras y labio superior
+    const perfil = [[.4, 0], [.455, 0], [.462, .018], [.445, .03], [.44, .06], [.452, .07], [.44, .08], [.44, .165], [.452, .175], [.44, .185], [.44, .205], [.465, .22], [.458, .245], [.4, .245], [.395, .12]].map(([x, y]) => new V2(x, y));
+    partes.push(new THREE.LatheGeometry(perfil, 64));
+    const perla = new THREE.SphereGeometry(.0105, 8, 6);
+    for (let k = 0; k < 64; k++) { const a = k / 64 * Math.PI * 2; for (const y of [.045, .195]) partes.push(perla.clone().translate(Math.sin(a) * .448, y, Math.cos(a) * .448)); }
+    // las puntas se dibujan planas y se curvan sobre el aro (x → ángulo)
+    const doblar = (g, a0) => { const pp = g.attributes.position; for (let i = 0; i < pp.count; i++) { const th = a0 + pp.getX(i) / R, rr = R + .004 + pp.getZ(i); pp.setXYZ(i, Math.sin(th) * rr, pp.getY(i), Math.cos(th) * rr); } g.computeVertexNormals(); return g; };
+    const lis = new THREE.Shape().moveTo(-.12, 0).lineTo(.12, 0).bezierCurveTo(.1, .08, .02, .1, .05, .2).bezierCurveTo(.1, .22, .09, .3, .02, .3).bezierCurveTo(.02, .36, .0, .4, 0, .42)
+      .bezierCurveTo(0, .4, -.02, .36, -.02, .3).bezierCurveTo(-.09, .3, -.1, .22, -.05, .2).bezierCurveTo(-.02, .1, -.1, .08, -.12, 0);
+    const lanza = new THREE.Shape().moveTo(-.1, 0).lineTo(.1, 0).bezierCurveTo(.06, .1, .025, .18, 0, .3).bezierCurveTo(-.025, .18, -.06, .1, -.1, 0);
+    const cabujon = (ancho, rojo) => { const g = new THREE.SphereGeometry(ancho, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2).rotateX(Math.PI / 2).scale(1, 1.2, .5); return g; };
     for (let k = 0; k < 8; k++) {
-      const a = k / 8 * Math.PI * 2, alto = k % 2 ? .8 : 1;
-      const g = new THREE.ExtrudeGeometry(punta, { depth: .025, bevelEnabled: true, bevelSize: .008, bevelThickness: .008, bevelSegments: 1 });
-      g.scale(1, alto, 1).translate(0, .23, .425).rotateY(a); partes.push(g);
-      partes.push(new THREE.SphereGeometry(.032, 10, 8).translate(0, .23 + .32 * alto + .02, .44).rotateY(a));
-      gemas.push(new THREE.OctahedronGeometry(.04, 0).scale(1, 1.3, .5).translate(0, .12, .458).rotateY(a + Math.PI / 8));
+      const a = k / 8 * Math.PI * 2, alta = k % 2 === 0;
+      const g = new THREE.ExtrudeGeometry(alta ? lis : lanza, { depth: .02, bevelEnabled: true, bevelSize: .007, bevelThickness: .007, bevelSegments: 2, curveSegments: 10 });
+      partes.push(doblar(g.translate(0, .235, 0), a));
+      const tope = alta ? .235 + .42 : .235 + .3;
+      partes.push(new THREE.SphereGeometry(alta ? .026 : .02, 12, 8).translate(Math.sin(a) * (R + .015), tope + .015, Math.cos(a) * (R + .015)));
+      // cabujón en el aro, entre las acanaladuras, y su bisel
+      const ag = a + Math.PI / 8, rx = Math.sin(ag) * (R + .03), rz = Math.cos(ag) * (R + .03);
+      gemas.push(cabujon(.034).rotateY(ag).translate(rx, .125, rz).toNonIndexed());
+      biseles.push(new THREE.TorusGeometry(.036, .006, 6, 20).scale(1, 1.2, 1).rotateY(ag).translate(Math.sin(ag) * (R + .028), .125, Math.cos(ag) * (R + .028)).toNonIndexed());
+      if (alta) gemas.push(new THREE.OctahedronGeometry(.022, 0).scale(1, 1.4, .5).rotateY(a).translate(Math.sin(a) * (R + .03), .235 + .2, Math.cos(a) * (R + .03)).toNonIndexed());
     }
+    // gotas de lluvia sobre el labio y las puntas
+    for (let k = 0; k < 26; k++) { const a = rnd() * 6.28, y = k < 16 ? .25 : .26 + rnd() * .3, rr = k < 16 ? .43 : R + .02; gotas.push(new THREE.SphereGeometry(.006 + rnd() * .006, 8, 6).scale(1, .7, 1).translate(Math.sin(a) * rr, y, Math.cos(a) * rr)); }
     const corona = new THREE.Group();
-    const oro = new THREE.Mesh(mergeGeometries(partes.map(g => g.toNonIndexed()), false), M.oro); oro.castShadow = true;
-    const rubi = new THREE.Mesh(mergeGeometries(gemas), new THREE.MeshStandardMaterial({ color: 0x6a0610, roughness: .12, metalness: .3, emissive: 0x3a0306, emissiveIntensity: .6, flatShading: true }));
-    corona.add(oro, rubi);
+    const oro = new THREE.Mesh(mergeGeometries([...partes, ...biseles].map(g => g.index ? g.toNonIndexed() : g), false), oroGastado); oro.castShadow = true;
+    const rubi = new THREE.Mesh(mergeGeometries(gemas), new THREE.MeshStandardMaterial({ color: 0x7a0612, roughness: .06, metalness: .1, envMapIntensity: 2.5, emissive: 0x2a0205, emissiveIntensity: .7 }));
+    rubi.material.userData.refleja = true;
+    const agua = new THREE.Mesh(mergeGeometries(gotas.map(g => g.toNonIndexed())), matAgua);
+    corona.add(oro, rubi, agua);
     corona.scale.setScalar(1.4);
     corona.position.set(.3, .03, 37.9); corona.rotation.set(.12, .55, .46);   // caída de lado sobre el barro
     add(corona); }
@@ -70,10 +106,11 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
     for (let k = 0; k < 5; k++) gs.push(petalo(.05, .012, .2, .02).rotateX(2.1).translate(0, -.03, 0).rotateY(k * 1.2566));
     return mergeGeometries(gs);
   }
-  const matRosa = new THREE.MeshStandardMaterial({ color: 0x6e0a12, roughness: .5, side: THREE.DoubleSide, emissive: 0x1c0204, emissiveIntensity: .7 });
+  const matRosa = new THREE.MeshStandardMaterial({ color: 0x6e0a12, roughness: .3, side: THREE.DoubleSide, emissive: 0x1c0204, emissiveIntensity: .7, envMapIntensity: .8 });
+  // pétalos mojados: la rugosidad baja basta para el brillo de luna y faroles (el mapa de entorno en ~100 rosas costaba de más)
   const matHoja = new THREE.MeshStandardMaterial({ color: 0x0f150c, roughness: .6, side: THREE.DoubleSide });
   const matTallo = new THREE.MeshStandardMaterial({ color: 0x10120c, roughness: .8 });
-  for (const m of [matRosa, matHoja, matTallo]) mecer(m, 'planta', .07);
+  for (const m of [matRosa, matHoja, matTallo, matAgua]) mecer(m, 'planta', .07);
   const ARBUSTOS = [   // [x, z, nº de rosas, escala]
     [-2.9, 38.2, 3, 2], [-5.4, 35.2, 4, 2.1], [3.2, 37.8, 3, 1.9], [6.1, 33.5, 3, 2], [-1.4, 36.6, 3, 1.5], [1.05, 39.4, 2, 1.3],
     [-4.2, 25, 2, 1.3], [4.6, 23.5, 2, 1.3], [-6.4, 9.2, 3, 1.5], [6.8, 8.4, 3, 1.5], [-7.6, 15, 2, 1.4], [8, 14.5, 2, 1.4],
@@ -88,7 +125,8 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
   const rosas = new THREE.InstancedMesh(cabeza(), matRosa, nRosas);
   const hojaG = (() => { const g = new THREE.ShapeGeometry(new THREE.Shape().moveTo(0, 0).quadraticCurveTo(.05, .06, 0, .15).quadraticCurveTo(-.05, .06, 0, 0), 4); g.rotateX(-.6); return g; })();
   const nHojas = nRosas * 5, hojas = new THREE.InstancedMesh(hojaG, matHoja, nHojas);
-  const tallos = [], espinas = [];
+  const tallos = [], espinas = [], cabezas = [];
+  let goteo = null;
   let kr = 0, kh = 0;
   for (const [x, z, n, esc, y0 = 0] of ARBUSTOS) for (let j = 0; j < n; j++) {
     const alto = (.16 + rnd() * .3) * esc, base = new V3(x + (rnd() - .5) * (y0 ? .35 : .5) * esc, y0, z + (rnd() - .5) * (y0 ? .3 : .4) * esc);
@@ -97,6 +135,7 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
     tallos.push(new THREE.TubeGeometry(curva, 8, .008 * esc, 4, false));
     for (let k = 0; k < 4; k++) { const p = curva.getPoint(.2 + k * .18); espinas.push(new THREE.ConeGeometry(.006 * esc, .03 * esc, 4).rotateZ(Math.PI / 2 * (k % 2 ? 1 : -1)).translate(p.x, p.y, p.z)); }
     const sc = (1.35 + rnd() * .5) * esc;   // cabezas grandes y llenas, como en la referencia
+    cabezas.push([tope.clone(), sc]);
     m4.compose(tope, q.setFromEuler(e.set((rnd() - .5) * .7, rnd() * 6, (rnd() - .5) * .7)), new V3(sc, sc, sc)); rosas.setMatrixAt(kr++, m4);
     for (let k = 0; k < 5; k++) {
       const p = curva.getPoint(.25 + rnd() * .65), s2 = esc * (.9 + rnd() * .6);
@@ -104,6 +143,22 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
     }
   }
   rosas.castShadow = true; hojas.castShadow = true; add(rosas, hojas);
+  // gotas de lluvia en el borde de los pétalos (se mecen con su rosa) y gotas que caen de ellas
+  { const n = cabezas.length * 4, gotas = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 8, 6).scale(1, .75, 1), matAgua, n);
+    let k = 0;
+    for (const [p, sc] of cabezas) for (let j = 0; j < 4; j++) {
+      const a = rnd() * 6.28, r = (.03 + rnd() * .03) * sc, t = (.0022 + rnd() * .0022) * sc;
+      m4.compose(new V3(p.x + Math.cos(a) * r, p.y + (.035 + rnd() * .03) * sc, p.z + Math.sin(a) * r), q.identity(), new V3(t, t, t)); gotas.setMatrixAt(k++, m4);
+    }
+    add(gotas);
+    const g = new THREE.BufferGeometry().setFromPoints(cabezas.map(([p, sc]) => new V3(p.x + (rnd() - .5) * .08 * sc, p.y - .02, p.z + (rnd() - .5) * .08 * sc)));
+    g.setAttribute('f', new THREE.BufferAttribute(Float32Array.from(cabezas, () => rnd() * 30), 1));
+    goteo = new THREE.Points(g, new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false, uniforms: { uT: { value: 0 }, uEsc: { value: 1 } },
+      vertexShader: 'attribute float f; uniform float uT, uEsc; varying float vA; void main(){ float c = fract(uT * .55 + f); float cae = max(0., c - .55) / .45; vec3 p = position - vec3(0., cae * cae * .55, 0.); vA = c < .55 ? smoothstep(0., .55, c) * .5 : 1. - cae; vec4 mv = modelViewMatrix * vec4(p, 1.); gl_PointSize = uEsc * 3.4 / -mv.z * 6.; gl_Position = projectionMatrix * mv; }',
+      fragmentShader: 'varying float vA; void main(){ vec2 q = gl_PointCoord - .5; float d = length(q * vec2(1.6, 1.)) * 2.; gl_FragColor = vec4(vec3(.85, .8, .82), (1. - smoothstep(.5, 1., d)) * vA * .8); }',
+    }));
+    goteo.renderOrder = 3; add(goteo); }
   fijo(mergeGeometries([...tallos, ...espinas].map(g => g.index ? g.toNonIndexed() : g)), matTallo);
 
   // pétalos caídos alrededor de la corona y por la plaza
@@ -151,51 +206,36 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
     [-3.2, 36.8, .1], [3.9, 33, .09], [-1.9, 25.6, .08], [2.1, 22.4, .09], [-5.4, 38.6, .12], [5.6, 41.2, .11], [.2, 41.6, .08], [-.9, 17.5, .08]];
   // talla brillante: pabellón, faja y corona con más facetas; el cristal irisado da destellos de color (fuego)
   const talla = new THREE.LatheGeometry([new V2(0, -.92), new V2(.42, -.52), new V2(.96, -.06), new V2(1, 0), new V2(1, .07), new V2(.86, .2), new V2(.62, .38), new V2(.5, .43), new V2(0, .43)], 16);
-  // Sombreador propio: cada faceta (normal por derivadas) devuelve un color distinto según cómo se mira:
-  // fondo frío y oscuro, fuego de colores en los bordes de las facetas y brillos blancos muy agudos que
-  // aparecen y se van al moverse la cámara. Es una imitación de la dispersión, sin trazado de rayos.
+  // Diamante: cada faceta (normal por derivadas) refleja y refracta un entorno de tormenta (cielo carmesí
+  // arriba, suelo casi negro abajo), así que las facetas alternan negro, rojo y blanco como en una piedra
+  // tallada de verdad. La dispersión solo separa un poco los canales al refractar: color fino en los bordes,
+  // sin destellos que parpadeen ni arcoíris.
   const matDiamante = new THREE.ShaderMaterial({
-    uniforms: { uT: { value: 0 } },
-    vertexShader: 'varying vec3 vV, vW; void main(){ vec4 w = modelMatrix * instanceMatrix * vec4(position, 1.); vW = w.xyz; vec4 mv = viewMatrix * w; vV = mv.xyz; gl_Position = projectionMatrix * mv; }',
-    fragmentShader: `uniform float uT; varying vec3 vV, vW;
+    vertexShader: 'varying vec3 vV; varying vec3 vN; void main(){ vec4 w = modelMatrix * instanceMatrix * vec4(position, 1.); vec4 mv = viewMatrix * w; vV = mv.xyz; gl_Position = projectionMatrix * mv; }',
+    fragmentShader: `varying vec3 vV;
+      vec3 entorno(vec3 d){   // en espacio de vista: aproximación suficiente para piedras pequeñas
+        float y = d.y;
+        vec3 c = mix(vec3(.008, .006, .007), mix(vec3(.4, .06, .07), vec3(.62, .58, .6), smoothstep(.35, .8, y)), smoothstep(-.1, .45, y));   // abajo negro, horizonte rojo, arriba gris claro
+        c += vec3(.9) * smoothstep(.97, 1., sin(d.x * 23. + d.y * 17.) * .5 + .5) * smoothstep(.1, .5, y);   // ventanas de luz: facetas blancas
+        c += vec3(1., .82, .82) * pow(max(dot(d, normalize(vec3(.35, .75, -.45))), 0.), 90.) * 6.;   // luna
+        c += vec3(1., .55, .3) * pow(max(dot(d, normalize(vec3(-.6, .2, -.6))), 0.), 50.) * 2.5;     // farol
+        return c; }
       void main(){
         vec3 n = normalize(cross(dFdx(vV), dFdy(vV))), v = normalize(-vV);
-        float nv = abs(dot(n, v));
+        float nv = clamp(abs(dot(n, v)), 0., 1.);
+        float fres = .17 + .83 * pow(1. - nv, 5.);   // diamante: n = 2,42
         vec3 r = reflect(-v, n);
-        vec3 fuego = .55 + .45 * cos(6.2832 * (vec3(0., .33, .67) + nv * 2.6 + dot(n, vec3(.3, .7, .2)) * 1.7));
-        float luz1 = pow(max(dot(r, normalize(vec3(.3, .8, .5))), 0.), 60.), luz2 = pow(max(dot(r, normalize(vec3(-.6, .5, .2))), 0.), 40.);
-        vec3 c = vec3(.04, .05, .08) + fuego * pow(1. - nv, 1.6) * .9 + vec3(.55, .6, .75) * pow(nv, 6.) * .35;
-        c += vec3(1.) * (luz1 * 3. + luz2 * 1.6);
-        c *= .85 + .15 * sin(uT * 2. + vW.x * 9.);
+        vec3 tR = refract(-v, n, 1. / 2.40), tG = refract(-v, n, 1. / 2.42), tB = refract(-v, n, 1. / 2.45);
+        vec3 nIn = normalize(n * vec3(-1., -1., 1.));   // rebote interno en la faceta opuesta
+        vec3 dentro = vec3(entorno(reflect(tR, nIn)).r, entorno(reflect(tG, nIn)).g, entorno(reflect(tB, nIn)).b);
+        vec3 c = entorno(r) * fres + dentro * (1. - fres) * 1.25;
         gl_FragColor = vec4(c, 1.); }`,
   });
   const diam = new THREE.InstancedMesh(talla, matDiamante, DIAMANTES.length);
-  const brillos = [];
   DIAMANTES.forEach(([x, z, s], k) => {
-    const p = new V3(x, s * .55, z);
-    m4.compose(p, q.setFromEuler(e.set((rnd() - .5) * 1.4, rnd() * 6, (rnd() - .5) * 1.4)), new V3(s, s, s)); diam.setMatrixAt(k, m4);
-    brillos.push(p.clone().add(new V3(0, s * .4, 0)));
+    m4.compose(new V3(x, s * .55, z), q.setFromEuler(e.set((rnd() - .5) * 1.4, rnd() * 6, (rnd() - .5) * 1.4)), new V3(s, s, s)); diam.setMatrixAt(k, m4);
   });
   diam.castShadow = true; add(diam);
-  // centelleo: una estrella de cuatro puntas por diamante, aditiva, que parpadea a destiempo
-  const estrellaTex = (() => {
-    const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d');
-    const g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.18, 'rgba(220,235,255,.5)'); g.addColorStop(1, 'rgba(200,220,255,0)');
-    x.fillStyle = g; x.fillRect(0, 0, 64, 64);
-    x.fillStyle = 'rgba(255,255,255,.9)'; x.fillRect(31, 2, 2, 60); x.fillRect(2, 31, 60, 2);
-    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
-  })();
-  const gb = new THREE.BufferGeometry().setFromPoints(brillos);
-  const fase = brillos.map(() => rnd() * 10);
-  gb.setAttribute('a', new THREE.BufferAttribute(new Float32Array(brillos.length), 1));
-  const puntos = new THREE.Points(gb, new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-    uniforms: { uMap: { value: estrellaTex }, uEsc: { value: 1 } },
-    vertexShader: 'attribute float a; varying float vA; uniform float uEsc; void main(){ vA = a; vec4 mv = modelViewMatrix * vec4(position, 1.); gl_PointSize = uEsc * (12. + 34. * a) / -mv.z * 6.; gl_Position = projectionMatrix * mv; }',
-    // el destello cambia de tono al girar (dispersión): blanco en el centro, arcoíris en las puntas
-    fragmentShader: 'uniform sampler2D uMap; varying float vA; void main(){ vec2 q = gl_PointCoord - .5; float ang = atan(q.y, q.x) + vA * 6.; vec3 arco = .65 + .35 * cos(6.283 * (vec3(0., .33, .67) + ang * .16)); vec4 t = texture2D(uMap, gl_PointCoord); gl_FragColor = vec4(mix(vec3(1.), arco, smoothstep(.05, .3, length(q))) * t.rgb, t.a) * vA; }',
-  }));
-  puntos.renderOrder = 3; add(puntos);
 
   /* ---------- cementerio a los lados ---------- */
   { const lapida = new THREE.Shape([new V2(-.3, 0), new V2(.3, 0), new V2(.3, .7)]); lapida.absarc(0, .7, .3, 0, Math.PI, false); lapida.lineTo(-.3, 0);
@@ -312,15 +352,9 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
   vuelo.frustumCulled = false; add(vuelo);
 
   /* ---------- animación ---------- */
-  const a = gb.attributes.a;
   let tPrevio = 0;
   return {
     actualizar(t, rm, ventisca = 0) {
-      for (let k = 0; k < fase.length; k++) {
-        const v = rm ? .5 : Math.max(0, Math.sin(t * (1.1 + k % 3 * .4) + fase[k])) ** 6;
-        a.array[k] = .25 + v * .95;
-      }
-      a.needsUpdate = true;
       const dt = Math.min(.05, Math.max(0, t - tPrevio)); tPrevio = t;
       const rafaga = (.6 + .4 * Math.sin(t * .37)) * (1 + ventisca * 3.5);   // la ventisca los hace correr
       vuelan.forEach((p, k) => {
@@ -331,8 +365,8 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
         vuelo.setMatrixAt(k, m4);
       });
       vuelo.instanceMatrix.needsUpdate = true;
-      llamas.material.uniforms.uT.value = rm ? 0 : t; matDiamante.uniforms.uT.value = rm ? 0 : t; llamas.material.uniforms.uR.value = ventisca;   // la ventisca agita las llamas
+      llamas.material.uniforms.uT.value = rm ? 0 : t; goteo.material.uniforms.uT.value = rm ? 0 : t; llamas.material.uniforms.uR.value = ventisca;   // la ventisca agita las llamas
     },
-    escalaPuntos(v) { puntos.material.uniforms.uEsc.value = v; llamas.material.uniforms.uEsc.value = v; },
+    escalaPuntos(v) { llamas.material.uniforms.uEsc.value = v; goteo.material.uniforms.uEsc.value = v; },
   };
 }

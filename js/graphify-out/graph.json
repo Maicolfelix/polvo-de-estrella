@@ -67,6 +67,18 @@
       "source_location": "L203"
     },
     {
+      "id": "audio_activar",
+      "label": "activar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "audio.js",
+      "file_type": "code",
+      "norm_label": "activar()",
+      "source_file": "js/audio.js",
+      "source_location": "L82"
+    },
+    {
       "id": "audio_alcambiarestado",
       "label": "alCambiarEstado()",
       "_callable": true,
@@ -76,7 +88,7 @@
       "file_type": "code",
       "norm_label": "alcambiarestado()",
       "source_file": "js/audio.js",
-      "source_location": "L133"
+      "source_location": "L149"
     },
     {
       "id": "audio_contexto",
@@ -88,7 +100,19 @@
       "file_type": "code",
       "norm_label": "contexto()",
       "source_file": "js/audio.js",
-      "source_location": "L81"
+      "source_location": "L97"
+    },
+    {
+      "id": "audio_crear",
+      "label": "crear()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "audio.js",
+      "file_type": "code",
+      "norm_label": "crear()",
+      "source_file": "js/audio.js",
+      "source_location": "L29"
     },
     {
       "id": "audio_estamudo",
@@ -100,7 +124,7 @@
       "file_type": "code",
       "norm_label": "estamudo()",
       "source_file": "js/audio.js",
-      "source_location": "L105"
+      "source_location": "L121"
     },
     {
       "id": "audio_estasonando",
@@ -112,7 +136,19 @@
       "file_type": "code",
       "norm_label": "estasonando()",
       "source_file": "js/audio.js",
-      "source_location": "L135"
+      "source_location": "L151"
+    },
+    {
+      "id": "audio_fuentepre",
+      "label": "fuentePre()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "audio.js",
+      "file_type": "code",
+      "norm_label": "fuentepre()",
+      "source_file": "js/audio.js",
+      "source_location": "L123"
     },
     {
       "id": "audio_fundir",
@@ -124,7 +160,7 @@
       "file_type": "code",
       "norm_label": "fundir()",
       "source_file": "js/audio.js",
-      "source_location": "L93"
+      "source_location": "L109"
     },
     {
       "id": "audio_niveles",
@@ -136,7 +172,19 @@
       "file_type": "code",
       "norm_label": "niveles()",
       "source_file": "js/audio.js",
-      "source_location": "L83"
+      "source_location": "L99"
+    },
+    {
+      "id": "audio_prepararpre",
+      "label": "prepararPre()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "audio.js",
+      "file_type": "code",
+      "norm_label": "prepararpre()",
+      "source_file": "js/audio.js",
+      "source_location": "L127"
     },
     {
       "id": "audio_rafaga",
@@ -148,7 +196,19 @@
       "file_type": "code",
       "norm_label": "rafaga()",
       "source_file": "js/audio.js",
-      "source_location": "L215"
+      "source_location": "L238"
+    },
+    {
+      "id": "audio_sala",
+      "label": "sala()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "audio.js",
+      "file_type": "code",
+      "norm_label": "sala()",
+      "source_file": "js/audio.js",
+      "source_location": "L23"
     },
     {
       "id": "audio_setmudo",
@@ -160,7 +220,7 @@
       "file_type": "code",
       "norm_label": "setmudo()",
       "source_file": "js/audio.js",
-      "source_location": "L104"
+      "source_location": "L120"
     },
     {
       "id": "audio_setvolumen",
@@ -172,7 +232,7 @@
       "file_type": "code",
       "norm_label": "setvolumen()",
       "source_file": "js/audio.js",
-      "source_location": "L100"
+      "source_location": "L116"
     },
     {
       "id": "audio_trueno",
@@ -184,7 +244,7 @@
       "file_type": "code",
       "norm_label": "trueno()",
       "source_file": "js/audio.js",
-      "source_location": "L229"
+      "source_location": "L252"
     },
     {
       "id": "audio_volumen",
@@ -197,90 +257,6 @@
       "norm_label": "volumen()",
       "source_file": "js/audio.js",
       "source_location": "L21"
-    },
-    {
-      "id": "audio_activar",
-      "label": "activar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "activar",
-      "file_type": "code",
-      "norm_label": "activar()",
-      "source_file": "js/audio.js",
-      "source_location": "L66"
-    },
-    {
-      "id": "audio_cargarcancion",
-      "label": "cargarCancion()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "activar",
-      "file_type": "code",
-      "norm_label": "cargarcancion()",
-      "source_file": "js/audio.js",
-      "source_location": "L154"
-    },
-    {
-      "id": "audio_crear",
-      "label": "crear()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "activar",
-      "file_type": "code",
-      "norm_label": "crear()",
-      "source_file": "js/audio.js",
-      "source_location": "L29"
-    },
-    {
-      "id": "audio_fuentepre",
-      "label": "fuentePre()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "activar",
-      "file_type": "code",
-      "norm_label": "fuentepre()",
-      "source_file": "js/audio.js",
-      "source_location": "L107"
-    },
-    {
-      "id": "audio_fuentesong",
-      "label": "fuenteSong()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "activar",
-      "file_type": "code",
-      "norm_label": "fuentesong()",
-      "source_file": "js/audio.js",
-      "source_location": "L108"
-    },
-    {
-      "id": "audio_prepararpre",
-      "label": "prepararPre()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "activar",
-      "file_type": "code",
-      "norm_label": "prepararpre()",
-      "source_file": "js/audio.js",
-      "source_location": "L111"
-    },
-    {
-      "id": "audio_sala",
-      "label": "sala()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "activar",
-      "file_type": "code",
-      "norm_label": "sala()",
-      "source_file": "js/audio.js",
-      "source_location": "L23"
     },
     {
       "id": "app_cambiar",
@@ -499,6 +475,30 @@
       "source_location": "L319"
     },
     {
+      "id": "escena_altoarco",
+      "label": "altoArco()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "altoarco()",
+      "source_file": "js/escena.js",
+      "source_location": "L27"
+    },
+    {
+      "id": "escena_caja",
+      "label": "caja()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "caja()",
+      "source_file": "js/escena.js",
+      "source_location": "L36"
+    },
+    {
       "id": "escena_cl",
       "label": "cl()",
       "_callable": true,
@@ -520,7 +520,7 @@
       "file_type": "code",
       "norm_label": "crearescena()",
       "source_file": "js/escena.js",
-      "source_location": "L192"
+      "source_location": "L225"
     },
     {
       "id": "escena_crearescena_actualizar",
@@ -532,7 +532,7 @@
       "file_type": "code",
       "norm_label": "actualizar()",
       "source_file": "js/escena.js",
-      "source_location": "L1071"
+      "source_location": "L1157"
     },
     {
       "id": "escena_crearescena_actualizarrayo",
@@ -544,7 +544,7 @@
       "file_type": "code",
       "norm_label": "actualizarrayo()",
       "source_file": "js/escena.js",
-      "source_location": "L1024"
+      "source_location": "L1110"
     },
     {
       "id": "escena_crearescena_actualizarsala",
@@ -556,7 +556,7 @@
       "file_type": "code",
       "norm_label": "actualizarsala()",
       "source_file": "js/escena.js",
-      "source_location": "L1219"
+      "source_location": "L1308"
     },
     {
       "id": "escena_crearescena_aplicarresolucion",
@@ -568,7 +568,7 @@
       "file_type": "code",
       "norm_label": "aplicarresolucion()",
       "source_file": "js/escena.js",
-      "source_location": "L916"
+      "source_location": "L1002"
     },
     {
       "id": "escena_crearescena_camarasala",
@@ -580,7 +580,7 @@
       "file_type": "code",
       "norm_label": "camarasala()",
       "source_file": "js/escena.js",
-      "source_location": "L1190"
+      "source_location": "L1279"
     },
     {
       "id": "escena_crearescena_cerrarlotes",
@@ -592,7 +592,7 @@
       "file_type": "code",
       "norm_label": "cerrarlotes()",
       "source_file": "js/escena.js",
-      "source_location": "L298"
+      "source_location": "L337"
     },
     {
       "id": "escena_crearescena_dibujarrayo",
@@ -604,7 +604,7 @@
       "file_type": "code",
       "norm_label": "dibujarrayo()",
       "source_file": "js/escena.js",
-      "source_location": "L818"
+      "source_location": "L857"
     },
     {
       "id": "escena_crearescena_entrar",
@@ -616,7 +616,7 @@
       "file_type": "code",
       "norm_label": "entrar()",
       "source_file": "js/escena.js",
-      "source_location": "L977"
+      "source_location": "L1063"
     },
     {
       "id": "escena_crearescena_estacion",
@@ -628,7 +628,7 @@
       "file_type": "code",
       "norm_label": "estacion()",
       "source_file": "js/escena.js",
-      "source_location": "L883"
+      "source_location": "L969"
     },
     {
       "id": "escena_crearescena_medirfotograma",
@@ -640,7 +640,7 @@
       "file_type": "code",
       "norm_label": "medirfotograma()",
       "source_file": "js/escena.js",
-      "source_location": "L934"
+      "source_location": "L1020"
     },
     {
       "id": "escena_crearescena_moverparticulas",
@@ -652,7 +652,7 @@
       "file_type": "code",
       "norm_label": "moverparticulas()",
       "source_file": "js/escena.js",
-      "source_location": "L1052"
+      "source_location": "L1138"
     },
     {
       "id": "escena_crearescena_particulas",
@@ -664,7 +664,7 @@
       "file_type": "code",
       "norm_label": "particulas()",
       "source_file": "js/escena.js",
-      "source_location": "L834"
+      "source_location": "L873"
     },
     {
       "id": "escena_crearescena_ponerenpuerta",
@@ -676,7 +676,7 @@
       "file_type": "code",
       "norm_label": "ponerenpuerta()",
       "source_file": "js/escena.js",
-      "source_location": "L1002"
+      "source_location": "L1088"
     },
     {
       "id": "escena_crearescena_ponerportal",
@@ -688,7 +688,7 @@
       "file_type": "code",
       "norm_label": "ponerportal()",
       "source_file": "js/escena.js",
-      "source_location": "L969"
+      "source_location": "L1055"
     },
     {
       "id": "escena_crearescena_posescroll",
@@ -700,7 +700,7 @@
       "file_type": "code",
       "norm_label": "posescroll()",
       "source_file": "js/escena.js",
-      "source_location": "L890"
+      "source_location": "L976"
     },
     {
       "id": "escena_crearescena_precompilar",
@@ -712,7 +712,7 @@
       "file_type": "code",
       "norm_label": "precompilar()",
       "source_file": "js/escena.js",
-      "source_location": "L852"
+      "source_location": "L938"
     },
     {
       "id": "escena_crearescena_preescucha",
@@ -724,7 +724,7 @@
       "file_type": "code",
       "norm_label": "preescucha()",
       "source_file": "js/escena.js",
-      "source_location": "L1020"
+      "source_location": "L1106"
     },
     {
       "id": "escena_crearescena_rectpuertas",
@@ -736,7 +736,7 @@
       "file_type": "code",
       "norm_label": "rectpuertas()",
       "source_file": "js/escena.js",
-      "source_location": "L1223"
+      "source_location": "L1312"
     },
     {
       "id": "escena_crearescena_render",
@@ -748,7 +748,7 @@
       "file_type": "code",
       "norm_label": "render()",
       "source_file": "js/escena.js",
-      "source_location": "L1200"
+      "source_location": "L1289"
     },
     {
       "id": "escena_crearescena_reponerparticulas",
@@ -760,7 +760,7 @@
       "file_type": "code",
       "norm_label": "reponerparticulas()",
       "source_file": "js/escena.js",
-      "source_location": "L1068"
+      "source_location": "L1154"
     },
     {
       "id": "escena_crearescena_salir",
@@ -772,7 +772,7 @@
       "file_type": "code",
       "norm_label": "salir()",
       "source_file": "js/escena.js",
-      "source_location": "L991"
+      "source_location": "L1077"
     },
     {
       "id": "escena_crearescena_tamano",
@@ -784,7 +784,7 @@
       "file_type": "code",
       "norm_label": "tamano()",
       "source_file": "js/escena.js",
-      "source_location": "L926"
+      "source_location": "L1012"
     },
     {
       "id": "escena_crearescena_terminarentrada",
@@ -796,7 +796,7 @@
       "file_type": "code",
       "norm_label": "terminarentrada()",
       "source_file": "js/escena.js",
-      "source_location": "L1011"
+      "source_location": "L1097"
     },
     {
       "id": "escena_crearescena_tex",
@@ -808,7 +808,7 @@
       "file_type": "code",
       "norm_label": "tex()",
       "source_file": "js/escena.js",
-      "source_location": "L221"
+      "source_location": "L254"
     },
     {
       "id": "escena_eio",
@@ -823,6 +823,18 @@
       "source_location": "L14"
     },
     {
+      "id": "escena_mojar",
+      "label": "mojar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "mojar()",
+      "source_file": "js/escena.js",
+      "source_location": "L168"
+    },
+    {
       "id": "escena_suave",
       "label": "suave()",
       "_callable": true,
@@ -835,6 +847,54 @@
       "source_location": "L13"
     },
     {
+      "id": "escena_texturaalfombra",
+      "label": "texturaAlfombra()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "texturaalfombra()",
+      "source_file": "js/escena.js",
+      "source_location": "L75"
+    },
+    {
+      "id": "escena_texturagradiente",
+      "label": "texturaGradiente()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "texturagradiente()",
+      "source_file": "js/escena.js",
+      "source_location": "L67"
+    },
+    {
+      "id": "escena_texturaplaca",
+      "label": "texturaPlaca()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "texturaplaca()",
+      "source_file": "js/escena.js",
+      "source_location": "L86"
+    },
+    {
+      "id": "escena_texturaradial",
+      "label": "texturaRadial()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "texturaradial()",
+      "source_file": "js/escena.js",
+      "source_location": "L60"
+    },
+    {
       "id": "audio_avisar",
       "label": "avisar()",
       "_callable": true,
@@ -844,7 +904,7 @@
       "file_type": "code",
       "norm_label": "avisar()",
       "source_file": "js/audio.js",
-      "source_location": "L134"
+      "source_location": "L150"
     },
     {
       "id": "audio_cambiarcancion",
@@ -856,7 +916,19 @@
       "file_type": "code",
       "norm_label": "cambiarcancion()",
       "source_file": "js/audio.js",
-      "source_location": "L182"
+      "source_location": "L199"
+    },
+    {
+      "id": "audio_cargarcancion",
+      "label": "cargarCancion()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "entrarCancion",
+      "file_type": "code",
+      "norm_label": "cargarcancion()",
+      "source_file": "js/audio.js",
+      "source_location": "L170"
     },
     {
       "id": "audio_detenerpreya",
@@ -868,7 +940,7 @@
       "file_type": "code",
       "norm_label": "detenerpreya()",
       "source_file": "js/audio.js",
-      "source_location": "L152"
+      "source_location": "L168"
     },
     {
       "id": "audio_entrarcancion",
@@ -880,7 +952,19 @@
       "file_type": "code",
       "norm_label": "entrarcancion()",
       "source_file": "js/audio.js",
-      "source_location": "L170"
+      "source_location": "L186"
+    },
+    {
+      "id": "audio_fuentesong",
+      "label": "fuenteSong()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "entrarCancion",
+      "file_type": "code",
+      "norm_label": "fuentesong()",
+      "source_file": "js/audio.js",
+      "source_location": "L124"
     },
     {
       "id": "audio_marcar",
@@ -892,7 +976,7 @@
       "file_type": "code",
       "norm_label": "marcar()",
       "source_file": "js/audio.js",
-      "source_location": "L136"
+      "source_location": "L152"
     },
     {
       "id": "audio_pausar",
@@ -904,7 +988,7 @@
       "file_type": "code",
       "norm_label": "pausar()",
       "source_file": "js/audio.js",
-      "source_location": "L163"
+      "source_location": "L179"
     },
     {
       "id": "audio_playpausa",
@@ -916,7 +1000,7 @@
       "file_type": "code",
       "norm_label": "playpausa()",
       "source_file": "js/audio.js",
-      "source_location": "L168"
+      "source_location": "L184"
     },
     {
       "id": "audio_reproducir",
@@ -928,7 +1012,7 @@
       "file_type": "code",
       "norm_label": "reproducir()",
       "source_file": "js/audio.js",
-      "source_location": "L157"
+      "source_location": "L173"
     },
     {
       "id": "audio_silenciarya",
@@ -940,7 +1024,7 @@
       "file_type": "code",
       "norm_label": "silenciarya()",
       "source_file": "js/audio.js",
-      "source_location": "L145"
+      "source_location": "L161"
     },
     {
       "id": "audio_subir",
@@ -952,7 +1036,7 @@
       "file_type": "code",
       "norm_label": "subir()",
       "source_file": "js/audio.js",
-      "source_location": "L146"
+      "source_location": "L162"
     },
     {
       "id": "habitaciones_crearatmosfera",
@@ -1051,18 +1135,6 @@
       "source_location": "L10"
     },
     {
-      "id": "escena_altoarco",
-      "label": "altoArco()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "escena.js",
-      "file_type": "code",
-      "norm_label": "altoarco()",
-      "source_file": "js/escena.js",
-      "source_location": "L27"
-    },
-    {
       "id": "escena_anillo",
       "label": "anillo()",
       "_callable": true,
@@ -1085,18 +1157,6 @@
       "norm_label": "arco()",
       "source_file": "js/escena.js",
       "source_location": "L21"
-    },
-    {
-      "id": "escena_caja",
-      "label": "caja()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "escena.js",
-      "file_type": "code",
-      "norm_label": "caja()",
-      "source_file": "js/escena.js",
-      "source_location": "L36"
     },
     {
       "id": "escena_contorno",
@@ -1156,55 +1216,7 @@
       "file_type": "code",
       "norm_label": "mecer()",
       "source_file": "js/escena.js",
-      "source_location": "L165"
-    },
-    {
-      "id": "escena_texturaalfombra",
-      "label": "texturaAlfombra()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "escena.js",
-      "file_type": "code",
-      "norm_label": "texturaalfombra()",
-      "source_file": "js/escena.js",
-      "source_location": "L75"
-    },
-    {
-      "id": "escena_texturagradiente",
-      "label": "texturaGradiente()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "escena.js",
-      "file_type": "code",
-      "norm_label": "texturagradiente()",
-      "source_file": "js/escena.js",
-      "source_location": "L67"
-    },
-    {
-      "id": "escena_texturaplaca",
-      "label": "texturaPlaca()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "escena.js",
-      "file_type": "code",
-      "norm_label": "texturaplaca()",
-      "source_file": "js/escena.js",
-      "source_location": "L86"
-    },
-    {
-      "id": "escena_texturaradial",
-      "label": "texturaRadial()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "escena.js",
-      "file_type": "code",
-      "norm_label": "texturaradial()",
-      "source_file": "js/escena.js",
-      "source_location": "L60"
+      "source_location": "L195"
     },
     {
       "id": "escena_uvmundo",
@@ -1240,7 +1252,7 @@
       "file_type": "code",
       "norm_label": "cabeza()",
       "source_file": "js/primer-plano.js",
-      "source_location": "L52"
+      "source_location": "L88"
     },
     {
       "id": "primer_plano_crearprimerplano_petalo",
@@ -1252,7 +1264,7 @@
       "file_type": "code",
       "norm_label": "petalo()",
       "source_file": "js/primer-plano.js",
-      "source_location": "L42"
+      "source_location": "L78"
     },
     {
       "id": "sala_mar_crearsalamar",
@@ -1300,7 +1312,7 @@
       "file_type": "code",
       "norm_label": "abrirpre()",
       "source_file": "js/audio.js",
-      "source_location": "L117"
+      "source_location": "L133"
     },
     {
       "id": "audio_ceder",
@@ -1312,7 +1324,7 @@
       "file_type": "code",
       "norm_label": "ceder()",
       "source_file": "js/audio.js",
-      "source_location": "L213"
+      "source_location": "L230"
     },
     {
       "id": "audio_cerrarpre",
@@ -1324,7 +1336,7 @@
       "file_type": "code",
       "norm_label": "cerrarpre()",
       "source_file": "js/audio.js",
-      "source_location": "L118"
+      "source_location": "L134"
     },
     {
       "id": "audio_detenerpre",
@@ -1336,7 +1348,19 @@
       "file_type": "code",
       "norm_label": "detenerpre()",
       "source_file": "js/audio.js",
-      "source_location": "L125"
+      "source_location": "L141"
+    },
+    {
+      "id": "audio_lluvia",
+      "label": "lluvia()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "rampa",
+      "file_type": "code",
+      "norm_label": "lluvia()",
+      "source_file": "js/audio.js",
+      "source_location": "L232"
     },
     {
       "id": "audio_rampa",
@@ -1348,7 +1372,7 @@
       "file_type": "code",
       "norm_label": "rampa()",
       "source_file": "js/audio.js",
-      "source_location": "L58"
+      "source_location": "L74"
     },
     {
       "id": "audio_salircancion",
@@ -1360,7 +1384,7 @@
       "file_type": "code",
       "norm_label": "salircancion()",
       "source_file": "js/audio.js",
-      "source_location": "L197"
+      "source_location": "L214"
     },
     {
       "id": "audio_silenciototal",
@@ -1372,7 +1396,7 @@
       "file_type": "code",
       "norm_label": "silenciototal()",
       "source_file": "js/audio.js",
-      "source_location": "L242"
+      "source_location": "L265"
     },
     {
       "id": "audio_viento",
@@ -1384,7 +1408,7 @@
       "file_type": "code",
       "norm_label": "viento()",
       "source_file": "js/audio.js",
-      "source_location": "L207"
+      "source_location": "L224"
     },
     {
       "id": "app_abrirhabitacion",
@@ -1733,7 +1757,7 @@
       "file_type": "code",
       "norm_label": "avisos",
       "source_file": "js/audio.js",
-      "source_location": "L132"
+      "source_location": "L148"
     },
     {
       "id": "audio_elementos",
@@ -1755,7 +1779,7 @@
       "file_type": "code",
       "norm_label": "fundido",
       "source_file": "js/audio.js",
-      "source_location": "L99"
+      "source_location": "L115"
     },
     {
       "id": "audio_nivel",
@@ -1899,6 +1923,17 @@
       "norm_label": "b",
       "source_file": "js/escena.js",
       "source_location": "L16"
+    },
+    {
+      "id": "escena_lluvia_t",
+      "label": "LLUVIA_T",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "lluvia_t",
+      "source_file": "js/escena.js",
+      "source_location": "L167"
     },
     {
       "id": "escena_movil",
@@ -2314,7 +2349,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L434",
+      "source_location": "L435",
       "weight": 1.0
     },
     {
@@ -2326,7 +2361,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L435",
+      "source_location": "L436",
       "weight": 1.0
     },
     {
@@ -2338,7 +2373,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L117",
+      "source_location": "L133",
       "weight": 1.0
     },
     {
@@ -2350,7 +2385,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L117",
+      "source_location": "L133",
       "weight": 1.0
     },
     {
@@ -2362,7 +2397,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L67",
+      "source_location": "L83",
       "weight": 1.0
     },
     {
@@ -2374,7 +2409,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L71",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -2386,7 +2421,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L72",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -2398,7 +2433,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L78",
+      "source_location": "L94",
       "weight": 1.0
     },
     {
@@ -2410,7 +2445,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L184",
+      "source_location": "L201",
       "weight": 1.0
     },
     {
@@ -2422,7 +2457,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L185",
+      "source_location": "L202",
       "weight": 1.0
     },
     {
@@ -2434,7 +2469,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L185",
+      "source_location": "L202",
       "weight": 1.0
     },
     {
@@ -2446,7 +2481,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L187",
+      "source_location": "L204",
       "weight": 1.0
     },
     {
@@ -2458,7 +2493,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L194",
+      "source_location": "L211",
       "weight": 1.0
     },
     {
@@ -2470,7 +2505,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L155",
+      "source_location": "L171",
+      "weight": 1.0
+    },
+    {
+      "source": "audio_ceder",
+      "target": "audio_lluvia",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/audio.js",
+      "source_location": "L230",
       "weight": 1.0
     },
     {
@@ -2482,7 +2529,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L213",
+      "source_location": "L230",
       "weight": 1.0
     },
     {
@@ -2494,7 +2541,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L120",
+      "source_location": "L136",
       "weight": 1.0
     },
     {
@@ -2506,7 +2553,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L121",
+      "source_location": "L137",
       "weight": 1.0
     },
     {
@@ -2530,7 +2577,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L125",
+      "source_location": "L141",
       "weight": 1.0
     },
     {
@@ -2542,7 +2589,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L152",
+      "source_location": "L168",
+      "weight": 1.0
+    },
+    {
+      "source": "audio_entrarcancion",
+      "target": "audio_rampa",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/audio.js",
+      "source_location": "L189",
       "weight": 1.0
     },
     {
@@ -2554,7 +2613,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L173",
+      "source_location": "L190",
       "weight": 1.0
     },
     {
@@ -2566,7 +2625,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L174",
+      "source_location": "L191",
       "weight": 1.0
     },
     {
@@ -2578,7 +2637,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L176",
+      "source_location": "L193",
       "weight": 1.0
     },
     {
@@ -2590,7 +2649,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L177",
+      "source_location": "L194",
       "weight": 1.0
     },
     {
@@ -2602,12 +2661,36 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L178",
+      "source_location": "L195",
       "weight": 1.0
     },
     {
       "source": "audio_entrarcancion",
       "target": "audio_subir",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/audio.js",
+      "source_location": "L197",
+      "weight": 1.0
+    },
+    {
+      "source": "audio_lluvia",
+      "target": "audio_rampa",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/audio.js",
+      "source_location": "L235",
+      "weight": 1.0
+    },
+    {
+      "source": "audio_pausar",
+      "target": "audio_avisar",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -2619,18 +2702,6 @@
     },
     {
       "source": "audio_pausar",
-      "target": "audio_avisar",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "js/audio.js",
-      "source_location": "L164",
-      "weight": 1.0
-    },
-    {
-      "source": "audio_pausar",
       "target": "audio_marcar",
       "relation": "calls",
       "_origin": "ast",
@@ -2638,7 +2709,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L164",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -2650,7 +2721,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L165",
+      "source_location": "L181",
       "weight": 1.0
     },
     {
@@ -2662,7 +2733,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L168",
+      "source_location": "L184",
       "weight": 1.0
     },
     {
@@ -2674,7 +2745,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L168",
+      "source_location": "L184",
       "weight": 1.0
     },
     {
@@ -2686,7 +2757,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L114",
+      "source_location": "L130",
       "weight": 1.0
     },
     {
@@ -2698,7 +2769,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L158",
+      "source_location": "L174",
       "weight": 1.0
     },
     {
@@ -2710,7 +2781,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L158",
+      "source_location": "L174",
       "weight": 1.0
     },
     {
@@ -2722,7 +2793,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L161",
+      "source_location": "L177",
       "weight": 1.0
     },
     {
@@ -2734,7 +2805,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L199",
+      "source_location": "L216",
       "weight": 1.0
     },
     {
@@ -2746,7 +2817,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L199",
+      "source_location": "L216",
       "weight": 1.0
     },
     {
@@ -2758,7 +2829,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L201",
+      "source_location": "L218",
       "weight": 1.0
     },
     {
@@ -2770,7 +2841,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L203",
+      "source_location": "L220",
       "weight": 1.0
     },
     {
@@ -2782,7 +2853,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L104",
+      "source_location": "L120",
       "weight": 1.0
     },
     {
@@ -2794,7 +2865,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L102",
+      "source_location": "L118",
       "weight": 1.0
     },
     {
@@ -2806,7 +2877,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L244",
+      "source_location": "L267",
       "weight": 1.0
     },
     {
@@ -2818,7 +2889,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L210",
+      "source_location": "L227",
       "weight": 1.0
     },
     {
@@ -2854,7 +2925,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1179",
+      "source_location": "L1268",
       "weight": 1.0
     },
     {
@@ -2866,7 +2937,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L290",
+      "source_location": "L328",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_mojar",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/escena.js",
+      "source_location": "L331",
       "weight": 1.0
     },
     {
@@ -2878,7 +2961,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L297",
+      "source_location": "L336",
       "weight": 1.0
     },
     {
@@ -2890,7 +2973,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L313",
+      "source_location": "L352",
       "weight": 1.0
     },
     {
@@ -2902,7 +2985,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L321",
+      "source_location": "L360",
       "weight": 1.0
     },
     {
@@ -2914,7 +2997,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L325",
+      "source_location": "L364",
       "weight": 1.0
     },
     {
@@ -2926,7 +3009,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L327",
+      "source_location": "L366",
       "weight": 1.0
     },
     {
@@ -2938,7 +3021,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L343",
+      "source_location": "L382",
       "weight": 1.0
     },
     {
@@ -2950,7 +3033,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L464",
+      "source_location": "L503",
       "weight": 1.0
     },
     {
@@ -2962,7 +3045,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L485",
+      "source_location": "L524",
       "weight": 1.0
     },
     {
@@ -2974,7 +3057,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L486",
+      "source_location": "L525",
       "weight": 1.0
     },
     {
@@ -2986,7 +3069,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L513",
+      "source_location": "L552",
       "weight": 1.0
     },
     {
@@ -2998,7 +3081,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L557",
+      "source_location": "L596",
       "weight": 1.0
     },
     {
@@ -3010,7 +3093,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L658",
+      "source_location": "L697",
       "weight": 1.0
     },
     {
@@ -3022,7 +3105,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L704",
+      "source_location": "L743",
       "weight": 1.0
     },
     {
@@ -3034,7 +3117,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L751",
+      "source_location": "L790",
       "weight": 1.0
     },
     {
@@ -3046,7 +3129,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1077",
+      "source_location": "L1163",
       "weight": 1.0
     },
     {
@@ -3058,7 +3141,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1089",
+      "source_location": "L1175",
       "weight": 1.0
     },
     {
@@ -3070,7 +3153,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1091",
+      "source_location": "L1177",
       "weight": 1.0
     },
     {
@@ -3082,7 +3165,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1096",
+      "source_location": "L1182",
       "weight": 1.0
     },
     {
@@ -3094,7 +3177,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1123",
+      "source_location": "L1209",
       "weight": 1.0
     },
     {
@@ -3106,7 +3189,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1139",
+      "source_location": "L1225",
       "weight": 1.0
     },
     {
@@ -3118,7 +3201,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1171",
+      "source_location": "L1257",
       "weight": 1.0
     },
     {
@@ -3130,7 +3213,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1031",
+      "source_location": "L1117",
       "weight": 1.0
     },
     {
@@ -3142,7 +3225,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1037",
+      "source_location": "L1123",
       "weight": 1.0
     },
     {
@@ -3154,7 +3237,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1219",
+      "source_location": "L1308",
       "weight": 1.0
     },
     {
@@ -3166,7 +3249,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L822",
+      "source_location": "L861",
       "weight": 1.0
     },
     {
@@ -3178,7 +3261,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L979",
+      "source_location": "L1065",
       "weight": 1.0
     },
     {
@@ -3190,7 +3273,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L943",
+      "source_location": "L1029",
       "weight": 1.0
     },
     {
@@ -3202,7 +3285,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1005",
+      "source_location": "L1091",
       "weight": 1.0
     },
     {
@@ -3214,7 +3297,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L974",
+      "source_location": "L1060",
       "weight": 1.0
     },
     {
@@ -3226,7 +3309,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L892",
+      "source_location": "L978",
       "weight": 1.0
     },
     {
@@ -3238,7 +3321,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L894",
+      "source_location": "L980",
       "weight": 1.0
     },
     {
@@ -3250,7 +3333,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L898",
+      "source_location": "L984",
       "weight": 1.0
     },
     {
@@ -3262,7 +3345,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L859",
+      "source_location": "L945",
       "weight": 1.0
     },
     {
@@ -3274,7 +3357,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1201",
+      "source_location": "L1290",
       "weight": 1.0
     },
     {
@@ -3286,7 +3369,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1203",
+      "source_location": "L1292",
       "weight": 1.0
     },
     {
@@ -3298,7 +3381,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1210",
+      "source_location": "L1299",
       "weight": 1.0
     },
     {
@@ -3310,7 +3393,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1212",
+      "source_location": "L1301",
       "weight": 1.0
     },
     {
@@ -3322,7 +3405,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L993",
+      "source_location": "L1079",
       "weight": 1.0
     },
     {
@@ -3334,7 +3417,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L932",
+      "source_location": "L1018",
       "weight": 1.0
     },
     {
@@ -3370,7 +3453,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/primer-plano.js",
-      "source_location": "L76",
+      "source_location": "L113",
       "weight": 1.0
     },
     {
@@ -3382,7 +3465,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/primer-plano.js",
-      "source_location": "L70",
+      "source_location": "L106",
       "weight": 1.0
     },
     {
@@ -3694,67 +3777,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/audio.js",
-      "source_location": "L134",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_crearescena_reponerparticulas",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "js/escena.js",
-      "source_location": "L1068",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_crearescena_tex",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "js/escena.js",
-      "source_location": "L221",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_crearescena_cerrarlotes",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "js/escena.js",
-      "source_location": "L298",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_crearescena_particulas",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "js/escena.js",
-      "source_location": "L834",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_crearescena_precompilar",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "js/escena.js",
-      "source_location": "L852",
+      "source_location": "L150",
       "weight": 1.0
     },
     {
@@ -3766,7 +3789,67 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L916",
+      "source_location": "L1002",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_crearescena_reponerparticulas",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/escena.js",
+      "source_location": "L1154",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_crearescena_tex",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/escena.js",
+      "source_location": "L254",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_crearescena_cerrarlotes",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/escena.js",
+      "source_location": "L337",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_crearescena_particulas",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/escena.js",
+      "source_location": "L873",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_crearescena_precompilar",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/escena.js",
+      "source_location": "L938",
       "weight": 1.0
     },
     {
@@ -3778,7 +3861,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/primer-plano.js",
-      "source_location": "L42",
+      "source_location": "L78",
       "weight": 1.0
     },
     {
@@ -3790,7 +3873,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/primer-plano.js",
-      "source_location": "L52",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -4476,13 +4559,35 @@
     },
     {
       "source": "audio",
+      "target": "audio_fundir",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L109",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
+      "target": "audio_fundido",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L115",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
       "target": "audio_setvolumen",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L100",
+      "source_location": "L116",
       "weight": 1.0
     },
     {
@@ -4493,7 +4598,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L104",
+      "source_location": "L120",
       "weight": 1.0
     },
     {
@@ -4504,7 +4609,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L105",
+      "source_location": "L121",
       "weight": 1.0
     },
     {
@@ -4515,7 +4620,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L107",
+      "source_location": "L123",
       "weight": 1.0
     },
     {
@@ -4526,7 +4631,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L108",
+      "source_location": "L124",
       "weight": 1.0
     },
     {
@@ -4537,7 +4642,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L111",
+      "source_location": "L127",
       "weight": 1.0
     },
     {
@@ -4548,7 +4653,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L117",
+      "source_location": "L133",
       "weight": 1.0
     },
     {
@@ -4559,62 +4664,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L118",
-      "weight": 1.0
-    },
-    {
-      "source": "audio",
-      "target": "audio_detenerpre",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/audio.js",
-      "source_location": "L125",
-      "weight": 1.0
-    },
-    {
-      "source": "audio",
-      "target": "audio_avisos",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/audio.js",
-      "source_location": "L132",
-      "weight": 1.0
-    },
-    {
-      "source": "audio",
-      "target": "audio_alcambiarestado",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/audio.js",
-      "source_location": "L133",
-      "weight": 1.0
-    },
-    {
-      "source": "audio",
-      "target": "audio_estasonando",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/audio.js",
-      "source_location": "L135",
-      "weight": 1.0
-    },
-    {
-      "source": "audio",
-      "target": "audio_marcar",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/audio.js",
-      "source_location": "L136",
+      "source_location": "L134",
       "weight": 1.0
     },
     {
@@ -4630,24 +4680,35 @@
     },
     {
       "source": "audio",
-      "target": "audio_silenciarya",
+      "target": "audio_detenerpre",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L145",
+      "source_location": "L141",
       "weight": 1.0
     },
     {
       "source": "audio",
-      "target": "audio_subir",
+      "target": "audio_avisos",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L146",
+      "source_location": "L148",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
+      "target": "audio_alcambiarestado",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L149",
       "weight": 1.0
     },
     {
@@ -4663,7 +4724,18 @@
     },
     {
       "source": "audio",
-      "target": "audio_detenerpreya",
+      "target": "audio_estasonando",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L151",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
+      "target": "audio_marcar",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -4674,40 +4746,29 @@
     },
     {
       "source": "audio",
-      "target": "audio_cargarcancion",
+      "target": "audio_silenciarya",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L154",
+      "source_location": "L161",
       "weight": 1.0
     },
     {
       "source": "audio",
-      "target": "audio_reproducir",
+      "target": "audio_subir",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L157",
+      "source_location": "L162",
       "weight": 1.0
     },
     {
       "source": "audio",
-      "target": "audio_pausar",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/audio.js",
-      "source_location": "L163",
-      "weight": 1.0
-    },
-    {
-      "source": "audio",
-      "target": "audio_playpausa",
+      "target": "audio_detenerpreya",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -4718,7 +4779,7 @@
     },
     {
       "source": "audio",
-      "target": "audio_entrarcancion",
+      "target": "audio_cargarcancion",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -4729,35 +4790,57 @@
     },
     {
       "source": "audio",
+      "target": "audio_reproducir",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L173",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
+      "target": "audio_pausar",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L179",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
+      "target": "audio_playpausa",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L184",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
+      "target": "audio_entrarcancion",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L186",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
       "target": "audio_cambiarcancion",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L182",
-      "weight": 1.0
-    },
-    {
-      "source": "audio",
-      "target": "audio_salircancion",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/audio.js",
-      "source_location": "L197",
-      "weight": 1.0
-    },
-    {
-      "source": "audio",
-      "target": "audio_viento",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/audio.js",
-      "source_location": "L207",
+      "source_location": "L199",
       "weight": 1.0
     },
     {
@@ -4773,35 +4856,24 @@
     },
     {
       "source": "audio",
-      "target": "audio_ceder",
+      "target": "audio_salircancion",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L213",
+      "source_location": "L214",
       "weight": 1.0
     },
     {
       "source": "audio",
-      "target": "audio_rafaga",
+      "target": "audio_viento",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L215",
-      "weight": 1.0
-    },
-    {
-      "source": "audio",
-      "target": "audio_trueno",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/audio.js",
-      "source_location": "L229",
+      "source_location": "L224",
       "weight": 1.0
     },
     {
@@ -4817,13 +4889,57 @@
     },
     {
       "source": "audio",
+      "target": "audio_ceder",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L230",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
+      "target": "audio_lluvia",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L232",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
+      "target": "audio_rafaga",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L238",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
+      "target": "audio_trueno",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L252",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
       "target": "audio_silenciototal",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L242",
+      "source_location": "L265",
       "weight": 1.0
     },
     {
@@ -4850,17 +4966,6 @@
     },
     {
       "source": "audio",
-      "target": "audio_rampa",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/audio.js",
-      "source_location": "L58",
-      "weight": 1.0
-    },
-    {
-      "source": "audio",
       "target": "audio_song",
       "relation": "contains",
       "_origin": "ast",
@@ -4868,17 +4973,6 @@
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
       "source_location": "L6",
-      "weight": 1.0
-    },
-    {
-      "source": "audio",
-      "target": "audio_activar",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/audio.js",
-      "source_location": "L66",
       "weight": 1.0
     },
     {
@@ -4894,40 +4988,40 @@
     },
     {
       "source": "audio",
+      "target": "audio_rampa",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
+      "target": "audio_activar",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/audio.js",
+      "source_location": "L82",
+      "weight": 1.0
+    },
+    {
+      "source": "audio",
       "target": "audio_contexto",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/audio.js",
-      "source_location": "L81",
+      "source_location": "L97",
       "weight": 1.0
     },
     {
       "source": "audio",
       "target": "audio_niveles",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/audio.js",
-      "source_location": "L83",
-      "weight": 1.0
-    },
-    {
-      "source": "audio",
-      "target": "audio_fundir",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/audio.js",
-      "source_location": "L93",
-      "weight": 1.0
-    },
-    {
-      "source": "audio",
-      "target": "audio_fundido",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -5015,13 +5109,24 @@
     },
     {
       "source": "escena",
-      "target": "escena_mecer",
+      "target": "escena_lluvia_t",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
-      "source_location": "L165",
+      "source_location": "L167",
+      "weight": 1.0
+    },
+    {
+      "source": "escena",
+      "target": "escena_mojar",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/escena.js",
+      "source_location": "L168",
       "weight": 1.0
     },
     {
@@ -5037,13 +5142,13 @@
     },
     {
       "source": "escena",
-      "target": "escena_crearescena",
+      "target": "escena_mecer",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
-      "source_location": "L192",
+      "source_location": "L195",
       "weight": 1.0
     },
     {
@@ -5055,6 +5160,17 @@
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
       "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "escena",
+      "target": "escena_crearescena",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/escena.js",
+      "source_location": "L225",
       "weight": 1.0
     },
     {
@@ -5191,79 +5307,13 @@
     },
     {
       "source": "escena_crearescena",
-      "target": "escena_crearescena_actualizarrayo",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/escena.js",
-      "source_location": "L1024",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_crearescena_moverparticulas",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/escena.js",
-      "source_location": "L1052",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_crearescena_camarasala",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/escena.js",
-      "source_location": "L1190",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_crearescena_dibujarrayo",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/escena.js",
-      "source_location": "L818",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_crearescena_estacion",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/escena.js",
-      "source_location": "L883",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_crearescena_posescroll",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/escena.js",
-      "source_location": "L890",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
       "target": "escena_crearescena_medirfotograma",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
-      "source_location": "L934",
+      "source_location": "L1020",
       "weight": 1.0
     },
     {
@@ -5274,7 +5324,73 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
+      "source_location": "L1055",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_crearescena_actualizarrayo",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/escena.js",
+      "source_location": "L1110",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_crearescena_moverparticulas",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/escena.js",
+      "source_location": "L1138",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_crearescena_camarasala",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/escena.js",
+      "source_location": "L1279",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_crearescena_dibujarrayo",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/escena.js",
+      "source_location": "L857",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_crearescena_estacion",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/escena.js",
       "source_location": "L969",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_crearescena_posescroll",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/escena.js",
+      "source_location": "L976",
       "weight": 1.0
     },
     {
@@ -5475,7 +5591,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "js/app.js",
-      "source_location": "L437",
+      "source_location": "L438",
       "weight": 1.0
     },
     {
@@ -5499,7 +5615,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/app.js",
-      "source_location": "L440",
+      "source_location": "L441",
       "weight": 1.0
     },
     {
@@ -5511,7 +5627,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1242",
+      "source_location": "L1331",
       "weight": 1.0
     },
     {
@@ -5523,7 +5639,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1242",
+      "source_location": "L1331",
       "weight": 1.0
     },
     {
@@ -5535,7 +5651,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1242",
+      "source_location": "L1331",
       "weight": 1.0
     },
     {
@@ -5547,7 +5663,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1242",
+      "source_location": "L1331",
       "weight": 1.0
     },
     {
@@ -5559,7 +5675,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1242",
+      "source_location": "L1331",
       "weight": 1.0
     },
     {
@@ -5571,7 +5687,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1242",
+      "source_location": "L1331",
       "weight": 1.0
     },
     {
@@ -5583,7 +5699,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1242",
+      "source_location": "L1331",
       "weight": 1.0
     },
     {
@@ -5595,7 +5711,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1242",
+      "source_location": "L1331",
       "weight": 1.0
     },
     {
@@ -5607,7 +5723,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1242",
+      "source_location": "L1331",
       "weight": 1.0
     },
     {
@@ -5619,10 +5735,10 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1242",
+      "source_location": "L1331",
       "weight": 1.0
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "524d1e043a4d0d0f4115a59021a577fb350fd9a5"
+  "built_at_commit": "5fd0b003e595b8be83edf06f5dd82947935d6bc7"
 }

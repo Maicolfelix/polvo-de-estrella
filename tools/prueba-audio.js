@@ -252,6 +252,7 @@ export async function correrAmbiente() {
   scrollTo(0, innerHeight * P.escena.uDePuerta(3)); await w(3000);
   const vNave = A.niveles().viento;
   ok(vNave > 0, 'en la nave suena el viento (' + vNave + ')');
+  ok(A.niveles().lluvia > 0, 'en la nave se oye la lluvia sobre el tejado (' + A.niveles().lluvia + ')');
   const b = document.querySelectorAll('.puerta')[3], r = b.getBoundingClientRect(), o = { pointerType: 'touch', clientX: r.x + r.width / 2, clientY: r.y + r.height / 2, bubbles: true, pointerId: 5 };
   b.dispatchEvent(new PointerEvent('pointerdown', o)); await w(1800);
   const vPre = A.niveles().viento;
@@ -259,7 +260,7 @@ export async function correrAmbiente() {
   b.dispatchEvent(new PointerEvent('pointerup', o)); b.click(); await w(2000);
   ok(A.niveles().viento > vPre, 'al soltar: el viento vuelve (' + A.niveles().viento + ')');
   toque(b); await modo('habitacion'); await w(1500);
-  ok(A.niveles().viento < .002 && sonando(A).join() === 'song', 'habitación: solo la canción, viento en silencio (' + A.niveles().viento + ')');
+  ok(A.niveles().viento < .002 && A.niveles().lluvia < .002 && sonando(A).join() === 'song', 'habitación: solo la canción; viento y lluvia en silencio (' + A.niveles().viento + ', ' + A.niveles().lluvia + ')');
   toque($('#volver')); await modo('nave'); await w(2500);
   ok(sonando(A).length === 0 && A.niveles().viento > 0, 'al volver: solo ambiente (' + A.niveles().viento + ')');
   toque($('#btnSonido')); await w(400);

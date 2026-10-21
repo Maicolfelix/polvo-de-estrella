@@ -232,3 +232,17 @@ Con la escala adaptativa a 0,85 (1224×765) la nave también llegó a 72 fps. Lo
 - Estrellas fugaces cada 5–15 s en la parte del cielo que se mira, dibujadas dentro de la función del cielo: también se ven en las vidrieras y en los charcos.
 
 **Medido (GTX 1650, 1440×900, rAF).** Llegada 71 fps, desplazamiento 71, escalinata 48, umbral 48, nave 48. `correrTransiciones()` 21/21. Captura: `capturas/18-entrada-viva-puertas-diamantes.jpg`. Sin teléfono físico. `escena.provocar.ventisca()` y `escena.provocar.fugaz()` sirven para revisarlos sin esperar.
+
+## 2026-10-21 · Lluvia, suelo mojado, corona y diamantes más reales (misma rama; PR #1)
+
+**Pedidos del artista.** Lluvia ligera con animación en el suelo y suelo húmedo; diamantes más realistas y sin el efecto que molestaba; corona más realista; gotas sobre las rosas; sonido de lluvia suave (no ruido blanco).
+
+**Cambios.**
+- Lluvia: 2600 trazos (1400 en teléfono) en una caja que acompaña a la cámara, todo en el sombreador; se inclina con el viento y más en la ventisca, se ilumina con los relámpagos y no entra en la capilla ni bajo el pórtico. Salpicaduras sutiles en el suelo. Con movimiento reducido no llueve.
+- Suelo mojado (`mojar` en `js/escena.js`): barro más oscuro y brillante en zonas encharcadas y ondas de gotas que se abren y se apagan (solo cerca de la cámara). Los charcos tienen anillos de gotas.
+- Rosas: pétalos mojados (rugosidad baja), gotas en el borde de los pétalos que se mecen con su flor, gotas que caen de ellas y la flor que se hunde y rebota al recibir gotas.
+- Corona: aro con molduras y dos hileras de perlas, ocho puntas curvadas sobre el aro (flor de lis y lanza), cabujones de rubí en bisel, oro gastado (rayas, suciedad, rugosidad variable) y gotas de lluvia.
+- Diamantes: sin destellos que parpadeen ni arcoíris (se quitó el centelleo). Cada faceta refleja y refracta un entorno de tormenta con una dispersión leve: facetas negras, rojas y blancas como una piedra tallada.
+- Sonido de lluvia: ruido rosa muy filtrado (220 Hz–2,6 kHz) con un repiqueteo de gotas sueltas; cede como el viento ante la preescucha y calla en las habitaciones; respeta silencio y volumen.
+
+**Medido (GTX 1650, 1440×900, rAF, pantalla de 144 Hz).** Con escala 1: 48 fps en llegada, escalinata y nave (el fotograma queda algo por encima de 13,9 ms y la sincronía lo lleva al siguiente escalón). Con la escala adaptativa a 0,85: 72 fps en llegada, escalinata y nave. Pruebas: `correrAmbiente()` 11/11 (incluye lluvia en la nave y silencio en la habitación), `correrTransiciones()` 21/21, `correr()` 22/22. Sin teléfono físico; nada escuchado.
