@@ -227,7 +227,69 @@ def tierra(n=1024, nombre='tierra'):
     guardar(nombre + '_nor', normal(alto, 6))
     guardar(nombre + '_rug', np.dstack([rug] * 3))
 
+# ---------- matas de hierba seca (RGBA, para tarjetas cruzadas) ----------
+def hierba(nombre='hierba', w=256, h=256, briznas=70, semilla=91):
+    r = np.random.default_rng(semilla)
+    a = np.zeros((h, w), np.float32); col = np.zeros((h, w, 3), np.float32)
+    y, x = np.mgrid[0:h, 0:w].astype(np.float32)
+    for _ in range(briznas):
+        x0 = r.uniform(w * .15, w * .85); alto = r.uniform(.45, .98) * h; curva = r.uniform(-.5, .5) * w * .35
+        t = np.clip((h - y) / alto, 0, 1)
+        cx = x0 + curva * t ** 2
+        ancho = (1 - t) * r.uniform(2.2, 4.2) + .5
+        m = (np.abs(x - cx) < ancho) & (y > h - alto)
+        tono = r.uniform(.75, 1.25)
+        c = np.array([.11, .1, .055]) * tono * (.6 + .5 * t[..., None])
+        a = np.where(m, 1, a); col = np.where(m[..., None], c, col)
+    guardar(nombre, np.dstack([srgb(col * 2.2), a]), png=True)
+
+# ---------- tierra agrietada (plaza de la llegada) ----------
+def voronoi(n, puntos, semilla, dx=0, dy=0):
+    r = np.random.default_rng(semilla)
+    P = r.uniform(0, n, (puntos, 2))
+    y, x = np.mgrid[0:n, 0:n].astype(np.float32)
+    x = x + dx; y = y + dy                                        # dominio deformado: bordes irregulares
+    f1 = np.full((n, n), 1e9, np.float32); f2 = f1.copy(); ident = np.zeros((n, n), np.int32)
+    for i, (px, py) in enumerate(P):
+        dxa = np.abs(x - px); dxa = np.minimum(dxa, n - dxa)
+        dya = np.abs(y - py); dya = np.minimum(dya, n - dya)
+        dd = np.sqrt(dxa ** 2 + dya ** 2)
+        nuevo = dd < f1
+        f2 = np.where(nuevo, f1, np.minimum(f2, dd)); f1 = np.where(nuevo, dd, f1)
+        ident = np.where(nuevo, i, ident)
+    return f1, f2 - f1, ident
+
+def grieta(n=1024, nombre='grieta'):
+    r = np.random.default_rng(41)
+    det = fbm(n, 2.0, 42); fino = fbm(n, 1.2, 43); manchas = fbm(n, 2.6, 44)
+    w1 = (fbm(n, 1.9, 45) - .5) * 60; w2 = (fbm(n, 1.9, 46) - .5) * 60     # deforma las celdas: grietas irregulares
+    f1, b1, id1 = voronoi(n, 70, 47, w1, w2)
+    _, b2, _ = voronoi(n, 360, 48, w1 * .6 + (fino - .5) * 10, w2 * .6)
+    grande = b1 < 3 + det * 6 * (manchas > .35)
+    peque = (b2 < 1.2 + fino * 1.4) & (fbm(n, 1.6, 49) > .45)        # grietas finas solo en parte de las placas
+    # cada placa se abomba y se curva en los bordes, como barro seco
+    abombado = np.clip(b1 / 40, 0, 1) ** .45
+    alto = abombado * .7 + det * .25 + fino * .08 - peque * .18
+    alto = np.where(grande, -.15 + det * .05, alto)
+    tint = r.uniform(.78, 1.2, (70, 1))[id1]
+    base = np.array([.07, .056, .047])
+    col = base * tint * (.62 + .7 * det[..., None]) * (.85 + .3 * fino[..., None])
+    col *= 1 - .35 * np.clip((manchas[..., None] - .6) * 3, 0, 1)           # humedad oscura
+    col = np.where(peque[..., None], col * .55, col)
+    col = col * (1 + .9 * np.clip((abombado[..., None] - .8) * 4, 0, 1) * (1 - grande[..., None]))  # bordes secos más claros
+    motas = (fbm(n, .4, 50) > .78)[..., None]
+    col = np.where(motas, col * 1.35, col)                                 # grano de polvo y arena
+    col *= (.8 + .4 * fbm(n, 2.4, 51)[..., None])                         # manchas grandes de tono
+    col = np.where(grande[..., None], np.array([.012, .009, .008]), col)
+    rug = np.where(grande, 1., .78 + .15 * fino)
+    guardar(nombre + '_col', srgb(col * 2.2))
+    guardar(nombre + '_nor', normal(alto, 9))
+    guardar(nombre + '_rug', np.dstack([rug] * 3))
+
 if __name__ == '__main__':
+    if __import__('sys').argv[1:] == ['grieta']: grieta(); raise SystemExit
+    hierba(); arboles('arboles_lejos2', 73, num=52, hmin=.25, hmax=.6); arboles('arboles_cerca2', 74, num=15, hmin=.6, hmax=1.0); print('hierba y bosques extra', flush=True)
+    if __import__('sys').argv[1:] == ['extra']: raise SystemExit
     tierra(); print('tierra', flush=True)
     silleria(); print('piedra', flush=True)
     silleria(filas=12, semilla=4, nombre='muro'); print('muro', flush=True)

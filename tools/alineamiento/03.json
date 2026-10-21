@@ -1,0 +1,289 @@
+{
+ "n": "03",
+ "titulo": "POR QUE ESTAS TAN BIEN DESPUES DE DEJARME TAN MAL",
+ "duracion": 136.2,
+ "metodo": "demucs htdemucs + torchaudio MMS_FA (forced_align)",
+ "lineas": [
+  {
+   "linea": "Ereesss todooooo lo que yo quissseeee",
+   "inicio": 12.1,
+   "fin": 20.14,
+   "confianza": 0.329,
+   "energia": 0.78,
+   "ritmo": 4.0,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.33"
+   ],
+   "palabras": []
+  },
+  null,
+  {
+   "linea": "Donde tú estabas",
+   "inicio": 20.26,
+   "fin": 23.88,
+   "confianza": 0.636,
+   "energia": 0.91,
+   "ritmo": 3.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Por qué ahora viniste dando otra caraaaa",
+   "inicio": 23.98,
+   "fin": 29.86,
+   "confianza": 0.222,
+   "energia": 0.73,
+   "ritmo": 5.8,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.22"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Dando otra cara aaa aa aaa",
+   "inicio": 32.24,
+   "fin": 33.64,
+   "confianza": 0.148,
+   "energia": 0.86,
+   "ritmo": 15.0,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.15"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Baby cómo estás ?",
+   "inicio": 37.34,
+   "fin": 39.06,
+   "confianza": 0.289,
+   "energia": 0.78,
+   "ritmo": 7.6,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.29"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Porque estás tan bien después dejarme to mal",
+   "inicio": 40.26,
+   "fin": 45.76,
+   "confianza": 0.656,
+   "energia": 0.86,
+   "ritmo": 6.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "No puedo entender si yo fui un placer o alguien que te enseñó amar",
+   "inicio": 49.3,
+   "fin": 57.8,
+   "confianza": 0.519,
+   "energia": 0.79,
+   "ritmo": 6.2,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y eso",
+   "inicio": 58.54,
+   "fin": 59.4,
+   "confianza": 0.295,
+   "energia": 0.75,
+   "ritmo": 4.7,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.30"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "rabia a mi me da si pienso en ti",
+   "inicio": 60.16,
+   "fin": 62.9,
+   "confianza": 0.395,
+   "energia": 0.84,
+   "ritmo": 8.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Porque no puedo pensar",
+   "inicio": 63.74,
+   "fin": 66.3,
+   "confianza": 0.772,
+   "energia": 0.89,
+   "ritmo": 7.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Porque no puedo vivir",
+   "inicio": 66.68,
+   "fin": 69.26,
+   "confianza": 0.653,
+   "energia": 0.91,
+   "ritmo": 7.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Si tú siempre estás ahí",
+   "inicio": 69.7,
+   "fin": 71.92,
+   "confianza": 0.562,
+   "energia": 0.81,
+   "ritmo": 8.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Mis cartas ya quémalas",
+   "inicio": 72.68,
+   "fin": 75.42,
+   "confianza": 0.563,
+   "energia": 0.84,
+   "ritmo": 6.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Ya no existen pa ti",
+   "inicio": 75.72,
+   "fin": 77.88,
+   "confianza": 0.23,
+   "energia": 0.75,
+   "ritmo": 6.9,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.23"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Yo Solo pensaba que eras una estrella que era para mi",
+   "inicio": 78.52,
+   "fin": 86.1,
+   "confianza": 0.011,
+   "energia": 0.77,
+   "ritmo": 5.7,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.01"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Y no fue así y no fue así y no fue así",
+   "inicio": 86.12,
+   "fin": 92.06,
+   "confianza": 0.029,
+   "energia": 0.65,
+   "ritmo": 4.5,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.03"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Estamos otra vez llegando a verano, esa fecha duele aunque la reconozco",
+   "inicio": 96.56,
+   "fin": 102.12,
+   "confianza": 0.427,
+   "energia": 0.83,
+   "ritmo": 10.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Yo sigo en mi cumple durmiendo temprano",
+   "inicio": 102.76,
+   "fin": 105.08,
+   "confianza": 0.846,
+   "energia": 0.75,
+   "ritmo": 14.2,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Es que por la distancia aún te siento lejos",
+   "inicio": 105.54,
+   "fin": 108.42,
+   "confianza": 0.73,
+   "energia": 0.71,
+   "ritmo": 12.2,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Ojalá los te amo se vuelvan añejos",
+   "inicio": 108.58,
+   "fin": 111.34,
+   "confianza": 0.371,
+   "energia": 0.82,
+   "ritmo": 10.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Para sentir que me amas en el fondo",
+   "inicio": 111.74,
+   "fin": 114.08,
+   "confianza": 0.664,
+   "energia": 0.66,
+   "ritmo": 12.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "La soledad consume aunque no te respondo",
+   "inicio": 114.54,
+   "fin": 117.06,
+   "confianza": 0.731,
+   "energia": 0.7,
+   "ritmo": 13.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Tu siempre serás todo pa mi, aunque lo pueda negar aunque ya no estés aquí",
+   "inicio": 120.0,
+   "fin": 128.9,
+   "confianza": 0.588,
+   "energia": 0.98,
+   "ritmo": 6.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Siempre te voy a buscar aunque esté en otro país.",
+   "inicio": 129.64,
+   "fin": 135.88,
+   "confianza": 0.66,
+   "energia": 0.92,
+   "ritmo": 6.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  }
+ ]
+}

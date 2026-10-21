@@ -1,6 +1,6 @@
 :root{
   --negro:#060405; --hueso:#efe8de; --hueso-2:rgba(239,232,222,.66); --hueso-3:rgba(239,232,222,.38);
-  --oro:#c9a24a; --oro-claro:#e8cf8e; --linea:rgba(239,232,222,.16);
+  --oro:#b3202a; --oro-claro:#e0464e;   /* acentos en rojo oscuro: la paleta del universo es rojo y negro */ --linea:rgba(239,232,222,.16);
   --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
   --sans:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --luz:#9fd0ea;
@@ -25,8 +25,8 @@ button{font:inherit;color:inherit}
   transition:border-color .3s,background .3s,opacity .3s}
 .btn:hover{border-color:var(--oro)}
 .btn[disabled]{opacity:.35;cursor:default}
-.btn-principal{border-color:var(--oro);background:rgba(201,162,74,.14)}
-.btn-principal:hover{background:rgba(201,162,74,.24)}
+.btn-principal{border-color:var(--oro);background:rgba(179,32,42,.14)}
+.btn-principal:hover{background:rgba(179,32,42,.24)}
 .btn-sutil{padding:.5rem 1rem;min-height:40px;font-size:.78rem;letter-spacing:.08em}
 .btn svg,.icono svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .icono{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:1px solid transparent;background:none;cursor:pointer;transition:border-color .3s,background .3s}
@@ -60,9 +60,11 @@ body.en-habitacion .marca{opacity:0!important}
 #indice .t{font:500 .78rem/1.4 var(--sans);letter-spacing:.09em;color:var(--hueso-2)}
 
 /* ---------- llegada ---------- */
-#llegada{position:fixed;inset:0;z-index:10;display:grid;grid-template-columns:auto auto;align-items:center;justify-content:center;gap:clamp(2rem,5vw,5rem);padding:80px var(--borde) 90px;
-  background:radial-gradient(80% 70% at 50% 45%,rgba(6,4,5,.25),rgba(6,4,5,.82));will-change:opacity,transform}
-.llegada-portada{width:min(50vh,40vw);aspect-ratio:426/416;box-shadow:0 50px 120px -30px #000,0 0 0 1px rgba(239,232,222,.08);overflow:hidden;position:relative}
+/* la capilla queda a la vista en el centro: portada y título en una columna a la izquierda */
+#llegada{position:fixed;inset:0;z-index:10;display:grid;grid-template-columns:auto;align-content:center;justify-content:start;justify-items:start;gap:1.6rem;padding:80px var(--borde) 90px clamp(24px,6vw,104px);
+  background:linear-gradient(90deg,rgba(6,4,5,.86),rgba(6,4,5,.6) 26%,rgba(6,4,5,0) 52%);will-change:opacity}
+#llegada .llegada-portada,#llegada .artista,#llegada h1,#llegada .llegada-sub,#llegada .acciones,#llegada .carga{transform:translateY(var(--sube,0))}
+.llegada-portada{width:min(30vh,22vw);aspect-ratio:426/416;box-shadow:0 50px 120px -30px #000,0 0 0 1px rgba(239,232,222,.08);overflow:hidden;position:relative}
 .llegada-portada img{display:block;width:100%;height:100%;object-fit:cover}
 .llegada-portada::after{content:"";position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 44%,rgba(255,255,255,.14) 50%,transparent 56%);mix-blend-mode:screen;animation:barrido 10s ease-in-out infinite}
 @keyframes barrido{0%,35%{transform:translateX(-35%)}75%,100%{transform:translateX(35%)}}
@@ -95,12 +97,14 @@ h1{margin:0;font:300 italic clamp(3rem,6.4vw,5.6rem)/.95 var(--serif);letter-spa
 .puerta.escuchando .rotulo .num::after{content:" · escuchando";letter-spacing:.14em;color:var(--hueso-2)}
 .ayuda{position:fixed;left:var(--borde);right:var(--borde);bottom:max(16px,env(safe-area-inset-bottom));z-index:9;margin:0;text-align:center;font-size:.7rem;letter-spacing:.14em;color:var(--hueso-2);
   opacity:0;transition:opacity .5s;pointer-events:none;text-shadow:0 1px 8px #000}
-.aviso{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:40;background:rgba(6,4,5,.92);border:1px solid rgba(201,162,74,.4);padding:.6rem 1.05rem;border-radius:999px;font-size:.8rem;
+.aviso{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:40;background:rgba(6,4,5,.92);border:1px solid rgba(179,32,42,.4);padding:.6rem 1.05rem;border-radius:999px;font-size:.8rem;
   opacity:0;transition:opacity .35s;pointer-events:none;max-width:calc(100vw - 32px);text-align:center}
 .aviso.ver{opacity:1}
 
 /* ---------- habitación ---------- */
-#habitacion{position:fixed;inset:0;z-index:20;opacity:0;transition:opacity 1.1s ease;background:#050405}
+#habitacion{position:fixed;inset:0;z-index:20;opacity:0;transition:opacity .6s ease;background:#050405}
+#habitacion .hab-scroll,#habitacion .reproductor{opacity:0;transition:opacity .5s ease}
+#habitacion.listo .hab-scroll,#habitacion.listo .reproductor{opacity:1}
 #habitacion.visible{opacity:1}
 #atmos{position:absolute;inset:0;width:100%;height:100%}
 .hab-scroll{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
@@ -109,18 +113,18 @@ h1{margin:0;font:300 italic clamp(3rem,6.4vw,5.6rem)/.95 var(--serif);letter-spa
   background:linear-gradient(90deg,transparent,rgba(4,3,4,.66) 16%,rgba(4,3,4,.66) 84%,transparent)}
 .hab-num{margin:0 0 1rem;font:500 .7rem/1.5 var(--sans);letter-spacing:.28em;color:var(--oro)}
 .hab-titulo{margin:0 0 2.6rem;font:500 clamp(1.45rem,3.6vw,2.2rem)/1.18 var(--sans);letter-spacing:.05em;outline:none;text-wrap:balance}
-.letra{margin:0;white-space:pre-wrap;font:400 clamp(1.06rem,.96rem + .42vw,1.3rem)/1.82 var(--sans);color:#f3ede4;text-shadow:0 1px 14px rgba(0,0,0,.85);overflow-wrap:break-word}
+.letra{margin:0;white-space:normal;font:400 clamp(1.06rem,.96rem + .42vw,1.3rem)/1.82 var(--sans);color:#f3ede4;text-shadow:0 1px 14px rgba(0,0,0,.85);overflow-wrap:break-word}
 .hab-nota{margin:3rem 0 0;font-size:.68rem;letter-spacing:.2em;color:var(--hueso-3)}
 .letra,.hab-titulo{transition:opacity .45s}
 .cambiando .letra,.cambiando .hab-titulo{opacity:0}
 
 .reproductor{position:absolute;left:0;right:0;bottom:0;z-index:2;display:grid;grid-template-columns:auto auto 1fr auto;align-items:center;gap:.6rem 1.4rem;
-  padding:2.4rem var(--borde) calc(1rem + env(safe-area-inset-bottom));background:linear-gradient(rgba(3,2,3,0),rgba(3,2,3,.9) 32%,rgba(3,2,3,.97) 60%)}
+  padding:2.4rem var(--borde) calc(1rem + env(safe-area-inset-bottom));background:linear-gradient(rgba(3,2,3,0),#030203 24%)}
 .transporte{display:flex;align-items:center;gap:.3rem}
 .barra{display:flex;align-items:center;gap:.75rem;font-size:.74rem;font-variant-numeric:tabular-nums;color:var(--hueso-2);min-width:0}
 .barra input{flex:1;min-width:0}
 .vol{display:flex;align-items:center;gap:.2rem}
-.vol input{width:96px}
+.vol input{width:110px;touch-action:none}
 input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;height:32px;cursor:pointer}
 input[type=range]::-webkit-slider-runnable-track{height:2px;background:linear-gradient(90deg,var(--oro) var(--v,0%),rgba(239,232,222,.2) var(--v,0%));border-radius:2px}
 input[type=range]::-moz-range-track{height:2px;background:rgba(239,232,222,.2)}
@@ -129,15 +133,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--hueso);border:0}
 
 @media (max-width:760px){
-  #llegada{grid-template-columns:1fr;justify-items:center;text-align:center;gap:1.6rem;padding-top:78px;align-content:center}
-  .llegada-portada{width:min(68vw,40vh)}
-  .acciones{justify-content:center}
-  .carga{justify-content:center}
-  h1{font-size:clamp(2.7rem,12vw,3.6rem)}
+  /* en vertical la capilla ocupa la mitad superior; portada, título y botones van abajo, sobre el primer plano */
+  #llegada{grid-template-columns:auto 1fr;align-items:end;justify-content:stretch;justify-items:start;text-align:left;gap:.4rem 1rem;align-content:end;
+    padding:78px var(--borde) calc(104px + env(safe-area-inset-bottom));background:linear-gradient(rgba(6,4,5,0) 38%,rgba(6,4,5,.78) 62%,rgba(6,4,5,.92))}
+  .llegada-portada{width:min(26vw,15vh)}
+  .llegada-texto{display:contents}
+  .artista{grid-column:2;align-self:end;margin:0}
+  #titulo-album{grid-column:2;grid-row:2}
+  .llegada-portada{grid-row:1/3}
+  .llegada-sub,.acciones,.carga{grid-column:1/-1}
+  h1{font-size:clamp(2.2rem,10vw,3rem)}
   .llegada-sub{margin:.9rem 0 1.5rem}
   .reproductor{grid-template-columns:auto 1fr auto;gap:.3rem .6rem;padding-top:1.8rem}
   .barra{grid-column:1/-1;order:-1}
-  .vol input{display:none}
+  .vol input{width:84px}
   .btn-volver span{display:none}
   .btn-volver{padding:.6rem .8rem}
   .transporte{justify-self:center}
@@ -148,3 +157,26 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 /* ---------- movimiento reducido ---------- */
 .rm .llegada-portada::after,.rm .desliza::after{animation:none}
 .rm #habitacion{transition-duration:.4s}
+
+/* ---------- letra sincronizada ---------- */
+.linea{display:block;white-space:pre-wrap;position:relative;transition:opacity .35s,color .35s}
+.letra.sincronizada .linea{opacity:.52}
+.letra.sincronizada .linea.activa{opacity:1;color:#fff}
+.linea.activa::before{content:"";position:absolute;left:-16px;top:.42em;bottom:.42em;width:2px;border-radius:2px;background:var(--luz)}
+.linea.vacia{min-height:1.82em}
+.letra.sincronizada~.hab-nota{margin-bottom:38vh}   /* la última línea puede subir sobre el reproductor */
+.btn-seguir{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom));z-index:3;background:rgba(6,4,5,.88);border-color:var(--oro)}
+.btn-seguir[hidden]{display:none}
+.rm .linea{transition:none}
+@media (max-width:760px){ .btn-seguir{bottom:calc(170px + env(safe-area-inset-bottom))} }
+/* la letra se desvanece bajo los botones superiores en vez de chocar con ellos */
+.hab-scroll{-webkit-mask-image:linear-gradient(transparent 0,transparent 64px,#000 128px);mask-image:linear-gradient(transparent 0,transparent 64px,#000 128px)}
+/* rótulo de cada puerta: placa de bronce pegada al pie de su puerta, legible en cualquier fondo */
+.rotulo{top:calc(100% + 10px);padding:.6rem 1rem .62rem;border-radius:4px;backdrop-filter:none;-webkit-backdrop-filter:none;
+  background:linear-gradient(#1a0809,#0c0405);border:1px solid rgba(179,32,42,.55);box-shadow:inset 0 1px 0 rgba(255,120,120,.08),0 8px 18px -8px #000}
+.rotulo::before{content:"";position:absolute;left:50%;top:-11px;width:1px;height:10px;background:rgba(179,32,42,.5)}
+.rotulo .titulo{color:#efe3e0}
+/* habitación 1: la sala del mar en 3D queda detrás de la letra */
+#habitacion.con-sala{background:transparent}
+#habitacion.con-sala #atmos{display:none}
+#habitacion.con-sala .hab-contenido::before{background:linear-gradient(90deg,transparent,rgba(4,6,9,.62) 14%,rgba(4,6,9,.62) 86%,transparent)}

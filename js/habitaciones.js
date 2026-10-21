@@ -35,7 +35,7 @@ export const ATMOSFERAS = [
     g.lineWidth = 1;
     for (let k = 0; k < 7; k++) {
       const y = h * (.14 + k * .09), amp = h * .045 * (1 - p * .85) * (k % 2 ? -1 : 1), osc = Math.sin(t * .35 + k) * h * .008;
-      g.strokeStyle = k === 2 || k === 5 ? 'rgba(201,162,74,.38)' : 'rgba(236,230,220,.14)';
+      g.strokeStyle = k === 2 || k === 5 ? 'rgba(179,32,42,.42)' : 'rgba(236,230,220,.14)';
       g.beginPath(); g.moveTo(-20, y + osc); g.bezierCurveTo(w * .3, y - amp + osc, w * .7, y + amp - osc, w + 20, y - osc); g.stroke();
     }
   } },
@@ -208,15 +208,16 @@ export function crearAtmosfera(canvas) {
   const estados = [];
   const off = document.createElement('canvas'), og = off.getContext('2d');
   function medir() {
-    const k = Math.min(devicePixelRatio || 1, 1.5);
+    const k = Math.min(devicePixelRatio || 1, 1);   // atmósfera suave: más resolución no se nota y cuesta en cada fotograma
     w = canvas.width = off.width = Math.round(innerWidth * k);
     h = canvas.height = off.height = Math.round(innerHeight * k);
   }
   addEventListener('resize', medir); medir();
   return {
-    poner(i) {
+    // fundir solo al cambiar de canción dentro de una habitación; al entrar desde la nave no debe asomar la anterior
+    poner(i, fundir = false) {
       if (i === actual) return;
-      anterior = actual; actual = i; mezcla = anterior < 0 ? 1 : 0;
+      anterior = actual; actual = i; mezcla = fundir && anterior >= 0 ? 0 : 1;
       estados[i] = ATMOSFERAS[i].iniciar();
     },
     dibujar(dt, p, rm) {

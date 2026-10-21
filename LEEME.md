@@ -14,18 +14,19 @@ Luego abrir http://localhost:8765. Parámetros de revisión: `?rm` fuerza movimi
 |---|---|
 | `index.html`, `estilos.css` | Página, interfaz, habitación y reproductor |
 | `js/datos.js` | Títulos y letras **exactamente como las entregó el artista**; inicios provisionales de fragmentos |
-| `js/escena.js` | Mundo 3D (Three.js): paisaje, capilla, portal, nave, nueve puertas, tormenta, cámara |
-| `js/audio.js` | Instrumental con reverb, preescucha "tras la puerta", canción, viento, trueno |
+| `js/escena.js` | Mundo 3D (Three.js): paisaje, capilla, portal, nave, nueve puertas, tormenta, cámara, transiciones |
+| `js/primer-plano.js` | Llegada: corona, rosas, pétalos, ataduras, destellos minerales, tumbas y cruces |
+| `js/audio.js` | Preescucha "tras la puerta", canción, viento y trueno (sin música de fondo) |
 | `js/habitaciones.js` | Las nueve atmósferas (canvas 2D) |
 | `js/app.js` | Recorrido por desplazamiento, estados, puertas accesibles, teclado, índice |
-| `audio/` | Copias web AAC 160 kbps de los nueve masters (`01`…`09`), fragmentos de 30 s (`NN-pre`), instrumental |
+| `audio/` | Copias web AAC 160 kbps de los nueve masters (`01`…`09`), fragmentos de 30 s (`NN-pre`); `instrumental.m4a` se conserva pero la página ya no la carga |
 | `tex/` | Texturas PBR generadas por `tools/texturas.py` |
 | `tools/` | `codificar.sh`, `preescuchas.sh`, `fragmentos.py`, `texturas.py`, prototipo anterior |
 
 `tools/ffmpeg.exe` no está en el repositorio (87 MB). Para volver a codificar audio: `pip install imageio-ffmpeg` y copiar su binario a `tools/ffmpeg.exe`, o usar cualquier ffmpeg instalado.
 | `capturas/` | Capturas de la revisión |
 
-Los WAV originales en `Downloads/ALBUM MAVO POLVO DE ESTRELLA` no se modificaron. Los masters se copian sin procesar (solo codificación); la reverb se aplica únicamente a la instrumental, en tiempo real, sin tocar su archivo.
+Los WAV originales en `Downloads/ALBUM MAVO POLVO DE ESTRELLA` no se modificaron. Los masters se copian sin procesar (solo codificación). Desde el 2026-10-21 no hay instrumental de fondo: el ambiente es solo viento y truenos sintetizados.
 
 ## Por qué 3D en tiempo real con texturas procedurales
 - Lo pedido —entrada profunda, escalones, perspectiva real, sombras de contacto, rayos que iluminan la arquitectura, puertas con espesor que se abren y una cámara que entra— necesita geometría y luz reales; imágenes planas en capas no permiten abrir una puerta ni cruzarla de forma creíble.
@@ -46,7 +47,7 @@ Se eligieron con `tools/fragmentos.py` (la ventana más repetida dentro de cada 
 ## Letras
 Se muestran completas y sin sincronizar, con su texto original (espacios iniciales y saltos incluidos). No hay tiempos de sincronización todavía.
 
-## Mezcla medida (render offline de 40 s de la instrumental)
+## Mezcla medida (histórico: la instrumental se retiró el 2026-10-21; ver `docs/estado-proyecto.md`)
 - Reverb: pre-delay 24 ms, cola 2,6 s que se oscurece al decaer, envío filtrado 240 Hz–6,2 kHz, seco 0,86 / húmedo 0,45.
 - Señal húmeda ≈ 11 dB por debajo de la seca (RMS −26,2 vs −14,8 dB); sonoridad total casi igual (−14,3 vs −13,5 dB).
 - La instrumental decodificada tiene picos de +3,6 dBFS; con el nivel de ambiente (0,5 = −6 dB) la salida queda por debajo de 0 dBFS.

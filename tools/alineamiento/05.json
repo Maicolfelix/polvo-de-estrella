@@ -1,0 +1,386 @@
+{
+ "n": "05",
+ "titulo": "TODOLOLO",
+ "duracion": 165.9,
+ "metodo": "demucs htdemucs + torchaudio MMS_FA (forced_align)",
+ "lineas": [
+  {
+   "linea": "Todololo",
+   "inicio": 19.4,
+   "fin": 20.42,
+   "confianza": 0.219,
+   "energia": 0.84,
+   "ritmo": 7.8,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.22"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Todololo",
+   "inicio": 21.18,
+   "fin": 22.18,
+   "confianza": 0.246,
+   "energia": 0.8,
+   "ritmo": 8.0,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.25"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Todo lo que tú quieras",
+   "inicio": 22.94,
+   "fin": 27.44,
+   "confianza": 0.298,
+   "energia": 0.83,
+   "ritmo": 4.0,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.30"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Todololo",
+   "inicio": 28.28,
+   "fin": 29.3,
+   "confianza": 0.041,
+   "energia": 0.83,
+   "ritmo": 7.8,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.04"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Todololo",
+   "inicio": 30.02,
+   "fin": 31.44,
+   "confianza": 0.266,
+   "energia": 0.81,
+   "ritmo": 5.6,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.27"
+   ],
+   "palabras": []
+  },
+  null,
+  {
+   "linea": "Sobran las razones y hay tantos corazónes que pelean emociones",
+   "inicio": 33.5,
+   "fin": 44.88,
+   "confianza": 0.799,
+   "energia": 0.78,
+   "ritmo": 4.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Como los que tú y yo estamos sintiendo en este momento no puedo controlar mi corazón",
+   "inicio": 44.98,
+   "fin": 54.94,
+   "confianza": 0.805,
+   "energia": 0.69,
+   "ritmo": 6.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Porque cada vez que vienes confirmo lo que es cierto",
+   "inicio": 55.52,
+   "fin": 58.74,
+   "confianza": 0.649,
+   "energia": 0.69,
+   "ritmo": 13.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y creo que yo no sé si tú quieres una vida juntos",
+   "inicio": 58.9,
+   "fin": 64.32,
+   "confianza": 0.804,
+   "energia": 0.7,
+   "ritmo": 7.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y si me la das te haré un lugar junto con el arte, mis sentimientos y la verdad",
+   "inicio": 64.4,
+   "fin": 72.8,
+   "confianza": 0.672,
+   "energia": 0.67,
+   "ritmo": 7.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Tú y yooo",
+   "inicio": 72.82,
+   "fin": 79.2,
+   "confianza": 0.104,
+   "energia": 0.92,
+   "ritmo": 1.1,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.10"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Tu y yo y mucho más",
+   "inicio": 79.8,
+   "fin": 81.24,
+   "confianza": 0.645,
+   "energia": 0.82,
+   "ritmo": 9.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Mucho tiempo más",
+   "inicio": 83.36,
+   "fin": 87.14,
+   "confianza": 0.848,
+   "energia": 0.89,
+   "ritmo": 3.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "No busco tiempo, eso lo perdí",
+   "inicio": 87.26,
+   "fin": 89.82,
+   "confianza": 0.568,
+   "energia": 0.71,
+   "ritmo": 9.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y aunque sea un momento quiero ser para ti",
+   "inicio": 90.4,
+   "fin": 93.3,
+   "confianza": 0.909,
+   "energia": 0.73,
+   "ritmo": 11.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y el momento es eterno si cruzamos mirada",
+   "inicio": 93.88,
+   "fin": 97.32,
+   "confianza": 0.842,
+   "energia": 0.77,
+   "ritmo": 9.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Como quieres que te mire y no sienta nada",
+   "inicio": 97.84,
+   "fin": 100.44,
+   "confianza": 0.807,
+   "energia": 0.71,
+   "ritmo": 12.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Mujer tú no te ves pues yo si lo hago",
+   "inicio": 100.92,
+   "fin": 104.34,
+   "confianza": 0.725,
+   "energia": 0.76,
+   "ritmo": 8.2,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "De cabeza a pies tú eres todo un halago",
+   "inicio": 104.92,
+   "fin": 107.88,
+   "confianza": 0.66,
+   "energia": 0.78,
+   "ritmo": 10.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Todololo",
+   "inicio": 108.46,
+   "fin": 109.48,
+   "confianza": 0.778,
+   "energia": 1.01,
+   "ritmo": 7.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Todololo",
+   "inicio": 110.24,
+   "fin": 111.22,
+   "confianza": 0.734,
+   "energia": 0.81,
+   "ritmo": 8.2,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Todololo",
+   "inicio": 112.0,
+   "fin": 113.0,
+   "confianza": 0.725,
+   "energia": 0.87,
+   "ritmo": 8.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Todo lo que quieras mujer tú no",
+   "inicio": 115.5,
+   "fin": 121.36,
+   "confianza": 0.754,
+   "energia": 0.78,
+   "ritmo": 4.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Tú no eres pasajera",
+   "inicio": 122.1,
+   "fin": 125.14,
+   "confianza": 0.833,
+   "energia": 0.81,
+   "ritmo": 5.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y aunque lo fueras",
+   "inicio": 126.08,
+   "fin": 129.18,
+   "confianza": 0.751,
+   "energia": 0.9,
+   "ritmo": 4.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "A to’ lao te llevaría",
+   "inicio": 129.2,
+   "fin": 132.24,
+   "confianza": 0.464,
+   "energia": 0.85,
+   "ritmo": 5.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "A España bienvenida",
+   "inicio": 132.76,
+   "fin": 135.74,
+   "confianza": 0.65,
+   "energia": 0.75,
+   "ritmo": 5.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "A mi casa es otra huida",
+   "inicio": 136.3,
+   "fin": 139.18,
+   "confianza": 0.707,
+   "energia": 0.77,
+   "ritmo": 6.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Si tú quieres mañana si tú quieres pasado no hace falta que me digas porque",
+   "inicio": 139.74,
+   "fin": 147.84,
+   "confianza": 0.762,
+   "energia": 0.76,
+   "ritmo": 7.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Todo",
+   "inicio": 149.0,
+   "fin": 149.62,
+   "confianza": 0.465,
+   "energia": 0.9,
+   "ritmo": 6.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Todololo",
+   "inicio": 150.8,
+   "fin": 151.76,
+   "confianza": 0.186,
+   "energia": 0.98,
+   "ritmo": 8.3,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.19"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Todololo",
+   "inicio": 154.26,
+   "fin": 155.26,
+   "confianza": 0.588,
+   "energia": 0.88,
+   "ritmo": 8.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Todololo",
+   "inicio": 156.06,
+   "fin": 157.1,
+   "confianza": 0.485,
+   "energia": 0.9,
+   "ritmo": 7.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  }
+ ]
+}

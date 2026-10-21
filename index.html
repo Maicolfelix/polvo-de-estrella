@@ -54,14 +54,15 @@
 
 <main id="habitacion" hidden aria-labelledby="hab-titulo">
   <canvas id="atmos" aria-hidden="true"></canvas>
-  <div class="hab-scroll" id="habScroll">
+  <div class="hab-scroll" id="habScroll" tabindex="0" aria-label="Letra">
     <article class="hab-contenido">
       <p class="hab-num"><span id="habNum">01</span> · MAVO · Polvo de estrella</p>
       <h2 class="hab-titulo" id="hab-titulo" tabindex="-1"></h2>
       <p class="letra" id="letra"></p>
-      <p class="hab-nota">Letra sin sincronizar</p>
+      <p class="hab-nota" id="habNota">Letra sin sincronizar</p>
     </article>
   </div>
+  <button class="btn btn-seguir" id="seguir" hidden>Seguir canción</button>
   <nav class="reproductor" aria-label="Reproducción">
     <button class="btn btn-volver" id="volver"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Puertas</span></button>
     <div class="transporte">
@@ -76,7 +77,7 @@
     </div>
     <div class="vol">
       <button class="icono" id="mudo" aria-label="Silenciar" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="altavoz" d="M4 9h4l5-4v14l-5-4H4z"/><path class="ondas" d="M16 8.5a5 5 0 0 1 0 7"/><path class="cruz" d="M16 9l5 6M21 9l-5 6"/></svg></button>
-      <input type="range" id="vol" min="0" max="100" value="90" aria-label="Volumen">
+      <input type="range" id="vol" min="0" max="100" value="100" step="1" aria-label="Volumen" aria-valuetext="100 %">
     </div>
   </nav>
 </main>

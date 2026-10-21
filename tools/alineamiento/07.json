@@ -1,0 +1,340 @@
+{
+ "n": "07",
+ "titulo": "QUE PASARíA?",
+ "duracion": 154.19,
+ "metodo": "demucs htdemucs + torchaudio MMS_FA (forced_align)",
+ "lineas": [
+  {
+   "linea": "poco a poco sigo creyendo",
+   "inicio": 2.88,
+   "fin": 5.4,
+   "confianza": 0.816,
+   "energia": 0.73,
+   "ritmo": 8.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Poco a poco sigo cambiando",
+   "inicio": 6.1,
+   "fin": 8.6,
+   "confianza": 0.916,
+   "energia": 0.73,
+   "ritmo": 8.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  null,
+  {
+   "linea": "Sobre todo aprendí del poco amor que tú me estabas dando",
+   "inicio": 9.2,
+   "fin": 14.8,
+   "confianza": 0.81,
+   "energia": 0.77,
+   "ritmo": 8.2,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Todo desearía de ti",
+   "inicio": 15.14,
+   "fin": 17.8,
+   "confianza": 0.726,
+   "energia": 0.91,
+   "ritmo": 6.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Pero más de mi",
+   "inicio": 18.64,
+   "fin": 20.34,
+   "confianza": 0.916,
+   "energia": 0.83,
+   "ritmo": 6.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Todo todo todo te lo doy",
+   "inicio": 23.76,
+   "fin": 27.8,
+   "confianza": 0.187,
+   "energia": 0.84,
+   "ritmo": 4.7,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.19"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Sin ti no se quien soy",
+   "inicio": 28.04,
+   "fin": 29.94,
+   "confianza": 0.037,
+   "energia": 0.75,
+   "ritmo": 8.9,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.04"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Y hasta el día hoy",
+   "inicio": 31.2,
+   "fin": 35.42,
+   "confianza": 0.428,
+   "energia": 0.96,
+   "ritmo": 3.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Solo He querido la respuesta",
+   "inicio": 36.1,
+   "fin": 40.04,
+   "confianza": 0.779,
+   "energia": 0.89,
+   "ritmo": 6.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Porque ahora estás dispuesta a dejar la puerta abierta",
+   "inicio": 40.68,
+   "fin": 46.4,
+   "confianza": 0.705,
+   "energia": 0.82,
+   "ritmo": 8.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Fuck",
+   "inicio": 50.14,
+   "fin": 50.72,
+   "confianza": 0.009,
+   "energia": 0.61,
+   "ritmo": 6.9,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.01"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Fuck",
+   "inicio": 50.9,
+   "fin": 51.64,
+   "confianza": 0.019,
+   "energia": 0.61,
+   "ritmo": 5.4,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.02"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Fuck",
+   "inicio": 51.72,
+   "fin": 52.12,
+   "confianza": 0.007,
+   "energia": 0.85,
+   "ritmo": 10.0,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.01"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Como desearía que todo fuera mentira para ver si algún día todo esto valdría",
+   "inicio": 53.0,
+   "fin": 59.08,
+   "confianza": 0.677,
+   "energia": 0.78,
+   "ritmo": 10.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Siento que me muero",
+   "inicio": 61.42,
+   "fin": 64.56,
+   "confianza": 0.793,
+   "energia": 0.84,
+   "ritmo": 5.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "He tratado de olvidar recuerdo que me lastiman pero sigo pensando en que te puedo encontrar",
+   "inicio": 65.14,
+   "fin": 73.18,
+   "confianza": 0.816,
+   "energia": 0.77,
+   "ritmo": 9.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y me muero de miedo",
+   "inicio": 74.32,
+   "fin": 77.24,
+   "confianza": 0.679,
+   "energia": 0.92,
+   "ritmo": 5.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Déjame abrir la puerta se que no soy tu invitado",
+   "inicio": 78.22,
+   "fin": 84.1,
+   "confianza": 0.831,
+   "energia": 0.67,
+   "ritmo": 6.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Conozco el final ya he estado ahí",
+   "inicio": 84.52,
+   "fin": 87.28,
+   "confianza": 0.489,
+   "energia": 0.68,
+   "ritmo": 9.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Que te parece si borramos el pasado",
+   "inicio": 87.46,
+   "fin": 89.88,
+   "confianza": 0.591,
+   "energia": 0.66,
+   "ritmo": 12.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Que pasaría si algún día cruzamos miradas",
+   "inicio": 90.84,
+   "fin": 96.74,
+   "confianza": 0.599,
+   "energia": 0.71,
+   "ritmo": 5.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y seguimos estando vaciooos",
+   "inicio": 99.54,
+   "fin": 105.22,
+   "confianza": 0.506,
+   "energia": 0.75,
+   "ritmo": 4.2,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Qué pasaría ?",
+   "inicio": 108.2,
+   "fin": 110.34,
+   "confianza": 0.827,
+   "energia": 0.83,
+   "ritmo": 4.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Qué pasaría ?",
+   "inicio": 111.32,
+   "fin": 113.46,
+   "confianza": 0.652,
+   "energia": 0.81,
+   "ritmo": 4.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Que pasaría si era mentira",
+   "inicio": 127.12,
+   "fin": 132.36,
+   "confianza": 0.61,
+   "energia": 0.72,
+   "ritmo": 4.2,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": " si aún nos vemos todos los día",
+   "inicio": 133.4,
+   "fin": 138.7,
+   "confianza": 0.472,
+   "energia": 0.8,
+   "ritmo": 4.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": " qué pasaría si te abrazaría",
+   "inicio": 139.72,
+   "fin": 144.98,
+   "confianza": 0.572,
+   "energia": 0.77,
+   "ritmo": 4.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": " me besarías ?",
+   "inicio": 146.02,
+   "fin": 149.26,
+   "confianza": 0.521,
+   "energia": 0.87,
+   "ritmo": 3.1,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Que pasa ?",
+   "inicio": 152.36,
+   "fin": 152.92,
+   "confianza": 0.228,
+   "energia": 0.45,
+   "ritmo": 12.5,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.23"
+   ],
+   "palabras": []
+  }
+ ]
+}

@@ -1,0 +1,270 @@
+{
+ "n": "04",
+ "titulo": "SE ACABA EL VERANO",
+ "duracion": 136.73,
+ "metodo": "demucs htdemucs + torchaudio MMS_FA (forced_align)",
+ "lineas": [
+  {
+   "linea": "He dejado cosas tiradas por el tiempo",
+   "inicio": 21.0,
+   "fin": 25.24,
+   "confianza": 0.404,
+   "energia": 0.63,
+   "ritmo": 7.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Que por su reflejo puedo conocerlo",
+   "inicio": 25.82,
+   "fin": 28.04,
+   "confianza": 0.326,
+   "energia": 0.71,
+   "ritmo": 13.1,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.33"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Pero en mi pasado he sido cruel y terco",
+   "inicio": 28.62,
+   "fin": 30.82,
+   "confianza": 0.295,
+   "energia": 0.71,
+   "ritmo": 14.1,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.29"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Que aún me pregunto si me lo merezco",
+   "inicio": 31.42,
+   "fin": 33.58,
+   "confianza": 0.742,
+   "energia": 0.72,
+   "ritmo": 13.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  null,
+  {
+   "linea": "Hay cartas por el mar y otras por el viento",
+   "inicio": 33.98,
+   "fin": 36.42,
+   "confianza": 0.778,
+   "energia": 0.78,
+   "ritmo": 13.9,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Otras cortan mi voz si yo te las cuenta",
+   "inicio": 37.04,
+   "fin": 39.2,
+   "confianza": 0.657,
+   "energia": 0.7,
+   "ritmo": 14.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Acá acaba el verano y ahora está lloviendo",
+   "inicio": 39.64,
+   "fin": 41.98,
+   "confianza": 0.586,
+   "energia": 0.81,
+   "ritmo": 15.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Solo te importa respetarme si es que estoy yo viéndote",
+   "inicio": 42.52,
+   "fin": 45.82,
+   "confianza": 0.601,
+   "energia": 0.67,
+   "ritmo": 13.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y duele",
+   "inicio": 46.6,
+   "fin": 47.88,
+   "confianza": 0.009,
+   "energia": 0.76,
+   "ritmo": 4.7,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.01"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Como no te importa lastimarme aun diciéndome que quieres",
+   "inicio": 48.16,
+   "fin": 54.78,
+   "confianza": 0.557,
+   "energia": 0.71,
+   "ritmo": 7.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Todo lo que alguna vez yo conocí de ti",
+   "inicio": 55.82,
+   "fin": 62.54,
+   "confianza": 0.399,
+   "energia": 0.69,
+   "ritmo": 4.5,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Era mentira y ya no quiero más",
+   "inicio": 63.5,
+   "fin": 66.28,
+   "confianza": 0.433,
+   "energia": 0.65,
+   "ritmo": 8.6,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "A quien engaño aún te extraño",
+   "inicio": 66.3,
+   "fin": 68.64,
+   "confianza": 0.819,
+   "energia": 0.81,
+   "ritmo": 10.3,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Todas esas llegadas tarde desde mi casa cuando aún era verano",
+   "inicio": 69.08,
+   "fin": 72.78,
+   "confianza": 0.686,
+   "energia": 0.82,
+   "ritmo": 13.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Fuck que dolor ahora es otro diciembre sin creer en el amor y",
+   "inicio": 73.2,
+   "fin": 77.22,
+   "confianza": 0.611,
+   "energia": 0.77,
+   "ritmo": 12.2,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Cuando te besaba sonreías tu mirada me decía todo eso que querías de mí",
+   "inicio": 77.44,
+   "fin": 82.4,
+   "confianza": 0.62,
+   "energia": 0.79,
+   "ritmo": 11.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Y aún yo siendo el tonto ese inventaría cualquier chiste o lo que fuera con tal de solo verte feliz",
+   "inicio": 82.74,
+   "fin": 88.18,
+   "confianza": 0.631,
+   "energia": 0.75,
+   "ritmo": 14.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Porque en tu mirada yo veía un camino desde que se rompió el puente no cruzamos destino",
+   "inicio": 88.42,
+   "fin": 93.7,
+   "confianza": 0.364,
+   "energia": 0.72,
+   "ritmo": 13.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Yo sé que te gustaría conocerme como yo",
+   "inicio": 93.82,
+   "fin": 96.32,
+   "confianza": 0.465,
+   "energia": 0.71,
+   "ritmo": 12.8,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Me he conocido conmigo pero ya no hay motivo para seguir tu reflejo",
+   "inicio": 96.38,
+   "fin": 101.54,
+   "confianza": 0.6,
+   "energia": 0.7,
+   "ritmo": 10.7,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Capaz aprendemos ya algo estando viejos",
+   "inicio": 103.74,
+   "fin": 109.42,
+   "confianza": 0.588,
+   "energia": 0.76,
+   "ritmo": 6.0,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  },
+  {
+   "linea": "Dime si tú no quieres que sea yo",
+   "inicio": 111.58,
+   "fin": 119.76,
+   "confianza": 0.32,
+   "energia": 0.86,
+   "ritmo": 3.1,
+   "estado": "incierto",
+   "motivos": [
+    "confianza 0.32"
+   ],
+   "palabras": []
+  },
+  {
+   "linea": "Quiero estar dentro de tu corazón",
+   "inicio": 122.72,
+   "fin": 134.52,
+   "confianza": 0.829,
+   "energia": 0.91,
+   "ritmo": 2.4,
+   "estado": "auto",
+   "motivos": [],
+   "palabras": []
+  }
+ ]
+}
