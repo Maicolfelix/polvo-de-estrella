@@ -97,9 +97,15 @@ export async function correr() {
 }
 
 // Recorrido sin sonido: hay que cargar la página y elegir «Sin sonido».
+// Sin sonido: abrir con ?sinautoplay en una pestaña recién cargada, sin clic real. Un toque sintético en
+// «Toca para entrar» quita la capa pero no cuenta como gesto: así se recorre sin audio.
 export async function correrSinSonido() {
   const P = window.__pde, A = P.A, L = [];
   const ok = (cond, txt) => L.push((cond ? 'OK   ' : 'FALLA') + ' ' + txt);
+  const capa = $('#entrarToque');
+  ok(!capa.hidden && document.body.classList.contains('bloqueado'), 'sin sonido: aparece «Toca para entrar» y la página no se desplaza');
+  toque(capa); await w(700);
+  ok(capa.hidden && !document.body.classList.contains('bloqueado'), 'el toque quita la capa y deja desplazar');
   for (const i of [0, 3, 6]) {
     scrollTo(0, innerHeight * P.escena.uDePuerta(i)); await w(2500);
     toque(document.querySelectorAll('.puerta')[i]); await modo('habitacion');

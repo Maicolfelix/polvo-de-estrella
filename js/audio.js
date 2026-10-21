@@ -1,13 +1,17 @@
 // Motor de sonido. Dos fuentes musicales que nunca se pisan: preescucha (detrás de la puerta) y canción
-// (master intacto). Sin música de fondo: el ambiente es solo viento sintetizado y truenos lejanos.
+// (master intacto). Sin música de fondo: el ambiente es lluvia y viento (archivo en bucle) más el viento que
+// acompaña el movimiento y los truenos, sintetizados en vivo.
+// El ambiente va en un elemento <audio> real a propósito: en iPhone el audio solo sintetizado se calla con el
+// interruptor de silencio, y un elemento sonando hace que todo lo demás también se oiga.
 import { CANCIONES } from './datos.js';
 
 const pre = new Audio(); pre.loop = true; pre.preload = 'auto';
 const song = new Audio(); song.preload = 'metadata';
-export const elementos = { pre, song };
+const amb = new Audio('audio/ambiente.m4a'); amb.loop = true; amb.preload = 'auto';
+export const elementos = { pre, song, amb };
 
 // viento: 1 en la nave; cede ante la preescucha y calla dentro de una habitación (la canción manda)
-export const NIVEL = { pre: 1, viento: .16, trueno: .5, vientoPre: .3, lluvia: .09 };   // lluvia: el ruido rosa filtrado suena más bajo que el blanco a igual ganancia
+export const NIVEL = { pre: 1, viento: .16, trueno: .5, vientoPre: .3, lluvia: .55 };   // lluvia: ganancia del archivo de ambiente (ya mezclado a −20 dBFS RMS)
 
 let ctx, master, preG, songG, vientoG, vientoF, cancionPre = -1, cancionSong = -1;
 let tokPre = 0, tokSong = 0; // cada pausa diferida solo actúa si nadie volvió a usar esa fuente
@@ -53,22 +57,9 @@ function crear() {
   vientoF = ctx.createBiquadFilter(); vientoF.type = 'bandpass'; vientoF.frequency.value = 420; vientoF.Q.value = .6;
   vientoG = ctx.createGain(); vientoG.gain.value = 0;
   src.connect(vientoF).connect(vientoG).connect(master); src.start();
-  // lluvia suave: rumor de ruido rosa muy filtrado (sin el siseo del ruido blanco) y un repiqueteo de gotas
-  // sueltas, cada una un golpecito breve y apagado a distinto volumen. Su nivel lo pone la nave.
-  const nl = ctx.sampleRate * 4, bl = ctx.createBuffer(2, nl, ctx.sampleRate);
-  for (let ch = 0; ch < 2; ch++) {
-    const d = bl.getChannelData(ch); let b0 = 0, b1 = 0, b2 = 0;
-    for (let i = 0; i < nl; i++) { const w = Math.random() * 2 - 1; b0 = .997 * b0 + w * .029; b1 = .985 * b1 + w * .032; b2 = .95 * b2 + w * .048; d[i] = (b0 + b1 + b2) * .55; }
-    for (let k = 0; k < 220; k++) {   // gotas
-      const i0 = Math.random() * (nl - 2000) | 0, amp = .04 + Math.random() * Math.random() * .22, dur = 300 + Math.random() * 900, f = 1800 + Math.random() * 2400;
-      for (let j = 0; j < dur; j++) d[i0 + j] += Math.sin(j * f / ctx.sampleRate * 6.283) * amp * Math.exp(-j / (dur * .18));
-    }
-  }
-  const sl = ctx.createBufferSource(); sl.buffer = bl; sl.loop = true;
-  const hpL = ctx.createBiquadFilter(); hpL.type = 'highpass'; hpL.frequency.value = 220; hpL.Q.value = .4;
-  const lpL = ctx.createBiquadFilter(); lpL.type = 'lowpass'; lpL.frequency.value = 2600; lpL.Q.value = .3;
+  // lluvia y viento de fondo: archivo en bucle (tools/ambiente.py) por un elemento <audio>; su nivel lo pone la nave
   lluviaG = ctx.createGain(); lluviaG.gain.value = 0;
-  sl.connect(hpL).connect(lpL).connect(lluviaG).connect(master); sl.start();
+  ctx.createMediaElementSource(amb).connect(lluviaG).connect(master);
 }
 
 function rampa(g, v, seg = .5, cuando = 0) {
@@ -84,6 +75,8 @@ function rampa(g, v, seg = .5, cuando = 0) {
 // el siguiente gesto lo vuelve a intentar.
 export async function activar() {
   if (!ctx) crear();
+  sesionReproduccion();
+  amb.play().catch(() => {});                       // dentro del gesto y antes de cualquier espera
   if (!activo) {
     // Safari/iOS: cada elemento debe reproducirse una vez dentro del gesto, antes de cualquier espera (en silencio)
     if (!pre.src) pre.src = fuentePre(0);
@@ -94,19 +87,23 @@ export async function activar() {
   }
   const reanudado = ctx.resume().then(() => true, () => false);
   await Promise.race([reanudado, new Promise(r => setTimeout(r, 700))]);
-  if (ctx.state !== 'running') return false;
+  if (ctx.state !== 'running' || amb.paused) return false;
   activo = true;
   fundir(master, mudo ? 0 : 1, FUNDIDO.silencio);
   return true;
 }
 // Intento sin gesto: si el navegador deja reanudar el audio, el ambiente suena desde el principio; si no, se
 // queda esperando (activar() lo arrancará con el primer gesto). Nunca bloquea.
+// iOS 17+: tratar el sonido como reproducción (como la música), no como «ambiente» que el interruptor silencia
+function sesionReproduccion() { try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch {} }
 export async function intentarActivar() {
   if (activo) return true;
   if (!ctx) crear();
+  sesionReproduccion();
+  amb.play().catch(() => {});
   ctx.resume().catch(() => {});
   await new Promise(r => setTimeout(r, 350));
-  if (ctx.state !== 'running') return false;
+  if (ctx.state !== 'running' || amb.paused) return false;   // sin el elemento sonando no cuenta como activado
   activo = true;
   fundir(master, mudo ? 0 : 1, FUNDIDO.silencio);
   return true;
@@ -117,7 +114,7 @@ export const niveles = () => ctx && ({
   master: master.gain.value, cancion: volG.gain.value,   // sin redondeo: el silencio debe ser 0 exacto
   pre: +preG.gain.value.toFixed(3),
   song: +songG.gain.value.toFixed(3), viento: +vientoG.gain.value.toFixed(3), lluvia: +lluviaG.gain.value.toFixed(3), cede: cedeViento,
-  sonando: { pre: !pre.paused, song: !song.paused },
+  sonando: { pre: !pre.paused, song: !song.paused, amb: !amb.paused },
   fuentes: { pre: pre.src.split('/').pop(), song: song.src.split('/').pop() },
 });
 // el volumen del reproductor es el de la canción (100 % = nivel base, sin amplificar); el silencio general manda
@@ -279,6 +276,9 @@ export function trueno(fuerza, dist, dentro) {
   s.connect(lp).connect(g).connect(master); s.start(t); s.stop(t + 4.5);
 }
 
+// al volver a la pestaña o desbloquear el teléfono, el sistema puede haber pausado el ambiente
+// en segundo plano el ambiente se pausa (no debe sonar con la pestaña oculta) y vuelve al regresar
+document.addEventListener('visibilitychange', () => { if (document.hidden) amb.pause(); else if (activo && amb.paused) amb.play().catch(() => {}); });
 export function silencioTotal() { // al ocultar la pestaña durante una preescucha
   if (!ctx) return;
   tokPre++; rampa(preG, 0, .1); pre.pause();
