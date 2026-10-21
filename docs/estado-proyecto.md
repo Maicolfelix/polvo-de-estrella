@@ -189,3 +189,16 @@ Con la escala adaptativa a 0,85 (1224×765) la nave también llegó a 72 fps. Lo
 5. Portada en alta resolución (≥ 3000 px) para el tímpano.
 
 **Siguiente paso.** Que el artista lo abra en su PC (enlace local) y en su teléfono; si la llegada y las transiciones le convencen, decidir si se encargan los recursos anteriores y, después, fusionar en `main`.
+
+## 2026-10-21 · Universo vivo y más primer plano (misma rama; se añade al PR #1)
+
+**Pedido del artista.** Más rosas y detalle en el suelo como en la referencia, todo animado (árboles, nubes, flores) y quitar el borde que se veía al acercarse.
+
+**Cambios.**
+- Borde: la capa del título se encogía y subía al desplazarse y su fondo dejaba de cubrir la pantalla. Ahora la capa queda fija a pantalla completa y solo sube su contenido (`--sube` en `js/app.js` / `estilos.css`).
+- Viento en el sombreador (`mecer` y `VIENTO` en `js/escena.js`), sin coste de CPU: las capas de pinos se doblan por arriba en una onda que recorre el bosque; rosas, hojas y tallos se mecen según su altura, con ráfagas, y cada flor se mueve con la misma fase que su tallo. Con movimiento reducido todo queda quieto.
+- Cielo: las nubes avanzan a la vista en dos capas a distinta velocidad y su deformación cambia con el tiempo (se arremolinan).
+- Primer plano (`js/primer-plano.js`): de 14 a 34 matas de rosas (unas 100 flores), 190 pétalos en el suelo (100 en teléfono), 140 hojas secas fuera del camino, 8 rollos de hierro, 14 zarzas, 18 destellos y 26 pétalos que el viento arrastra a brincos por la plaza (14 en teléfono). El camino central sigue libre.
+- Rendimiento: las nuevas rosas bajaban la llegada a 48 fps; con cabezas más ligeras (15 pétalos de 5×4) y 5 hojas por flor vuelve a **72 fps** a 1440×900 (desplazamiento 71 fps; 180 k triángulos en la llegada). GTX 1650, mismo método que arriba.
+
+**Pruebas.** `correrTransiciones()` 21/21 tras los cambios. Captura actualizada: `capturas/14-llegada-acercamiento-umbral.jpg`. Sin teléfono físico.

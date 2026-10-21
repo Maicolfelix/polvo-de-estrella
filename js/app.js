@@ -419,7 +419,8 @@ function tick(now) {
   llegada.style.opacity = (1 - a).toFixed(3);
   llegada.style.visibility = a >= 1 ? 'hidden' : 'visible';
   llegada.style.pointerEvents = a > .6 ? 'none' : '';
-  if (!RM) llegada.style.transform = `translateY(${(-a * 5).toFixed(2)}vh) scale(${(1 - a * .04).toFixed(4)})`;
+  // solo el contenido sube; el fondo oscuro de la capa no se mueve ni encoge (antes dejaba ver su borde)
+  if (!RM) llegada.style.setProperty('--sube', (-a * 5).toFixed(2) + 'vh');
   $('#marca').style.opacity = cl((u - .5) / .4);
   ayuda.style.opacity = modo === 'nave' && u > escena.U_NAVE - .25 && escuchando == null ? .9 : 0;
 

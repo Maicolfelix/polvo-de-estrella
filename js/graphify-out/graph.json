@@ -283,42 +283,6 @@
       "source_location": "L23"
     },
     {
-      "id": "primer_plano_crearprimerplano",
-      "label": "crearPrimerPlano()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "crearPrimerPlano",
-      "file_type": "code",
-      "norm_label": "crearprimerplano()",
-      "source_file": "js/primer-plano.js",
-      "source_location": "L12"
-    },
-    {
-      "id": "primer_plano_crearprimerplano_cabeza",
-      "label": "cabeza()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "crearPrimerPlano",
-      "file_type": "code",
-      "norm_label": "cabeza()",
-      "source_file": "js/primer-plano.js",
-      "source_location": "L50"
-    },
-    {
-      "id": "primer_plano_crearprimerplano_petalo",
-      "label": "petalo()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "crearPrimerPlano",
-      "file_type": "code",
-      "norm_label": "petalo()",
-      "source_file": "js/primer-plano.js",
-      "source_location": "L40"
-    },
-    {
       "id": "app_cambiar",
       "label": "cambiar()",
       "_callable": true,
@@ -535,232 +499,16 @@
       "source_location": "L319"
     },
     {
-      "id": "escena_arco",
-      "label": "arco()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "crearSalaMar",
-      "file_type": "code",
-      "norm_label": "arco()",
-      "source_file": "js/escena.js",
-      "source_location": "L21"
-    },
-    {
-      "id": "escena_contorno",
-      "label": "contorno()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "crearSalaMar",
-      "file_type": "code",
-      "norm_label": "contorno()",
-      "source_file": "js/escena.js",
-      "source_location": "L28"
-    },
-    {
-      "id": "escena_envejecer",
-      "label": "envejecer()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "crearSalaMar",
-      "file_type": "code",
-      "norm_label": "envejecer()",
-      "source_file": "js/escena.js",
-      "source_location": "L86"
-    },
-    {
-      "id": "escena_extruir",
-      "label": "extruir()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "crearSalaMar",
-      "file_type": "code",
-      "norm_label": "extruir()",
-      "source_file": "js/escena.js",
-      "source_location": "L35"
-    },
-    {
-      "id": "escena_formau",
-      "label": "formaU()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "crearSalaMar",
-      "file_type": "code",
-      "norm_label": "formau()",
-      "source_file": "js/escena.js",
-      "source_location": "L29"
-    },
-    {
-      "id": "escena_uvmundo",
-      "label": "uvMundo()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "crearSalaMar",
-      "file_type": "code",
-      "norm_label": "uvmundo()",
-      "source_file": "js/escena.js",
-      "source_location": "L39"
-    },
-    {
-      "id": "sala_mar_crearsalamar",
-      "label": "crearSalaMar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "crearSalaMar",
-      "file_type": "code",
-      "norm_label": "crearsalamar()",
-      "source_file": "js/sala-mar.js",
-      "source_location": "L22"
-    },
-    {
-      "id": "sala_mar_crearsalamar_actualizar",
-      "label": "actualizar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "crearSalaMar",
-      "file_type": "code",
-      "norm_label": "actualizar()",
-      "source_file": "js/sala-mar.js",
-      "source_location": "L126"
-    },
-    {
-      "id": "sala_mar_crearsalamar_tensar",
-      "label": "tensar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "crearSalaMar",
-      "file_type": "code",
-      "norm_label": "tensar()",
-      "source_file": "js/sala-mar.js",
-      "source_location": "L74"
-    },
-    {
       "id": "escena_cl",
       "label": "cl()",
       "_callable": true,
       "_origin": "ast",
-      "community": 16,
-      "community_name": "actualizar",
+      "community": 3,
+      "community_name": "crearEscena",
       "file_type": "code",
       "norm_label": "cl()",
       "source_file": "js/escena.js",
       "source_location": "L12"
-    },
-    {
-      "id": "escena_crearescena_actualizar",
-      "label": "actualizar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "actualizar()",
-      "source_file": "js/escena.js",
-      "source_location": "L881"
-    },
-    {
-      "id": "escena_crearescena_actualizarrayo",
-      "label": "actualizarRayo()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "actualizarrayo()",
-      "source_file": "js/escena.js",
-      "source_location": "L833"
-    },
-    {
-      "id": "escena_crearescena_actualizarsala",
-      "label": "actualizarSala()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "actualizarsala()",
-      "source_file": "js/escena.js",
-      "source_location": "L1008"
-    },
-    {
-      "id": "escena_crearescena_dibujarrayo",
-      "label": "dibujarRayo()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "dibujarrayo()",
-      "source_file": "js/escena.js",
-      "source_location": "L627"
-    },
-    {
-      "id": "escena_crearescena_estacion",
-      "label": "estacion()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "estacion()",
-      "source_file": "js/escena.js",
-      "source_location": "L692"
-    },
-    {
-      "id": "escena_crearescena_moverparticulas",
-      "label": "moverParticulas()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "moverparticulas()",
-      "source_file": "js/escena.js",
-      "source_location": "L862"
-    },
-    {
-      "id": "escena_crearescena_posescroll",
-      "label": "poseScroll()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "posescroll()",
-      "source_file": "js/escena.js",
-      "source_location": "L699"
-    },
-    {
-      "id": "escena_eio",
-      "label": "eio()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "eio()",
-      "source_file": "js/escena.js",
-      "source_location": "L14"
-    },
-    {
-      "id": "escena_suave",
-      "label": "suave()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "actualizar",
-      "file_type": "code",
-      "norm_label": "suave()",
-      "source_file": "js/escena.js",
-      "source_location": "L13"
     },
     {
       "id": "escena_crearescena",
@@ -772,7 +520,43 @@
       "file_type": "code",
       "norm_label": "crearescena()",
       "source_file": "js/escena.js",
-      "source_location": "L114"
+      "source_location": "L145"
+    },
+    {
+      "id": "escena_crearescena_actualizar",
+      "label": "actualizar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "actualizar()",
+      "source_file": "js/escena.js",
+      "source_location": "L913"
+    },
+    {
+      "id": "escena_crearescena_actualizarrayo",
+      "label": "actualizarRayo()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "actualizarrayo()",
+      "source_file": "js/escena.js",
+      "source_location": "L865"
+    },
+    {
+      "id": "escena_crearescena_actualizarsala",
+      "label": "actualizarSala()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "actualizarsala()",
+      "source_file": "js/escena.js",
+      "source_location": "L1041"
     },
     {
       "id": "escena_crearescena_aplicarresolucion",
@@ -784,7 +568,7 @@
       "file_type": "code",
       "norm_label": "aplicarresolucion()",
       "source_file": "js/escena.js",
-      "source_location": "L725"
+      "source_location": "L757"
     },
     {
       "id": "escena_crearescena_camarasala",
@@ -796,7 +580,7 @@
       "file_type": "code",
       "norm_label": "camarasala()",
       "source_file": "js/escena.js",
-      "source_location": "L979"
+      "source_location": "L1012"
     },
     {
       "id": "escena_crearescena_cerrarlotes",
@@ -808,7 +592,19 @@
       "file_type": "code",
       "norm_label": "cerrarlotes()",
       "source_file": "js/escena.js",
-      "source_location": "L177"
+      "source_location": "L208"
+    },
+    {
+      "id": "escena_crearescena_dibujarrayo",
+      "label": "dibujarRayo()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "dibujarrayo()",
+      "source_file": "js/escena.js",
+      "source_location": "L659"
     },
     {
       "id": "escena_crearescena_entrar",
@@ -820,7 +616,19 @@
       "file_type": "code",
       "norm_label": "entrar()",
       "source_file": "js/escena.js",
-      "source_location": "L786"
+      "source_location": "L818"
+    },
+    {
+      "id": "escena_crearescena_estacion",
+      "label": "estacion()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "estacion()",
+      "source_file": "js/escena.js",
+      "source_location": "L724"
     },
     {
       "id": "escena_crearescena_medirfotograma",
@@ -832,7 +640,19 @@
       "file_type": "code",
       "norm_label": "medirfotograma()",
       "source_file": "js/escena.js",
-      "source_location": "L743"
+      "source_location": "L775"
+    },
+    {
+      "id": "escena_crearescena_moverparticulas",
+      "label": "moverParticulas()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "moverparticulas()",
+      "source_file": "js/escena.js",
+      "source_location": "L894"
     },
     {
       "id": "escena_crearescena_particulas",
@@ -844,7 +664,7 @@
       "file_type": "code",
       "norm_label": "particulas()",
       "source_file": "js/escena.js",
-      "source_location": "L643"
+      "source_location": "L675"
     },
     {
       "id": "escena_crearescena_ponerenpuerta",
@@ -856,7 +676,7 @@
       "file_type": "code",
       "norm_label": "ponerenpuerta()",
       "source_file": "js/escena.js",
-      "source_location": "L811"
+      "source_location": "L843"
     },
     {
       "id": "escena_crearescena_ponerportal",
@@ -868,7 +688,19 @@
       "file_type": "code",
       "norm_label": "ponerportal()",
       "source_file": "js/escena.js",
-      "source_location": "L778"
+      "source_location": "L810"
+    },
+    {
+      "id": "escena_crearescena_posescroll",
+      "label": "poseScroll()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "posescroll()",
+      "source_file": "js/escena.js",
+      "source_location": "L731"
     },
     {
       "id": "escena_crearescena_precompilar",
@@ -880,7 +712,7 @@
       "file_type": "code",
       "norm_label": "precompilar()",
       "source_file": "js/escena.js",
-      "source_location": "L661"
+      "source_location": "L693"
     },
     {
       "id": "escena_crearescena_preescucha",
@@ -892,7 +724,7 @@
       "file_type": "code",
       "norm_label": "preescucha()",
       "source_file": "js/escena.js",
-      "source_location": "L829"
+      "source_location": "L861"
     },
     {
       "id": "escena_crearescena_rectpuertas",
@@ -904,7 +736,7 @@
       "file_type": "code",
       "norm_label": "rectpuertas()",
       "source_file": "js/escena.js",
-      "source_location": "L1012"
+      "source_location": "L1045"
     },
     {
       "id": "escena_crearescena_render",
@@ -916,7 +748,7 @@
       "file_type": "code",
       "norm_label": "render()",
       "source_file": "js/escena.js",
-      "source_location": "L989"
+      "source_location": "L1022"
     },
     {
       "id": "escena_crearescena_reponerparticulas",
@@ -928,7 +760,7 @@
       "file_type": "code",
       "norm_label": "reponerparticulas()",
       "source_file": "js/escena.js",
-      "source_location": "L878"
+      "source_location": "L910"
     },
     {
       "id": "escena_crearescena_salir",
@@ -940,7 +772,7 @@
       "file_type": "code",
       "norm_label": "salir()",
       "source_file": "js/escena.js",
-      "source_location": "L800"
+      "source_location": "L832"
     },
     {
       "id": "escena_crearescena_tamano",
@@ -952,7 +784,7 @@
       "file_type": "code",
       "norm_label": "tamano()",
       "source_file": "js/escena.js",
-      "source_location": "L735"
+      "source_location": "L767"
     },
     {
       "id": "escena_crearescena_terminarentrada",
@@ -964,7 +796,7 @@
       "file_type": "code",
       "norm_label": "terminarentrada()",
       "source_file": "js/escena.js",
-      "source_location": "L820"
+      "source_location": "L852"
     },
     {
       "id": "escena_crearescena_tex",
@@ -976,7 +808,31 @@
       "file_type": "code",
       "norm_label": "tex()",
       "source_file": "js/escena.js",
-      "source_location": "L142"
+      "source_location": "L173"
+    },
+    {
+      "id": "escena_eio",
+      "label": "eio()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "eio()",
+      "source_file": "js/escena.js",
+      "source_location": "L14"
+    },
+    {
+      "id": "escena_suave",
+      "label": "suave()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "crearEscena",
+      "file_type": "code",
+      "norm_label": "suave()",
+      "source_file": "js/escena.js",
+      "source_location": "L13"
     },
     {
       "id": "audio_avisar",
@@ -1219,6 +1075,18 @@
       "source_location": "L30"
     },
     {
+      "id": "escena_arco",
+      "label": "arco()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "arco()",
+      "source_file": "js/escena.js",
+      "source_location": "L21"
+    },
+    {
       "id": "escena_caja",
       "label": "caja()",
       "_callable": true,
@@ -1229,6 +1097,66 @@
       "norm_label": "caja()",
       "source_file": "js/escena.js",
       "source_location": "L36"
+    },
+    {
+      "id": "escena_contorno",
+      "label": "contorno()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "contorno()",
+      "source_file": "js/escena.js",
+      "source_location": "L28"
+    },
+    {
+      "id": "escena_envejecer",
+      "label": "envejecer()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "envejecer()",
+      "source_file": "js/escena.js",
+      "source_location": "L86"
+    },
+    {
+      "id": "escena_extruir",
+      "label": "extruir()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "extruir()",
+      "source_file": "js/escena.js",
+      "source_location": "L35"
+    },
+    {
+      "id": "escena_formau",
+      "label": "formaU()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "formau()",
+      "source_file": "js/escena.js",
+      "source_location": "L29"
+    },
+    {
+      "id": "escena_mecer",
+      "label": "mecer()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "mecer()",
+      "source_file": "js/escena.js",
+      "source_location": "L119"
     },
     {
       "id": "escena_texturagradiente",
@@ -1265,6 +1193,90 @@
       "norm_label": "texturaradial()",
       "source_file": "js/escena.js",
       "source_location": "L60"
+    },
+    {
+      "id": "escena_uvmundo",
+      "label": "uvMundo()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "uvmundo()",
+      "source_file": "js/escena.js",
+      "source_location": "L39"
+    },
+    {
+      "id": "primer_plano_crearprimerplano",
+      "label": "crearPrimerPlano()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "crearprimerplano()",
+      "source_file": "js/primer-plano.js",
+      "source_location": "L14"
+    },
+    {
+      "id": "primer_plano_crearprimerplano_cabeza",
+      "label": "cabeza()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "cabeza()",
+      "source_file": "js/primer-plano.js",
+      "source_location": "L52"
+    },
+    {
+      "id": "primer_plano_crearprimerplano_petalo",
+      "label": "petalo()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "petalo()",
+      "source_file": "js/primer-plano.js",
+      "source_location": "L42"
+    },
+    {
+      "id": "sala_mar_crearsalamar",
+      "label": "crearSalaMar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "crearsalamar()",
+      "source_file": "js/sala-mar.js",
+      "source_location": "L22"
+    },
+    {
+      "id": "sala_mar_crearsalamar_actualizar",
+      "label": "actualizar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "actualizar()",
+      "source_file": "js/sala-mar.js",
+      "source_location": "L126"
+    },
+    {
+      "id": "sala_mar_crearsalamar_tensar",
+      "label": "tensar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "tensar()",
+      "source_file": "js/sala-mar.js",
+      "source_location": "L74"
     },
     {
       "id": "audio_abrirpre",
@@ -1778,17 +1790,6 @@
       "source_location": "L14"
     },
     {
-      "id": "sala_mar",
-      "label": "sala-mar.js",
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "crearSalaMar",
-      "file_type": "code",
-      "norm_label": "sala-mar.js",
-      "source_file": "js/sala-mar.js",
-      "source_location": "L1"
-    },
-    {
       "id": "datos",
       "label": "datos.js",
       "_origin": "ast",
@@ -1899,6 +1900,17 @@
       "source_location": "L18"
     },
     {
+      "id": "escena_viento",
+      "label": "VIENTO",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "viento",
+      "source_file": "js/escena.js",
+      "source_location": "L118"
+    },
+    {
       "id": "primer_plano",
       "label": "primer-plano.js",
       "_origin": "ast",
@@ -1907,6 +1919,17 @@
       "file_type": "code",
       "norm_label": "primer-plano.js",
       "source_file": "js/primer-plano.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "sala_mar",
+      "label": "sala-mar.js",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "escena.js",
+      "file_type": "code",
+      "norm_label": "sala-mar.js",
+      "source_file": "js/sala-mar.js",
       "source_location": "L1"
     },
     {
@@ -2268,7 +2291,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L432",
+      "source_location": "L433",
       "weight": 1.0
     },
     {
@@ -2280,7 +2303,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/app.js",
-      "source_location": "L433",
+      "source_location": "L434",
       "weight": 1.0
     },
     {
@@ -2801,43 +2824,19 @@
     },
     {
       "source": "escena_crearescena",
+      "target": "sala_mar_crearsalamar",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/escena.js",
+      "source_location": "L1001",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
       "target": "escena_envejecer",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "js/escena.js",
-      "source_location": "L169",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_uvmundo",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "js/escena.js",
-      "source_location": "L176",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_caja",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "js/escena.js",
-      "source_location": "L192",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_contorno",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -2849,6 +2848,42 @@
     },
     {
       "source": "escena_crearescena",
+      "target": "escena_uvmundo",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/escena.js",
+      "source_location": "L207",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_caja",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/escena.js",
+      "source_location": "L223",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_contorno",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/escena.js",
+      "source_location": "L231",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
       "target": "escena_extruir",
       "relation": "calls",
       "_origin": "ast",
@@ -2856,7 +2891,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L204",
+      "source_location": "L235",
       "weight": 1.0
     },
     {
@@ -2868,7 +2903,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L206",
+      "source_location": "L237",
       "weight": 1.0
     },
     {
@@ -2880,7 +2915,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L222",
+      "source_location": "L253",
       "weight": 1.0
     },
     {
@@ -2892,7 +2927,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L312",
+      "source_location": "L343",
       "weight": 1.0
     },
     {
@@ -2904,7 +2939,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L332",
+      "source_location": "L363",
       "weight": 1.0
     },
     {
@@ -2916,7 +2951,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L334",
+      "source_location": "L365",
       "weight": 1.0
     },
     {
@@ -2928,7 +2963,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L355",
+      "source_location": "L386",
       "weight": 1.0
     },
     {
@@ -2940,7 +2975,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L454",
+      "source_location": "L485",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
+      "target": "escena_mecer",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/escena.js",
+      "source_location": "L545",
       "weight": 1.0
     },
     {
@@ -2952,19 +2999,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L560",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "sala_mar_crearsalamar",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "js/escena.js",
-      "source_location": "L968",
+      "source_location": "L592",
       "weight": 1.0
     },
     {
@@ -2976,7 +3011,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L887",
+      "source_location": "L920",
       "weight": 1.0
     },
     {
@@ -2988,7 +3023,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L892",
+      "source_location": "L925",
       "weight": 1.0
     },
     {
@@ -3000,7 +3035,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L894",
+      "source_location": "L927",
       "weight": 1.0
     },
     {
@@ -3012,7 +3047,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L899",
+      "source_location": "L932",
       "weight": 1.0
     },
     {
@@ -3024,7 +3059,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L926",
+      "source_location": "L959",
       "weight": 1.0
     },
     {
@@ -3036,7 +3071,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L931",
+      "source_location": "L964",
       "weight": 1.0
     },
     {
@@ -3048,7 +3083,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L960",
+      "source_location": "L993",
       "weight": 1.0
     },
     {
@@ -3060,7 +3095,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L840",
+      "source_location": "L872",
       "weight": 1.0
     },
     {
@@ -3072,7 +3107,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L846",
+      "source_location": "L878",
       "weight": 1.0
     },
     {
@@ -3084,7 +3119,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L1008",
+      "source_location": "L1041",
       "weight": 1.0
     },
     {
@@ -3096,7 +3131,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L631",
+      "source_location": "L663",
       "weight": 1.0
     },
     {
@@ -3108,7 +3143,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L788",
+      "source_location": "L820",
       "weight": 1.0
     },
     {
@@ -3120,7 +3155,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L752",
+      "source_location": "L784",
       "weight": 1.0
     },
     {
@@ -3132,7 +3167,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L814",
+      "source_location": "L846",
       "weight": 1.0
     },
     {
@@ -3144,7 +3179,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L783",
+      "source_location": "L815",
       "weight": 1.0
     },
     {
@@ -3156,7 +3191,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L701",
+      "source_location": "L733",
       "weight": 1.0
     },
     {
@@ -3168,7 +3203,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L703",
+      "source_location": "L735",
       "weight": 1.0
     },
     {
@@ -3180,7 +3215,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L707",
+      "source_location": "L739",
       "weight": 1.0
     },
     {
@@ -3192,19 +3227,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L668",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena_render",
-      "target": "escena_crearescena_render",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "js/escena.js",
-      "source_location": "L1001",
+      "source_location": "L700",
       "weight": 1.0
     },
     {
@@ -3216,7 +3239,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L990",
+      "source_location": "L1023",
       "weight": 1.0
     },
     {
@@ -3228,7 +3251,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L992",
+      "source_location": "L1025",
       "weight": 1.0
     },
     {
@@ -3240,7 +3263,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L999",
+      "source_location": "L1032",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena_render",
+      "target": "escena_crearescena_render",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/escena.js",
+      "source_location": "L1034",
       "weight": 1.0
     },
     {
@@ -3252,7 +3287,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L802",
+      "source_location": "L834",
       "weight": 1.0
     },
     {
@@ -3264,7 +3299,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L741",
+      "source_location": "L773",
       "weight": 1.0
     },
     {
@@ -3292,6 +3327,18 @@
       "weight": 1.0
     },
     {
+      "source": "primer_plano_crearprimerplano",
+      "target": "escena_mecer",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "js/primer-plano.js",
+      "source_location": "L76",
+      "weight": 1.0
+    },
+    {
       "source": "primer_plano_crearprimerplano_cabeza",
       "target": "primer_plano_crearprimerplano_petalo",
       "relation": "calls",
@@ -3300,7 +3347,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/primer-plano.js",
-      "source_location": "L68",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -3624,7 +3671,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L142",
+      "source_location": "L173",
       "weight": 1.0
     },
     {
@@ -3636,7 +3683,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L177",
+      "source_location": "L208",
       "weight": 1.0
     },
     {
@@ -3648,7 +3695,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L643",
+      "source_location": "L675",
       "weight": 1.0
     },
     {
@@ -3660,7 +3707,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L661",
+      "source_location": "L693",
       "weight": 1.0
     },
     {
@@ -3672,7 +3719,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L725",
+      "source_location": "L757",
       "weight": 1.0
     },
     {
@@ -3684,7 +3731,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/escena.js",
-      "source_location": "L878",
+      "source_location": "L910",
       "weight": 1.0
     },
     {
@@ -3696,7 +3743,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/primer-plano.js",
-      "source_location": "L40",
+      "source_location": "L42",
       "weight": 1.0
     },
     {
@@ -3708,7 +3755,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "js/primer-plano.js",
-      "source_location": "L50",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -3841,6 +3888,18 @@
       "context": "import",
       "source_file": "js/letras.js",
       "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "primer_plano",
+      "target": "escena_mecer",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "js/primer-plano.js",
+      "source_location": "L10",
       "weight": 1.0
     },
     {
@@ -4068,7 +4127,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "js/primer-plano.js",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -4855,13 +4914,24 @@
     },
     {
       "source": "escena",
-      "target": "escena_crearescena",
+      "target": "escena_viento",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
-      "source_location": "L114",
+      "source_location": "L118",
+      "weight": 1.0
+    },
+    {
+      "source": "escena",
+      "target": "escena_mecer",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/escena.js",
+      "source_location": "L119",
       "weight": 1.0
     },
     {
@@ -4895,6 +4965,17 @@
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
       "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "escena",
+      "target": "escena_crearescena",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/escena.js",
+      "source_location": "L145",
       "weight": 1.0
     },
     {
@@ -5053,13 +5134,24 @@
     },
     {
       "source": "escena_crearescena",
+      "target": "escena_crearescena_camarasala",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/escena.js",
+      "source_location": "L1012",
+      "weight": 1.0
+    },
+    {
+      "source": "escena_crearescena",
       "target": "escena_crearescena_dibujarrayo",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
-      "source_location": "L627",
+      "source_location": "L659",
       "weight": 1.0
     },
     {
@@ -5070,7 +5162,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
-      "source_location": "L692",
+      "source_location": "L724",
       "weight": 1.0
     },
     {
@@ -5081,7 +5173,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
-      "source_location": "L699",
+      "source_location": "L731",
       "weight": 1.0
     },
     {
@@ -5092,7 +5184,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
-      "source_location": "L743",
+      "source_location": "L775",
       "weight": 1.0
     },
     {
@@ -5103,7 +5195,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
-      "source_location": "L778",
+      "source_location": "L810",
       "weight": 1.0
     },
     {
@@ -5114,7 +5206,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
-      "source_location": "L833",
+      "source_location": "L865",
       "weight": 1.0
     },
     {
@@ -5125,18 +5217,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/escena.js",
-      "source_location": "L862",
-      "weight": 1.0
-    },
-    {
-      "source": "escena_crearescena",
-      "target": "escena_crearescena_camarasala",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "js/escena.js",
-      "source_location": "L979",
+      "source_location": "L894",
       "weight": 1.0
     },
     {
@@ -5268,7 +5349,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "js/primer-plano.js",
-      "source_location": "L12",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -5337,7 +5418,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "js/app.js",
-      "source_location": "L435",
+      "source_location": "L436",
       "weight": 1.0
     },
     {
@@ -5361,7 +5442,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/app.js",
-      "source_location": "L438",
+      "source_location": "L439",
       "weight": 1.0
     },
     {
@@ -5373,7 +5454,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1031",
+      "source_location": "L1064",
       "weight": 1.0
     },
     {
@@ -5385,7 +5466,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1031",
+      "source_location": "L1064",
       "weight": 1.0
     },
     {
@@ -5397,7 +5478,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1031",
+      "source_location": "L1064",
       "weight": 1.0
     },
     {
@@ -5409,7 +5490,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1031",
+      "source_location": "L1064",
       "weight": 1.0
     },
     {
@@ -5421,7 +5502,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1031",
+      "source_location": "L1064",
       "weight": 1.0
     },
     {
@@ -5433,7 +5514,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1031",
+      "source_location": "L1064",
       "weight": 1.0
     },
     {
@@ -5445,7 +5526,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1031",
+      "source_location": "L1064",
       "weight": 1.0
     },
     {
@@ -5457,7 +5538,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1031",
+      "source_location": "L1064",
       "weight": 1.0
     },
     {
@@ -5469,7 +5550,7 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1031",
+      "source_location": "L1064",
       "weight": 1.0
     },
     {
@@ -5481,10 +5562,10 @@
       "confidence_score": 0.85,
       "context": "collection",
       "source_file": "js/escena.js",
-      "source_location": "L1031",
+      "source_location": "L1064",
       "weight": 1.0
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b8474d9599a9ef4cae2ed5e6730c3c7d5f626c88"
+  "built_at_commit": "57c97fefaa94e8f812520a332fb95df491af30b9"
 }

@@ -111,6 +111,37 @@ roughnessFactor *= ${alto > 0 ? `mix(1., .6, 1. - smoothstep(0., ${f(alto * .6)}
   mat.needsUpdate = true;
 }
 
+// Viento en el sombreador (sin coste de CPU): un solo reloj compartido.
+//   'tarjeta': las capas de pinos se doblan por arriba (uv.y) en una onda que recorre el bosque.
+//   'planta': tallos, hojas y rosas se mecen según su altura; cada instancia se mueve entera desde su ancla,
+//   con la misma fase que el punto del tallo donde está, para que flor y tallo no se separen.
+export const VIENTO = { value: 0 };
+export function mecer(mat, modo, amp) {
+  const prev = mat.onBeforeCompile;
+  mat.onBeforeCompile = (sh, r) => {
+    prev?.(sh, r);
+    sh.uniforms.uViento = VIENTO;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uViento;');
+    if (modo === 'tarjeta') sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+      transformed.x += (sin(uViento * .8 + position.x * .07) * .7 + sin(uViento * 1.9 + position.x * .21) * .3) * ${amp.toFixed(3)} * uv.y * uv.y;`);
+    else sh.vertexShader = sh.vertexShader.replace('#include <project_vertex>', `
+      vec4 mvPosition = vec4(transformed, 1.);
+      #ifdef USE_INSTANCING
+        mvPosition = instanceMatrix * mvPosition;
+        vec3 ancla = instanceMatrix[3].xyz;
+      #else
+        vec3 ancla = mvPosition.xyz;
+      #endif
+      float alto = clamp(ancla.y / .9, 0., 1.);
+      float rafaga = .65 + .35 * sin(uViento * .37 + ancla.x * .05);
+      mvPosition.xz += vec2(sin(uViento * 1.6 + ancla.x * .35 + ancla.z * .25), cos(uViento * 1.2 + ancla.x * .3 - ancla.z * .2) * .6) * ${amp.toFixed(3)} * alto * alto * rafaga;
+      mvPosition = modelViewMatrix * mvPosition;
+      gl_Position = projectionMatrix * mvPosition;`);
+  };
+  mat.customProgramCacheKey = () => (prev ? 'env-' : '') + `mecer-${modo}-${amp}`;
+  mat.needsUpdate = true;
+}
+
 export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, alRayo }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
   // El coste es casi todo de relleno (medido: la nave a 1440×900 tardaba 82 ms en una GTX 1650):
@@ -486,9 +517,9 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       float fbm2(vec2 p){return n(p)*.6+n(p*2.03+vec2(1.7,9.2))*.4;}
       void main(){ vec3 d=normalize(vD); float y=d.y;
         // tormenta carmesí: masas de nube iluminadas en rojo desde abajo, huecos casi negros
-        vec2 uv=d.xz/(max(y,0.)+.2)*1.25+vec2(uT*.004,uT*.0015);
-        vec2 w=vec2(fbm2(uv*.6),fbm2(uv*.6+5.2));
-        float c=fbm(uv+w*1.6); float c2=fbm(uv*2.1+w*2.4-vec2(uT*.007,0.));
+        vec2 uv=d.xz/(max(y,0.)+.2)*1.25+vec2(uT*.022,uT*.008);   // las nubes avanzan a la vista
+        vec2 w=vec2(fbm2(uv*.6+uT*.012),fbm2(uv*.6+5.2-uT*.009));   // la deformación también cambia: las nubes se arremolinan
+        float c=fbm(uv+w*1.6+vec2(0.,uT*.006)); float c2=fbm(uv*2.1+w*2.4-vec2(uT*.035,0.));   // dos capas a distinta velocidad: se deforman al pasar
         float nube=smoothstep(.3,.78,c*.7+c2*.45);
         float borde=smoothstep(.52,.9,c2)*nube;
         vec3 alto=vec3(.006,.002,.004), medio=vec3(.022,.004,.007), horiz=vec3(.1,.012,.016);   // entre nubes, casi negro
@@ -511,6 +542,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   const capaBosque = (t, w, h, x, z, ry, rep, off, espejo, tono) => {
     const t2 = t.clone(); t2.wrapS = THREE.RepeatWrapping; t2.repeat.set(rep * (espejo ? -1 : 1), 1); t2.offset.x = off; t2.needsUpdate = true;
     const mat = new THREE.MeshBasicMaterial({ map: t2, transparent: true, alphaTest: .05, depthWrite: false, color: tono, fog: true, side: THREE.DoubleSide });
+    mecer(mat, 'tarjeta', Math.min(1.2, h * .045));   // los pinos se mecen: más arriba, más movimiento
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); m.position.set(x, h / 2 - .5, z); m.rotation.y = ry; add(m);
   };
   // pinos oscuros pegados a la capilla: la enmarcan contra el cielo
@@ -880,6 +912,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   const bezier = (o, a, c, b, s) => o.copy(a).multiplyScalar((1 - s) ** 2).addScaledVector(c, 2 * (1 - s) * s).addScaledVector(b, s * s);
   function actualizar(dt, u, { usarScroll = true } = {}) {
     tiempo += dt; uActual = u;
+    if (!rm) VIENTO.value += dt;
     const ahora = performance.now();
     // cámara
     if (anim) {

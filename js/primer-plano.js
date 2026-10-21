@@ -3,16 +3,18 @@
 //   Plano medio: tumbas y cruces a los lados, la escalinata en el centro.
 // Interpretación artística (no es un significado oficial): la corona de quien se creyó dueño del mundo,
 // pequeña ante la tormenta; las rosas, los vínculos y su fragilidad; los destellos, el polvo de estrella.
-// Todo es estático salvo el centelleo: geometría fusionada o instanciada, pocos materiales.
+// Geometría fusionada o instanciada, pocos materiales. Se mueve con el viento en el sombreador (rosas, hojas,
+// tallos); en la CPU solo el centelleo y unos pocos pétalos que el viento arrastra por el suelo.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { mecer } from './escena.js';
 
 const V3 = THREE.Vector3, V2 = THREE.Vector2;
 
 export function crearPrimerPlano({ add, poner, M, MOVIL }) {
   let semilla = 23;
   const rnd = () => (semilla = semilla * 16807 % 2147483647) / 2147483647;
-  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), tmpV = new V3(), uno = new V3(1, 1, 1);
   const fijo = (g, mat, sombra = true) => { const m = new THREE.Mesh(g, mat); m.castShadow = sombra; m.receiveShadow = true; add(m); return m; };
 
   /* ---------- corona ---------- */
@@ -49,10 +51,10 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
   // (capullo); los exteriores, más anchos, se abren hacia arriba y vuelven el borde.
   function cabeza() {
     const gs = [];
-    for (let k = 0; k < 20; k++) {
-      const f = k / 19, a0 = k * 2.399, span = 1.9 + f * 1.1;
+    for (let k = 0; k < 15; k++) {
+      const f = k / 14, a0 = k * 2.399, span = 1.9 + f * 1.1;
       const r0 = .006 + f * .036, alto = .045 + f * .045, abre = .12 + f * .65, base = -f * .03;
-      const g = new THREE.PlaneGeometry(1, 1, 8, 6), p = g.attributes.position;
+      const g = new THREE.PlaneGeometry(1, 1, 5, 4), p = g.attributes.position;   // ligero: ~100 rosas en pantalla
       for (let i = 0; i < p.count; i++) {
         const u = p.getX(i) * 2, v = p.getY(i) + .5;
         const ancho = .55 + .45 * Math.sin(Math.min(1, v * 1.15) * Math.PI * .5);     // estrecho en la base
@@ -71,14 +73,19 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
   const matRosa = new THREE.MeshStandardMaterial({ color: 0x6e0a12, roughness: .5, side: THREE.DoubleSide, emissive: 0x1c0204, emissiveIntensity: .7 });
   const matHoja = new THREE.MeshStandardMaterial({ color: 0x0f150c, roughness: .6, side: THREE.DoubleSide });
   const matTallo = new THREE.MeshStandardMaterial({ color: 0x10120c, roughness: .8 });
+  for (const m of [matRosa, matHoja, matTallo]) mecer(m, 'planta', .07);
   const ARBUSTOS = [   // [x, z, nº de rosas, escala]
     [-2.9, 38.2, 3, 2], [-5.4, 35.2, 4, 2.1], [3.2, 37.8, 3, 1.9], [6.1, 33.5, 3, 2], [-1.4, 36.6, 3, 1.5], [1.05, 39.4, 2, 1.3],
     [-4.2, 25, 2, 1.3], [4.6, 23.5, 2, 1.3], [-6.4, 9.2, 3, 1.5], [6.8, 8.4, 3, 1.5], [-7.6, 15, 2, 1.4], [8, 14.5, 2, 1.4],
+    // matas densas en las esquinas del primer plano y a lo largo del camino, como en la referencia
+    [-2.5, 40.3, 3, 1.8], [2.7, 40.1, 3, 1.8], [-4.4, 37.6, 4, 2.2], [4.6, 37, 4, 2.2],
+    [-3.3, 30.2, 4, 2.2], [3.5, 28.6, 4, 2.2], [-2.6, 20.4, 4, 2], [2.8, 18.2, 4, 2], [-5.9, 15.6, 4, 2], [6.1, 13.1, 4, 2], [-4.6, 25.4, 3, 2], [4.8, 23.6, 3, 2],
+    [-4.3, 6.5, 4, 1.7], [4.5, 6.3, 4, 1.7], [-.95, 40.5, 2, 1.2], [1.9, 35.3, 2, 1.3], [-2.1, 34, 2, 1.3], [.4, 31.5, 1, 1.1],
   ];
   const nRosas = ARBUSTOS.reduce((a, b) => a + b[2], 0);
   const rosas = new THREE.InstancedMesh(cabeza(), matRosa, nRosas);
   const hojaG = (() => { const g = new THREE.ShapeGeometry(new THREE.Shape().moveTo(0, 0).quadraticCurveTo(.05, .06, 0, .15).quadraticCurveTo(-.05, .06, 0, 0), 4); g.rotateX(-.6); return g; })();
-  const nHojas = nRosas * 7, hojas = new THREE.InstancedMesh(hojaG, matHoja, nHojas);
+  const nHojas = nRosas * 5, hojas = new THREE.InstancedMesh(hojaG, matHoja, nHojas);
   const tallos = [], espinas = [];
   let kr = 0, kh = 0;
   for (const [x, z, n, esc] of ARBUSTOS) for (let j = 0; j < n; j++) {
@@ -89,7 +96,7 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
     for (let k = 0; k < 4; k++) { const p = curva.getPoint(.2 + k * .18); espinas.push(new THREE.ConeGeometry(.006 * esc, .03 * esc, 4).rotateZ(Math.PI / 2 * (k % 2 ? 1 : -1)).translate(p.x, p.y, p.z)); }
     const sc = (1.35 + rnd() * .5) * esc;   // cabezas grandes y llenas, como en la referencia
     m4.compose(tope, q.setFromEuler(e.set((rnd() - .5) * .7, rnd() * 6, (rnd() - .5) * .7)), new V3(sc, sc, sc)); rosas.setMatrixAt(kr++, m4);
-    for (let k = 0; k < 7; k++) {
+    for (let k = 0; k < 5; k++) {
       const p = curva.getPoint(.25 + rnd() * .65), s2 = esc * (.9 + rnd() * .6);
       m4.compose(p, q.setFromEuler(e.set(rnd() * .6, rnd() * 6.3, rnd() * .6)), new V3(s2, s2, s2)); hojas.setMatrixAt(kh++, m4);
     }
@@ -98,9 +105,9 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
   fijo(mergeGeometries([...tallos, ...espinas].map(g => g.index ? g.toNonIndexed() : g)), matTallo);
 
   // pétalos caídos alrededor de la corona y por la plaza
-  { const n = MOVIL ? 40 : 70, pet = new THREE.InstancedMesh(petalo(.09, .06, .35, .01), matRosa, n);
+  { const n = MOVIL ? 100 : 190, pet = new THREE.InstancedMesh(petalo(.09, .06, .35, .01), matRosa, n);
     for (let k = 0; k < n; k++) {
-      const cerca = k < n * .45, x = cerca ? (rnd() - .5) * 3.2 : (rnd() - .5) * 9, z = cerca ? 35.5 + rnd() * 3.5 : 18 + rnd() * 18;
+      const cerca = k < n * .4, x = cerca ? (rnd() - .5) * 4 : (rnd() - .5) * 14, z = cerca ? 35 + rnd() * 5 : 6 + rnd() * 34;
       m4.compose(new V3(x, .012, z), q.setFromEuler(e.set(-Math.PI / 2 + (rnd() - .5) * .4, 0, rnd() * 6.3)), new V3(1, 1, 1).multiplyScalar(.8 + rnd() * .8));
       pet.setMatrixAt(k, m4);
     }
@@ -120,6 +127,7 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
       hierro.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), pts.length * 3, grosor, 6, false));
     };
     rollo(-2.7, 40.6, .7, 2.3, .035); rollo(3.9, 39.6, .55, 2, .03); rollo(5.4, 27, .6, 2, .03); rollo(-5.2, 30.5, .5, 1.6, .028);
+    rollo(-4.4, 38.3, .8, 2.6, .04); rollo(4.7, 37.6, .75, 2.4, .04); rollo(-3.8, 23, .5, 1.8, .028); rollo(4.1, 10.5, .55, 1.8, .03);
     const vid = (a, b, n) => {
       const pts = [];
       for (let k = 0; k <= n; k++) { const t = k / n, p = a.clone().lerp(b, t); p.x += Math.sin(t * 9 + a.x) * .35; p.z += Math.cos(t * 7 + a.z) * .35; p.y = .02 + Math.abs(Math.sin(t * 5)) * .05; pts.push(p); }
@@ -129,11 +137,16 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
     vid(new V3(-3.1, 0, 38.6), new V3(-.9, 0, 38.9), 6); vid(new V3(3.4, 0, 38.2), new V3(1.4, 0, 36.3), 6);
     vid(new V3(-5.6, 0, 35.2), new V3(-3, 0, 31), 7); vid(new V3(6.1, 0, 33.5), new V3(3.2, 0, 30.2), 7);
     vid(new V3(-6.4, 0, 9.2), new V3(-4.4, 0, 6.6), 5); vid(new V3(6.8, 0, 8.4), new V3(4.5, 0, 6.4), 5);
+    vid(new V3(-2.5, 0, 40.3), new V3(-.8, 0, 39.5), 6); vid(new V3(2.7, 0, 40.1), new V3(1, 0, 39.2), 6);
+    vid(new V3(-4.4, 0, 37.6), new V3(-3.6, 0, 33), 7); vid(new V3(4.6, 0, 37), new V3(3.8, 0, 32.4), 7);
+    vid(new V3(-3.3, 0, 30.2), new V3(-1.2, 0, 27), 6); vid(new V3(3.5, 0, 28.6), new V3(1.4, 0, 25.5), 6);
+    vid(new V3(-4.3, 0, 6.5), new V3(-2.6, 0, 4.9), 5); vid(new V3(4.5, 0, 6.3), new V3(2.8, 0, 4.8), 5);
     fijo(mergeGeometries(hierro), M.hierro);
     fijo(mergeGeometries([...zarza, ...pinchos.map(g => g.toNonIndexed())].map(g => g.index ? g.toNonIndexed() : g)), matTallo); }
 
   /* ---------- destellos minerales ---------- */
-  const DIAMANTES = [[1.25, 38.7, .11], [-.95, 39.7, .09], [2.6, 35.2, .13], [-2.3, 31.4, .1], [.8, 28.4, .08], [-4.4, 40.2, .1], [4.7, 36.6, .12], [-1.6, 12.3, .09], [2.3, 10.6, .1], [-.4, 33.6, .07]];
+  const DIAMANTES = [[1.25, 38.7, .11], [-.95, 39.7, .09], [2.6, 35.2, .13], [-2.3, 31.4, .1], [.8, 28.4, .08], [-4.4, 40.2, .1], [4.7, 36.6, .12], [-1.6, 12.3, .09], [2.3, 10.6, .1], [-.4, 33.6, .07],
+    [-3.2, 36.8, .1], [3.9, 33, .09], [-1.9, 25.6, .08], [2.1, 22.4, .09], [-5.4, 38.6, .12], [5.6, 41.2, .11], [.2, 41.6, .08], [-.9, 17.5, .08]];
   const talla = new THREE.LatheGeometry([new V2(0, -.9), new V2(1, 0), new V2(1, .1), new V2(.58, .45), new V2(0, .45)], 8);
   const matDiamante = new THREE.MeshStandardMaterial({ color: 0xeef4ff, metalness: 1, roughness: .04, envMapIntensity: 3, flatShading: true, emissive: 0x3a4a66, emissiveIntensity: .45 });
   const diam = new THREE.InstancedMesh(talla, matDiamante, DIAMANTES.length);
@@ -181,8 +194,23 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
       }
     } }
 
-  /* ---------- animación: solo el centelleo ---------- */
+  /* ---------- hojas secas sueltas por la plaza ---------- */
+  { const n = MOVIL ? 70 : 140, seca = new THREE.InstancedMesh(hojaG, new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: .9, side: THREE.DoubleSide }), n);
+    for (let k = 0; k < n; k++) {
+      const x = (rnd() - .5) * 18, z = 5 + rnd() * 38, sc = 1.2 + rnd() * 1.4;
+      if (Math.abs(x) < 1.2 && z < 30) { m4.makeScale(0, 0, 0); seca.setMatrixAt(k, m4); continue; }   // el camino queda limpio
+      m4.compose(new V3(x, .01, z), q.setFromEuler(e.set(-Math.PI / 2 + (rnd() - .5) * .5, 0, rnd() * 6.3)), new V3(sc, sc, sc)); seca.setMatrixAt(k, m4);
+    }
+    seca.receiveShadow = true; add(seca); }
+
+  /* ---------- pétalos que el viento arrastra por el suelo (CPU: pocos) ---------- */
+  const N_VUELO = MOVIL ? 14 : 26, vuelo = new THREE.InstancedMesh(petalo(.09, .06, .35, .01), matRosa, N_VUELO);
+  const vuelan = Array.from({ length: N_VUELO }, () => ({ x: (rnd() - .5) * 14, z: 28 + rnd() * 14, v: .25 + rnd() * .45, f: rnd() * 6.3, giro: (rnd() - .5) * 4 }));
+  vuelo.frustumCulled = false; add(vuelo);
+
+  /* ---------- animación ---------- */
   const a = gb.attributes.a;
+  let tPrevio = 0;
   return {
     actualizar(t, rm) {
       for (let k = 0; k < fase.length; k++) {
@@ -190,6 +218,16 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
         a.array[k] = .25 + v * .95;
       }
       a.needsUpdate = true;
+      const dt = Math.min(.05, Math.max(0, t - tPrevio)); tPrevio = t;
+      const rafaga = .6 + .4 * Math.sin(t * .37);
+      vuelan.forEach((p, k) => {
+        if (!rm) { p.x += p.v * rafaga * dt; p.z += Math.sin(t * .7 + p.f) * .12 * dt; p.f += dt * (2 + p.v * 3); }
+        if (p.x > 8) { p.x = -8; p.z = 28 + rnd() * 14; }
+        const salto = Math.abs(Math.sin(p.f)) * .22 * rafaga;   // brincos al rodar
+        m4.compose(tmpV.set(p.x, .02 + salto, p.z), q.setFromEuler(e.set(-Math.PI / 2 + Math.sin(p.f) * .9, p.f * p.giro * .2, p.f * .5)), uno);
+        vuelo.setMatrixAt(k, m4);
+      });
+      vuelo.instanceMatrix.needsUpdate = true;
     },
     escalaPuntos(v) { puntos.material.uniforms.uEsc.value = v; },
   };

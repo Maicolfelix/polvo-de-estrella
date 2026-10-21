@@ -62,7 +62,8 @@ body.en-habitacion .marca{opacity:0!important}
 /* ---------- llegada ---------- */
 /* la capilla queda a la vista en el centro: portada y título en una columna a la izquierda */
 #llegada{position:fixed;inset:0;z-index:10;display:grid;grid-template-columns:auto;align-content:center;justify-content:start;justify-items:start;gap:1.6rem;padding:80px var(--borde) 90px clamp(24px,6vw,104px);
-  background:linear-gradient(90deg,rgba(6,4,5,.86),rgba(6,4,5,.6) 26%,rgba(6,4,5,0) 52%);will-change:opacity,transform}
+  background:linear-gradient(90deg,rgba(6,4,5,.86),rgba(6,4,5,.6) 26%,rgba(6,4,5,0) 52%);will-change:opacity}
+#llegada .llegada-portada,#llegada .artista,#llegada h1,#llegada .llegada-sub,#llegada .acciones,#llegada .carga{transform:translateY(var(--sube,0))}
 .llegada-portada{width:min(30vh,22vw);aspect-ratio:426/416;box-shadow:0 50px 120px -30px #000,0 0 0 1px rgba(239,232,222,.08);overflow:hidden;position:relative}
 .llegada-portada img{display:block;width:100%;height:100%;object-fit:cover}
 .llegada-portada::after{content:"";position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 44%,rgba(255,255,255,.14) 50%,transparent 56%);mix-blend-mode:screen;animation:barrido 10s ease-in-out infinite}
