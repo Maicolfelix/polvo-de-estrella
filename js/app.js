@@ -32,7 +32,8 @@ const escena = crearEscena({
   alRayo: (f, d, dentro) => { if (modo === 'nave') A.trueno(f, d, dentro); },
 });
 function medir() {
-  if (innerWidth !== W || !medir.ok) { W = innerWidth; H = innerHeight; medir.ok = true; } // ignora la barra de URL del móvil
+  // ignora la barra de URL del móvil; vuelve a medir si la ventana empezó sin tamaño (pestaña oculta)
+  if (innerWidth !== W || !medir.ok || !H) { W = innerWidth; H = innerHeight; medir.ok = H > 0; }
   escena.tamano(innerWidth, innerHeight);
   $('#recorrido').style.height = (escena.U_FIN + 1.1) * H + 'px';
 }
@@ -387,7 +388,7 @@ ayuda.textContent = HOVER ? 'Deja el cursor sobre una puerta para escuchar · Ha
 
 function tick(now) {
   const dt = Math.min(.05, (now - ultimo) / 1000); ultimo = now;
-  uObjetivo = scrollY / H;
+  uObjetivo = H > 0 ? scrollY / H : 0;
   let u;
   if (RM) {
     const est = ESTACIONES_RM.reduce((a, b) => Math.abs(b - uObjetivo) < Math.abs(a - uObjetivo) ? b : a);
