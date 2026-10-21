@@ -214,3 +214,21 @@ Con la escala adaptativa a 0,85 (1224×765) la nave también llegó a 72 fps. Lo
 - Nave: losas de piedra gastadas en lugar del mármol con vetas, alfombra carmesí con cenefa dorada hasta la puerta del fondo, charco de luz cálida bajo cada lámpara (y lámparas más intensas), dos apliques con llama junto a la puerta 9 y su luz sobre el muro del fondo, y vidrieras emplomadas que dejan ver la tormenta de detrás.
 
 **Medido (GTX 1650, 1440×900, rAF).** Llegada 72 fps, desplazamiento 72, umbral 48, nave 48: igual que antes de estos cambios. `correrTransiciones()` 21/21. Captura: `capturas/17-capilla-suelo-nave.jpg`. Sin teléfono físico.
+
+## 2026-10-21 · Puertas reales, vidrieras, rojo y negro, ventiscas, entrada decorada, diamantes y estrellas fugaces (misma rama; PR #1)
+
+**Pedidos del artista.** Lo que asomaba al abrir una puerta se veía feo; la puerta 9 parecía falsa de lejos; ventanas más realistas; quitar todo el amarillo (la paleta es rojo y negro); ventiscas fuertes de vez en cuando; más decoración en la entrada; diamantes con más detalle; estrellas fugaces.
+
+**Cambios.**
+- Tras cada puerta 2–9 hay un pasillo corto de piedra iluminado desde dentro con el color de la canción; la luz de la puerta está dentro y sale por el hueco al suelo de la nave. Sustituye al fondo negro plano y al resplandor plano.
+- Las nueve puertas llevan el acabado de la puerta 1 (pernios, puntas y bisagras de hierro, clave, umbral); el hierro va fusionado en una malla por hoja.
+- Puerta 9: una de las 3 luces reales queda reservada para el fondo mientras se está en la nave (luz de apliques que cae sobre madera, moldura y muro), con un resto leve de luz horneada. Se quitó el velo naranja plano.
+- Una capa de niebla atravesaba la nave (z −12) y se veía su borde desde dentro: movida detrás de la capilla.
+- Vidrieras exteriores: rombos emplomados carmesí, vino y brasa, una vela que parpadea detrás, el cielo reflejado y el destello de los relámpagos. Vidrieras interiores: la tormenta real a través de cristal antiguo teñido. Todas en rojo y negro.
+- Paleta de la interfaz: el dorado (MAVO, números, bordes, botones, barras, placas de las puertas, alfombra, cordón de la habitación 1) pasa a rojo oscuro. Se conservan dorados la corona y la estrella porque lo son en la referencia.
+- Ventisca cada 20–45 s (4–7 s): rosas, hojas, tallos y pinos se agitan y se doblan hacia un lado, los pétalos y el polvo corren, las velas se agitan y el viento sube de volumen y de tono. Con movimiento reducido no hay ventisca.
+- Entrada: urnas de piedra con rosas a los dos lados del pie de la escalinata, unas 70 velas en los peldaños y junto a las urnas (llamas que parpadean, una sola llamada de dibujo), zarzas con espinas trepando por las columnas del pórtico, los pináculos y los faroles, rosas pequeñas entre ellas y pétalos sobre los peldaños.
+- Diamantes: talla brillante con más facetas y sombreador propio (facetas por derivadas, fuego de colores en los bordes y brillos blancos agudos); el centelleo tiene borde irisado.
+- Estrellas fugaces cada 5–15 s en la parte del cielo que se mira, dibujadas dentro de la función del cielo: también se ven en las vidrieras y en los charcos.
+
+**Medido (GTX 1650, 1440×900, rAF).** Llegada 71 fps, desplazamiento 71, escalinata 48, umbral 48, nave 48. `correrTransiciones()` 21/21. Captura: `capturas/18-entrada-viva-puertas-diamantes.jpg`. Sin teléfono físico. `escena.provocar.ventisca()` y `escena.provocar.fugaz()` sirven para revisarlos sin esperar.

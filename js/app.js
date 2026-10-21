@@ -427,7 +427,8 @@ function tick(now) {
   // viento que acompaña el avance
   if (modo === 'nave' && A.activo) {
     const fuera = u < escena.U_EXT - .2, k = Math.min(1, vel * 1.6);
-    A.viento(fuera ? .35 + k * .65 : .1 + k * .35, fuera ? 380 + k * 300 : 300 + k * 200, .4);
+    const R = escena.rafaga();   // ventisca: el viento sube y se vuelve más agudo con ella
+    A.viento(fuera ? .35 + k * .65 + R * .9 : .1 + k * .35 + R * .35, (fuera ? 380 + k * 300 : 300 + k * 200) + R * 650, .4);
   }
   // si la puerta escuchada se aleja por desplazamiento, la preescucha se cierra
   if (escuchando != null && Math.abs(uObjetivo - uPre) > .35) pararPre();

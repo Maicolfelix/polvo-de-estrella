@@ -1,16 +1,16 @@
 # Graph Report - js  (2026-10-21)
 
 ## Corpus Check
-- 9 files · ~26,490 words
+- 9 files · ~28,941 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 166 nodes · 313 edges · 14 communities (13 shown, 1 thin omitted)
+- 167 nodes · 314 edges · 14 communities (13 shown, 1 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 15 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `cd552998`
+- Built from commit: `524d1e04`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -80,8 +80,8 @@ Cohesion: 0.38
 Nodes (10): avisar(), cambiarCancion(), detenerPreYa(), entrarCancion(), marcar(), pausar(), playPausa(), reproducir() (+2 more)
 
 ### Community 6 - "escena.js"
-Cohesion: 0.14
-Nodes (23): altoArco(), anillo(), arco(), B, caja(), contorno(), envejecer(), extruir() (+15 more)
+Cohesion: 0.13
+Nodes (24): altoArco(), anillo(), arco(), B, caja(), contorno(), envejecer(), extruir() (+16 more)
 
 ### Community 7 - "rampa"
 Cohesion: 0.36
@@ -112,23 +112,23 @@ Cohesion: 0.50
 Nodes (5): alternarMudo(), guardar(), pintarSonido(), ponerVol(), silenciado()
 
 ## Knowledge Gaps
-- **31 isolated node(s):** `CAPTURA`, `hab`, `llegada`, `capa`, `velo` (+26 more)
-  These have ≤1 connection - possible missing edges. (Counts symbols only; 57 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **32 isolated node(s):** `CAPTURA`, `hab`, `llegada`, `capa`, `velo` (+27 more)
+  These have ≤1 connection - possible missing edges. (Counts symbols only; 58 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `crearEscena()` connect `crearEscena` to `app.js`, `escena.js`?**
-  _High betweenness centrality (0.332) - this node is a cross-community bridge._
+  _High betweenness centrality (0.330) - this node is a cross-community bridge._
 - **Are the 10 inferred relationships involving `crearEscena()` (e.g. with `actualizar()` and `actualizarSala()`) actually correct?**
   _`crearEscena()` has 10 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `CAPTURA`, `hab`, `llegada` to the rest of the system?**
-  _31 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _32 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `app.js` be split into smaller, more focused modules?**
   _Cohesion score 0.08333333333333333 - nodes in this community are weakly interconnected._
 - **Why does `CANCIONES` connect `letras.js` to `app.js`, `audio.js`, `escena.js`?**
-  _High betweenness centrality (0.033) - this node is a cross-community bridge._
+  _High betweenness centrality (0.034) - this node is a cross-community bridge._
 - **Should `audio.js` be split into smaller, more focused modules?**
   _Cohesion score 0.11052631578947368 - nodes in this community are weakly interconnected._
 - **Why does `crearSalaMar()` connect `escena.js` to `crearEscena`?**

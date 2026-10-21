@@ -77,9 +77,9 @@ function texturaAlfombra() {
   const x = c.getContext('2d');
   x.fillStyle = '#2a070b'; x.fillRect(0, 0, 256, 512);
   for (let i = 0; i < 2600; i++) { x.fillStyle = `rgba(${Math.random() < .5 ? '70,12,18' : '12,3,4'},${Math.random() * .35})`; x.fillRect(Math.random() * 256, Math.random() * 512, 2, 3); }
-  x.strokeStyle = 'rgba(176,132,58,.75)'; x.lineWidth = 5; x.strokeRect(-10, -10, 34, 532); x.strokeRect(232, -10, 34, 532);
-  x.lineWidth = 2; x.strokeStyle = 'rgba(176,132,58,.45)'; x.beginPath(); x.moveTo(34, 0); x.lineTo(34, 512); x.moveTo(222, 0); x.lineTo(222, 512); x.stroke();
-  x.strokeStyle = 'rgba(150,110,50,.35)'; x.lineWidth = 2;
+  x.strokeStyle = 'rgba(150,26,34,.85)'; x.lineWidth = 5; x.strokeRect(-10, -10, 34, 532); x.strokeRect(232, -10, 34, 532);
+  x.lineWidth = 2; x.strokeStyle = 'rgba(150,26,34,.5)'; x.beginPath(); x.moveTo(34, 0); x.lineTo(34, 512); x.moveTo(222, 0); x.lineTo(222, 512); x.stroke();
+  x.strokeStyle = 'rgba(120,20,28,.4)'; x.lineWidth = 2;
   for (let y = 64; y < 512; y += 128) { x.beginPath(); x.moveTo(128, y - 40); x.lineTo(168, y); x.lineTo(128, y + 40); x.lineTo(88, y); x.closePath(); x.stroke(); }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; return t;
 }
@@ -87,8 +87,8 @@ function texturaPlaca(n) {
   const c = document.createElement('canvas'); c.width = 256; c.height = 150;
   const x = c.getContext('2d');
   x.fillStyle = '#0d0a09'; x.fillRect(0, 0, 256, 150);
-  x.strokeStyle = 'rgba(201,162,74,.55)'; x.lineWidth = 3; x.strokeRect(10, 10, 236, 130);
-  const g = x.createLinearGradient(0, 30, 0, 120); g.addColorStop(0, '#f3dc9a'); g.addColorStop(.5, '#b98a34'); g.addColorStop(1, '#e9c879');
+  x.strokeStyle = 'rgba(179,32,42,.7)'; x.lineWidth = 3; x.strokeRect(10, 10, 236, 130);
+  const g = x.createLinearGradient(0, 30, 0, 120); g.addColorStop(0, '#f0b4b4'); g.addColorStop(.5, '#9a1e26'); g.addColorStop(1, '#d86a6a');
   x.fillStyle = g; x.font = '500 84px "Cormorant Garamond", Georgia, serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
   x.fillText(n, 128, 80);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
@@ -125,7 +125,7 @@ roughnessFactor *= ${alto > 0 ? `mix(1., .6, 1. - smoothstep(0., ${f(alto * .6)}
 
 // Cielo de tormenta como función GLSL: lo usan el cielo, las vidrieras de la nave (dejan ver el cielo real
 // que hay detrás, con sus nubes y relámpagos) y los charcos de la plaza (lo reflejan).
-const CIELO_GLSL = `uniform float uT,uF; uniform vec3 uD,uFog;
+const CIELO_GLSL = `uniform float uT,uF,uFugaP; uniform vec3 uD,uFog,uFugaA,uFugaB;
       float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
       float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
       float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
@@ -144,6 +144,14 @@ const CIELO_GLSL = `uniform float uT,uF; uniform vec3 uD,uFog;
         col+=rojo*borde*1.5+rojo*.22*nube*(1.-smoothstep(.0,.4,y));
         float fl=pow(max(dot(d,normalize(uD)),0.),5.);
         col+=vec3(.95,.8,.95)*uF*fl*(.35+nube*1.3)+vec3(.35,.12,.16)*uF*.2;
+        // estrella fugaz: un trazo sobre el arco entre A y B; la cabeza avanza con uFugaP y la cola se apaga
+        if (uFugaP > 0. && uFugaP < 1.) {
+          vec3 nf = normalize(cross(uFugaA, uFugaB)); float dl = abs(dot(d, nf));
+          float a = atan(dot(d, cross(nf, uFugaA)), dot(d, uFugaA)), T = acos(clamp(dot(uFugaA, uFugaB), -1., 1.));
+          float cab = uFugaP * T, cola = .24 * T, s = (cab - a) / cola;
+          float br = (1. - smoothstep(.0, 1., s)) * step(0., s) * smoothstep(.0045, .0, dl) * sin(3.1416 * uFugaP) * (1. - nube * .4);
+          col += vec3(1., .92, .92) * br * 2.2 + vec3(1., .5, .5) * smoothstep(.009, .0, dl) * br * .25;
+        }
         col=mix(uFog*1.1,col,smoothstep(-.06,.1,y));
         return col; }
 `;
@@ -153,14 +161,15 @@ const CIELO_GLSL = `uniform float uT,uF; uniform vec3 uD,uFog;
 //   'planta': tallos, hojas y rosas se mecen según su altura; cada instancia se mueve entera desde su ancla,
 //   con la misma fase que el punto del tallo donde está, para que flor y tallo no se separen.
 export const VIENTO = { value: 0 };
+export const RAFAGA = { value: 0 };   // 0..1: ventisca de vez en cuando (las plantas se doblan y se agitan más)
 export function mecer(mat, modo, amp) {
   const prev = mat.onBeforeCompile;
   mat.onBeforeCompile = (sh, r) => {
     prev?.(sh, r);
-    sh.uniforms.uViento = VIENTO;
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uViento;');
+    sh.uniforms.uViento = VIENTO; sh.uniforms.uRafaga = RAFAGA;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uViento, uRafaga;');
     if (modo === 'tarjeta') sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
-      transformed.x += (sin(uViento * .8 + position.x * .07) * .7 + sin(uViento * 1.9 + position.x * .21) * .3) * ${amp.toFixed(3)} * uv.y * uv.y;`);
+      transformed.x += ((sin(uViento * .8 + position.x * .07) * .7 + sin(uViento * 1.9 + position.x * .21) * .3) * (1. + uRafaga * 1.6) + uRafaga * 1.4) * ${amp.toFixed(3)} * uv.y * uv.y;`);
     else sh.vertexShader = sh.vertexShader.replace('#include <project_vertex>', `
       vec4 mvPosition = vec4(transformed, 1.);
       #ifdef USE_INSTANCING
@@ -171,7 +180,8 @@ export function mecer(mat, modo, amp) {
       #endif
       float alto = clamp(ancla.y / .9, 0., 1.);
       float rafaga = .65 + .35 * sin(uViento * .37 + ancla.x * .05);
-      mvPosition.xz += vec2(sin(uViento * 1.6 + ancla.x * .35 + ancla.z * .25), cos(uViento * 1.2 + ancla.x * .3 - ancla.z * .2) * .6) * ${amp.toFixed(3)} * alto * alto * rafaga;
+      vec2 agita = vec2(sin(uViento * 1.6 + ancla.x * .35 + ancla.z * .25), cos(uViento * 1.2 + ancla.x * .3 - ancla.z * .2) * .6) * (1. + uRafaga * 2.2);
+      mvPosition.xz += (agita + vec2(uRafaga * 2.4, -uRafaga * .5)) * ${amp.toFixed(3)} * alto * alto * rafaga;   // en la ventisca, además, se doblan hacia un lado
       mvPosition = modelViewMatrix * mvPosition;
       gl_Position = projectionMatrix * mvPosition;`);
   };
@@ -193,7 +203,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   const scene = new THREE.Scene();
   const FOG = new THREE.Color(0x1a0a0c);
   scene.fog = new THREE.FogExp2(FOG, .0105);
-  const uCielo = { uT: { value: 0 }, uF: { value: 0 }, uD: { value: new V3(0, .3, -1) }, uFog: { value: FOG } };
+  const uCielo = { uT: { value: 0 }, uF: { value: 0 }, uD: { value: new V3(0, .3, -1) }, uFog: { value: FOG }, uFugaA: { value: new V3(0, .5, -1) }, uFugaB: { value: new V3(.3, .4, -1) }, uFugaP: { value: -1 } };
   // zonas: el exterior y la nave se ocultan cuando la cámara no puede verlos (ahorra el sobredibujado)
   const ext = new THREE.Group(), int = new THREE.Group();
   scene.add(ext, int);
@@ -228,16 +238,36 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     losa: pbr('suelo', { normal: 1.3, env: .3, color: 0x8f8780 }),   // losas de piedra gastadas de la nave
     hierro: new THREE.MeshStandardMaterial({ color: 0x16130f, metalness: .9, roughness: .42, envMapIntensity: .8 }),
     madera: new THREE.MeshStandardMaterial({ map: tex('puerta_col', true), normalMap: tex('puerta_nor'), roughnessMap: tex('puerta_rug'), metalnessMap: tex('puerta_met'), metalness: 1, roughness: 1, envMapIntensity: .6, normalScale: new V2(1.4, 1.4) }),
-    vidrio: new THREE.MeshStandardMaterial({ color: 0x050304, roughness: .2, metalness: 0, emissive: 0x6a1812, emissiveIntensity: .55 }),
+    // vidriera vista desde fuera: rombos emplomados de colores, una vela que parpadea detrás, el cielo
+    // reflejado en el cristal y el destello de los relámpagos
+    vidrio: new THREE.ShaderMaterial({ uniforms: uCielo, fog: false,
+      vertexShader: 'varying vec3 vW, vN; varying vec2 vUv; void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.); vW = w.xyz; vN = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * viewMatrix * w; }',
+      fragmentShader: `varying vec3 vW, vN; varying vec2 vUv; ${CIELO_GLSL}
+        void main(){
+          vec2 r = vec2(vUv.x + vUv.y, vUv.x - vUv.y) * 3.4, id = floor(r), f = fract(r);
+          float plomo = smoothstep(.41, .47, max(abs(f.x - .5), abs(f.y - .5)));
+          float k = h(id), k2 = h(id + 7.3);
+          vec3 vid = k < .45 ? vec3(.62, .04, .05) : k < .72 ? vec3(.32, .015, .05) : k < .9 ? vec3(.5, .1, .04) : vec3(.12, .015, .025);   // carmesí, vino, brasa y casi negro
+          vid *= .55 + .45 * k2;                                       // cada pieza de cristal con su propio espesor
+          float vela = .32 + .1 * sin(uT * 7.3 + id.x * 1.7) * sin(uT * 3.1 + id.y) + .08 * n(vW.xy * .6 + uT * .4);
+          float abajo = smoothstep(-.2, 1.6, 3.2 - (vW.y - 1.) * .45);  // la luz de dentro llega más abajo
+          vec3 v = normalize(vW - cameraPosition), nn = normalize(vN), rf = reflect(v, nn); rf.y = abs(rf.y);
+          float fres = .05 + .55 * pow(1. - abs(dot(v, nn)), 3.);
+          vec3 c = vid * vela * abajo * (1. + uF * 4.) + cielo(rf) * fres * .7;
+          gl_FragColor = vec4(mix(c, vec3(.012, .01, .01), plomo * .92), 1.); }` }),
     vidrioCalido: new THREE.MeshStandardMaterial({ color: 0x050304, roughness: .2, emissive: 0xc06a2a, emissiveIntensity: .9 }),
     // vidriera emplomada que deja ver el cielo de detrás (dirección de la vista a través del cristal)
     ventana: new THREE.ShaderMaterial({ uniforms: uCielo, fog: false,
       vertexShader: 'varying vec3 vW; varying vec2 vUv; void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
       fragmentShader: `varying vec3 vW; varying vec2 vUv; ${CIELO_GLSL}
         void main(){ vec3 d = normalize(vW - cameraPosition); d.y = max(d.y, .04);
-          vec3 c = cielo(d) * 1.25 + vec3(.012, .004, .006);
-          vec2 g = abs(fract(vUv * vec2(4.5, 6.)) - .5); float plomo = smoothstep(.43, .47, max(g.x, g.y));
-          gl_FragColor = vec4(mix(c, vec3(.008, .006, .006), plomo * .9), 1.); }` }),
+          vec2 r = vec2(vUv.x + vUv.y, vUv.x - vUv.y) * 3.4, id = floor(r), f = fract(r);
+          float plomo = smoothstep(.41, .47, max(abs(f.x - .5), abs(f.y - .5)));
+          float k = h(id);
+          vec3 tinte = k < .45 ? vec3(1., .45, .45) : k < .72 ? vec3(.8, .3, .4) : k < .9 ? vec3(1., .6, .45) : vec3(.5, .25, .3);
+          // cristal antiguo: el cielo de detrás teñido por cada pieza y algo ondulado
+          vec3 c = cielo(normalize(d + vec3(n(vUv * 9.) - .5, 0., n(vUv * 9. + 4.) - .5) * .05)) * 1.3 * tinte + vec3(.014, .006, .006);
+          gl_FragColor = vec4(mix(c, vec3(.008, .006, .006), plomo * .92), 1.); }` }),
     // charco: agua oscura que refleja el cielo real (nubes y relámpagos), con onditas y borde irregular
     charco: new THREE.ShaderMaterial({ uniforms: uCielo, transparent: true, depthWrite: false, fog: false,
       vertexShader: 'varying vec3 vW; varying vec2 vUv; void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
@@ -533,18 +563,20 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     poner(M.hierro, new THREE.CylinderGeometry(.015, .015, 7.8, 6).translate(0, B + 4.6 + 3.9, z), 1);
     poner(M.hierro, new THREE.TorusGeometry(.55, .025, 8, 40).rotateX(Math.PI / 2).translate(0, B + 4.6, z), 1);
     for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; poner(M.hierro, new THREE.CylinderGeometry(.008, .008, 1.1, 4).rotateZ(.46).rotateY(a).translate(Math.cos(a) * .27, B + 5.1, z - Math.sin(a) * .27), 1); }
-    return foco(0, B + 4.6, z, 0xffd2aa, 10);
+    return foco(0, B + 4.6, z, 0xffa080, 10);
   });
   // charco de luz cálida bajo cada lámpara: se ve aunque esa lámpara no tenga una de las luces reales
   const charcoLuz = texturaRadial([[0, 'rgba(255,255,255,.85)'], [.45, 'rgba(255,255,255,.25)'], [1, 'rgba(255,255,255,0)']]);
   for (const { p } of lamparas) {
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 5.2).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: charcoLuz, color: 0xffb070, transparent: true, opacity: .32, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 5.2).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: charcoLuz, color: 0xff7a50, transparent: true, opacity: .32, blending: THREE.AdditiveBlending, depthWrite: false }));
     m.position.set(p.x, B + .02, p.z); add(m);
     m.material.opacity = .22;
   }
-  // la luz de los apliques sobre el muro del fondo: la puerta 9 se distingue desde la entrada de la nave
-  { const lavado = new THREE.Mesh(new THREE.PlaneGeometry(6.5, 5.5), new THREE.MeshBasicMaterial({ map: charcoLuz, color: 0xff9a55, transparent: true, opacity: .3, blending: THREE.AdditiveBlending, depthWrite: false }));
-    lavado.position.set(0, B + 2.4, Z1 + .03); add(lavado); }
+  // la luz de cada aplique sobre el muro (un halo pequeño a su alrededor, no un velo sobre la puerta)
+  for (const s of [-1, 1]) {
+    const lavado = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 2.2), new THREE.MeshBasicMaterial({ map: charcoLuz, color: 0xff9a55, transparent: true, opacity: .22, blending: THREE.AdditiveBlending, depthWrite: false }));
+    lavado.position.set(s * 1.75, B + 2.5, Z1 + .02); add(lavado);
+  }
   // la puerta del fondo: dos apliques con llama a los lados y su luz en el suelo
   const apliques = [-1, 1].map(s => {
     const x = s * 1.75, y = B + 2.5, z = Z1 + .2;
@@ -553,13 +585,18 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     const hl = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color: 0xffa860, transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false, fog: false })); hl.position.set(x, y, z + .32); hl.scale.setScalar(.9); add(hl);
     const m = new THREE.Mesh(new THREE.PlaneGeometry(3, 3).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: charcoLuz, color: 0xff9a50, transparent: true, opacity: .28, blending: THREE.AdditiveBlending, depthWrite: false }));
     m.position.set(x * .6, B + .021, z + 1.4); add(m);
-    return foco(x, y, z + .45, 0xffa860, 7, 5);
+    return null;
   });
+  // una sola luz real para el fondo, a la altura de los apliques: siempre reservada dentro de la nave
+  const luzFondo = foco(0, B + 2.7, Z1 + 1.3, 0xff9a60, 10, 0);
   const bulbos = new THREE.InstancedMesh(new THREE.SphereGeometry(.05, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffd7a0 }), 24);
   { const m = new THREE.Matrix4(); let k = 0; for (const { p } of lamparas) for (let a = 0; a < 6; a++) { m.makeTranslation(p.x + Math.cos(a * Math.PI / 3) * .55, p.y + .06, p.z + Math.sin(a * Math.PI / 3) * .55); bulbos.setMatrixAt(k++, m); } }
   add(bulbos);
 
   // ---------- las nueve puertas ----------
+  M.maderaFondo = M.madera.clone(); Object.assign(M.maderaFondo, { emissive: new THREE.Color(0xff8a40), emissiveMap: tex('puerta_col', true), emissiveIntensity: .12 });
+  M.piedraFondo = M.piedra.clone(); Object.assign(M.piedraFondo, { emissive: new THREE.Color(0xff9050), emissiveMap: tex('piedra_col', true), emissiveIntensity: .08 });
+  envejecer(M.piedraFondo, { base: B, alto: 1.1, fuerza: .22, vetas: .14, musgo: 0, macro: .25 });
   const glowTex = texturaRadial([[0, 'rgba(255,255,255,1)'], [.35, 'rgba(255,255,255,.45)'], [1, 'rgba(255,255,255,0)']]);
   const charcoTex = texturaRadial([[0, 'rgba(255,255,255,.9)'], [.5, 'rgba(255,255,255,.25)'], [1, 'rgba(255,255,255,0)']]);
   const puertas = puertasDef.map(d => {
@@ -572,7 +609,9 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     const mold = d.lado === 0
       ? extruir(formaU(0, { w: 1.16, s: 2.9, R: 1.51 }, P9), .16).translate(0, B, Z1)
       : extruir(formaU(0, MARCO, PUERTA), .12).rotateY(Math.PI / 2).translate(d.lado < 0 ? -IW : IW - .12, B, d.z);
-    poner(M.piedra, mold, 1);
+    // la puerta 9 queda lejos de las luces reales: su madera y su moldura llevan el reflejo cálido de sus dos
+    // apliques en el propio material (como luz horneada) para leerse igual que las demás desde la entrada
+    if (d.lado === 0) add(new THREE.Mesh(uvMundo(mold, 1), M.piedraFondo)); else poner(M.piedra, mold, 1);
     // hojas: medio arco cada una, con bisagra en el borde exterior
     const ap = altoArco(dim.w, dim.R), arcPts = arco(0, dim.s, dim.w, dim.R);
     const mitad = arcPts.slice(0, Math.ceil(arcPts.length / 2));
@@ -584,36 +623,54 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       for (let k = 0; k < p.count; k++) uv.setXY(k, (p.getX(k) + dim.w) / (2 * dim.w), p.getY(k) / (dim.s + ap));
       g.translate(-s * dim.w, 0, 0);
       const piv = new THREE.Group(); piv.position.set(s * dim.w, 0, -.02);
-      const m = new THREE.Mesh(g, M.madera); m.receiveShadow = true;
+      const m = new THREE.Mesh(g, d.lado === 0 ? M.maderaFondo : M.madera); m.receiveShadow = true;
       const tirador = new THREE.Mesh(new THREE.TorusGeometry(.06, .012, 6, 18), M.hierro);
       tirador.position.set(-s * dim.w + -s * -.12, 1.15, .085); piv.add(m, tirador);
       marco.add(piv);
       return { piv, s };
     });
-    // tras la puerta: un fondo oscuro con el resplandor de la canción (lo que asoma al entreabrirla);
-    // al entrar, el hueco pasa a mostrar la habitación preparada (portal, ver `portalHab`)
+    // tras la puerta: un pasillo corto de piedra iluminado desde dentro con el color de la canción
+    // (lo que se ve al entreabrirla; su luz sale por la puerta al suelo de la nave). Al entrar, el hueco
+    // pasa a mostrar la habitación preparada (portal, ver `portalHab`). La puerta 1 da a la sala del mar.
     const altoHab = dim.s + ap;
-    const negro = new THREE.Mesh(new THREE.PlaneGeometry(dim.w * 2 + .1, altoHab + .1).translate(0, altoHab / 2, -.36), new THREE.MeshBasicMaterial({ color: 0x050304 }));
-    const fondo = new THREE.Mesh(new THREE.PlaneGeometry(dim.w * 2, altoHab).translate(0, altoHab * .48, -.3), new THREE.MeshBasicMaterial({ map: glowTex, color: luz, transparent: true, opacity: .25, blending: THREE.AdditiveBlending, depthWrite: false }));
-    marco.add(negro, fondo);
-    if (d.i === 0) negro.visible = fondo.visible = false;   // la puerta 1 da a la sala del mar (portal)
+    let matVest = null, fondo = null;
+    if (d.i !== 0) {
+      const Wv = dim.w * 2 + .24, Hv = altoHab + .25, z0 = -.12, z1 = -1.9, Dv = z0 - z1;
+      const piezas = [
+        new THREE.PlaneGeometry(Wv, Hv).translate(0, Hv / 2, z1),
+        new THREE.PlaneGeometry(Dv, Hv).rotateY(Math.PI / 2).translate(-Wv / 2, Hv / 2, (z0 + z1) / 2),
+        new THREE.PlaneGeometry(Dv, Hv).rotateY(-Math.PI / 2).translate(Wv / 2, Hv / 2, (z0 + z1) / 2),
+        new THREE.PlaneGeometry(Wv, Dv).rotateX(-Math.PI / 2).translate(0, .001, (z0 + z1) / 2),
+        new THREE.PlaneGeometry(Wv, Dv).rotateX(Math.PI / 2).translate(0, Hv, (z0 + z1) / 2),
+      ];
+      matVest = new THREE.MeshStandardMaterial({ map: tex('piedra_col', true), normalMap: tex('piedra_nor'), color: 0x8a817a, roughness: .95, emissive: luz, emissiveIntensity: .03 });
+      marco.add(new THREE.Mesh(uvMundo(mergeGeometries(piezas), 1.4), matVest));
+      // al fondo del pasillo, el resplandor de la habitación
+      fondo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: luz, transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+      fondo.position.set(0, altoHab * .45, z1 + .1); fondo.scale.set(Wv * 1.1, Hv * .9, 1); marco.add(fondo);
+    }
     // luz que se escapa por debajo y su reflejo en el mármol
     const rendija = new THREE.Mesh(new THREE.BoxGeometry(dim.w * 2 - .04, .012, .02), new THREE.MeshBasicMaterial({ color: luz }));
     rendija.position.set(0, .006, .03); marco.add(rendija);
     const charco = new THREE.Mesh(new THREE.PlaneGeometry(dim.w * 3.2, 2.2), new THREE.MeshBasicMaterial({ map: charcoTex, color: luz, transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false }));
     charco.rotation.x = -Math.PI / 2; charco.position.set(0, .012, d.lado === 0 ? 1.1 : 1.0 + .5); marco.add(charco);
     // placa con el número
-    const placa = new THREE.Mesh(new THREE.PlaneGeometry(.46, .27), new THREE.MeshStandardMaterial({ map: texturaPlaca(c.n), roughness: .4, metalness: .5, emissive: 0x2a1c08, emissiveIntensity: .4 }));
+    const placa = new THREE.Mesh(new THREE.PlaneGeometry(.46, .27), new THREE.MeshStandardMaterial({ map: texturaPlaca(c.n), roughness: .4, metalness: .5, emissive: 0x2a0606, emissiveIntensity: .4 }));
     placa.position.set(0, dim.s + ap + .42, d.lado === 0 ? 1.0 : .62); marco.add(placa);
-    // acabado nuevo (muestra en la puerta 1; se extenderá a las demás tras la revisión)
-    if (d.i === 0) {
-      for (const { piv, s } of hojas) for (const y of [.42, 1.55, 2.75]) {
-        const banda = new THREE.Mesh(new THREE.BoxGeometry(dim.w * .9, .07, .022), M.hierro); banda.position.set(-s * dim.w * .47, y, .078); piv.add(banda);
-        const punta = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, .022, 10).rotateX(Math.PI / 2), M.hierro); punta.position.set(-s * dim.w * .9, y, .078); piv.add(punta);
-        const pin = new THREE.Mesh(new THREE.CylinderGeometry(.028, .028, .14, 10), M.hierro); pin.position.set(0, y, .03); piv.add(pin);
+    // acabado de las nueve puertas: pernios, puntas y bisagras de hierro (una malla por hoja), clave y umbral
+    for (const { piv, s } of hojas) {
+      const gs = [];
+      for (const y of [.42, dim.s * .63, dim.s * 1.12]) {
+        gs.push(new THREE.BoxGeometry(dim.w * .9, .07, .022).translate(-s * dim.w * .47, y, .078));
+        gs.push(new THREE.CylinderGeometry(.03, .03, .022, 10).rotateX(Math.PI / 2).translate(-s * dim.w * .9, y, .078).toNonIndexed());
+        gs.push(new THREE.CylinderGeometry(.028, .028, .14, 10).translate(0, y, .03).toNonIndexed());
       }
-      const clave = new THREE.Mesh(new THREE.BoxGeometry(.24, .34, .2), M.piedra); clave.position.set(0, dim.s + ap + .06, .55); marco.add(clave);
-      const umbral = new THREE.Mesh(new THREE.BoxGeometry(dim.w * 2 + .26, .05, .56), M.piedra); umbral.position.set(0, .025, .26); umbral.receiveShadow = true; marco.add(umbral);
+      piv.add(new THREE.Mesh(mergeGeometries(gs.map(g => g.index ? g.toNonIndexed() : g)), M.hierro));
+    }
+    { const prof = d.lado === 0 ? .9 : .55;
+      const clave = new THREE.Mesh(new THREE.BoxGeometry(.26, .36, .2), M.piedra); clave.position.set(0, dim.s + ap + .06, prof); marco.add(clave);
+      const umbral = new THREE.Mesh(new THREE.BoxGeometry(dim.w * 2 + .26, .05, .56), M.piedra); umbral.position.set(0, .025, prof - .29); umbral.receiveShadow = true; marco.add(umbral); }
+    if (d.i === 0) {
       // farol de hierro en la columna contigua (a 1,1 m de la puerta, hacia la entrada de la nave)
       const brazo = new THREE.Mesh(new THREE.BoxGeometry(.04, .04, .3), M.hierro); brazo.position.set(-1.1, 2.45, .88); marco.add(brazo);
       const caja = new THREE.Mesh(new THREE.BoxGeometry(.16, .24, .16), M.vidrioCalido); caja.position.set(-1.1, 2.3, 1.02); marco.add(caja);
@@ -622,7 +679,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       const l = marco.localToWorld(new V3(-1.1, 2.3, 1.1)); foco(l.x, l.y, l.z, 0xffa860, 4.5, 1.8);   // llama del farol
       const hl = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color: 0xffa860, transparent: true, opacity: .5, blending: THREE.AdditiveBlending, depthWrite: false, fog: false })); hl.position.set(-1.1, 2.3, 1.02); hl.scale.setScalar(.7); marco.add(hl);
     }
-    return { ...d, c, luz, marco, hojas, fondo, rendija, charco, ap, abierto: 0, objetivo: 0, brillo: 0, objetivoBrillo: 0, foco: foco(0, 0, 0, luz, 5) };
+    return { ...d, c, luz, marco, hojas, fondo, matVest, rendija, charco, ap, abierto: 0, objetivo: 0, brillo: 0, objetivoBrillo: 0, foco: foco(0, 0, 0, luz, 6) };
   });
 
   destino = ext;
@@ -710,7 +767,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     add(m); capasNiebla.push({ mat, vel });
   };
   capa(160, 9, 0, 3.2, -45, 0, .55, .004);
-  capa(120, 7, 0, 2.4, -12, 0, .32, -.006);
+  capa(120, 7, 0, 2.4, -34, 0, .32, -.006);   // detrás de la capilla (antes cruzaba la nave y se veía su borde desde dentro)
   capa(90, 5, -18, 1.6, 10, .2, .35, .008);
   capa(90, 5, 18, 1.4, 26, -.15, .4, -.007);
   capa(70, 4, 0, 1.2, 52, 0, .3, .01);
@@ -751,7 +808,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     // solo lo que refleja (metal, oro, mármol, diamantes, tímpano) lleva mapa de entorno: en la piedra,
     // la madera y el suelo apenas se notaba y costaba en cada píxel
     const env = pm.fromScene(es, .04).texture;
-    scene.traverse(o => { const m = o.material; if (m?.isMeshStandardMaterial && m.metalness > .2) m.envMap = env; }); }
+    scene.traverse(o => { const m = o.material; if (m?.isMeshStandardMaterial && (m.metalness > .2 || m.userData.refleja)) m.envMap = env; }); }
 
   // rayo: textura dibujada en cada descarga
   const rayoCanvas = document.createElement('canvas'); rayoCanvas.width = 256; rayoCanvas.height = 1024;
@@ -848,7 +905,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
 
   /* ===================== ESTADO Y ANIMACIÓN ===================== */
   let tiempo = 0, uActual = 0, anim = null, mezcla = null, retenido = false; // retenido: la cámara se queda dentro de la habitación
-  let rayo = null, proximoRayo = 1.5;
+  let rayo = null, proximoRayo = 1.5, ventisca = null, proximaVentisca = 12, proximaFugaz = 4;
   const cam = { p: new V3(), t: new V3() };
   const tmp = new V3();
   const fovBase = () => camera.aspect < 1 ? 64 : 50;
@@ -987,7 +1044,6 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     rayoMesh.lookAt(cam.p);
     relampago.intensity = dentro ? 0 : f * 2.4;
     if (rayo) relampago.position.copy(rayo.dir).multiplyScalar(60);
-    M.vidrio.emissiveIntensity = .55 + f * (dentro ? 7 : 3);
     hemi.intensity = (dentro ? .5 : .9) + f * (dentro ? .5 : .6);   // dentro, con menos luces puntuales, algo más de ambiente
     capasNiebla.forEach(c => c.mat.uniforms.uF.value = f);
     return f;
@@ -998,7 +1054,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     for (let i = 0; i < pos.count; i++) {
       fase[i] += dt * .4;
       let x = base[i * 3] + Math.sin(fase[i] * .7) * .25, y = base[i * 3 + 1] + Math.sin(fase[i]) * .15, z = base[i * 3 + 2] + Math.cos(fase[i] * .5) * .25;
-      if (!rm) { base[i * 3] += dt * .05; base[i * 3 + 2] -= dt * .02; }
+      if (!rm) { const r = 1 + RAFAGA.value * 9; base[i * 3] += dt * .05 * r; base[i * 3 + 2] -= dt * .02 * r; }   // la ventisca arrastra el polvo
       for (let k = 0; k < 3; k++) { const [lo, hi] = pts.userData.caja3[k]; if (base[i * 3 + k] < lo) base[i * 3 + k] += hi - lo; else if (base[i * 3 + k] > hi) base[i * 3 + k] -= hi - lo; }
       if (atraer) {
         tmp.set(x, y, z).sub(atraer.p); const dd = tmp.length();
@@ -1014,7 +1070,13 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   const bezier = (o, a, c, b, s) => o.copy(a).multiplyScalar((1 - s) ** 2).addScaledVector(c, 2 * (1 - s) * s).addScaledVector(b, s * s);
   function actualizar(dt, u, { usarScroll = true } = {}) {
     tiempo += dt; uActual = u;
-    if (!rm) VIENTO.value += dt;
+    if (!rm) {
+      // ventisca: cada 20–45 s, una racha de 4–7 s que sube y baja suave
+      proximaVentisca -= dt;
+      if (proximaVentisca <= 0 && !ventisca) { ventisca = { t: 0, dur: 4 + Math.random() * 3 }; proximaVentisca = 20 + Math.random() * 25; }
+      if (ventisca) { ventisca.t += dt; const k = ventisca.t / ventisca.dur; RAFAGA.value = Math.sin(Math.PI * cl(k)) ** 1.4; if (k >= 1) { ventisca = null; RAFAGA.value = 0; } }
+      VIENTO.value += dt * (1 + RAFAGA.value * 1.6);
+    }
     const ahora = performance.now();
     // cámara
     if (anim) {
@@ -1060,10 +1122,21 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
 
     const f = actualizarRayo(dt, dentro);
     cielo.material.uniforms.uT.value = rm ? 0 : tiempo;
+    // estrellas fugaces de vez en cuando, en la parte del cielo que se está mirando
+    if (!rm) {
+      proximaFugaz -= dt;
+      if (proximaFugaz <= 0 && uCielo.uFugaP.value < 0) {
+        const az = Math.atan2(cam.t.x - cam.p.x, cam.t.z - cam.p.z) + (Math.random() - .5) * 1.1, el = .36 + Math.random() * .2, lado = Math.random() < .5 ? -1 : 1;
+        uCielo.uFugaA.value.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)).normalize();
+        uCielo.uFugaB.value.set(Math.sin(az + lado * .55) * Math.cos(el - .12), Math.sin(el - .12), Math.cos(az + lado * .55) * Math.cos(el - .12)).normalize();
+        uCielo.uFugaP.value = 0; proximaFugaz = 5 + Math.random() * 10;
+      }
+      if (uCielo.uFugaP.value >= 0) { uCielo.uFugaP.value += dt / .9; if (uCielo.uFugaP.value >= 1) uCielo.uFugaP.value = -1; }
+    }
     if (!rm) { capasNiebla.forEach(c => c.mat.uniforms.uT.value += c.vel * dt); sueloNiebla.material.uniforms.uT.value += dt * .004; }
     // sin sombra propia, el contraluz entraría en la nave: se apaga antes de cruzar el portal
     luna.intensity = dentro ? 0 : 1.5; contra.intensity = .18 * suave(.6, 3.2, cam.p.z);
-    if (ext.visible) primerPlano.actualizar(tiempo, rm);
+    if (ext.visible) primerPlano.actualizar(tiempo, rm, RAFAGA.value);
 
     // puertas: hojas, luz, portal
     for (const d of puertas) {
@@ -1074,12 +1147,13 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       const ang = cl(d.abierto) * 1.8;
       // todas se abren hacia la nave, hasta quedar contra el derrame del muro: el hueco queda libre para la cámara
       d.hojas.forEach(({ piv, s }) => piv.rotation.y = s * Math.min(ang, 1.52));
-      d.fondo.material.opacity = .18 + d.brillo * .7;
+      if (d.fondo) { d.fondo.material.opacity = .12 + d.brillo * .5; d.matVest.emissiveIntensity = .03 + d.brillo * .12 + d.abierto * .08; }
       d.charco.material.opacity = .16 + d.brillo * .35 + d.abierto * .3;
-      d.foco.p.copy(mundo(d, 0, .9, .7)); d.foco.i = dentro ? 1 + d.brillo * 2.4 + d.abierto * 1.2 : 0;
+      // la luz de cada puerta está dentro de su pasillo: sale por el hueco al abrirse
+      d.foco.p.copy(mundo(d, 0, 1.5, d.i === 0 ? .9 : -.9)); d.foco.i = dentro ? .8 + d.brillo * 3 + d.abierto * 2.5 : 0;
     }
     lamparas.forEach(l => l.i = dentro || cam.p.z < 1.5 ? 16 : 0);
-    apliques.forEach(l => l.i = dentro ? 5 + Math.sin(tiempo * 8 + l.p.x) * .3 : 0);
+    luzFondo.i = dentro ? 9 + Math.sin(tiempo * 8) * .35 + Math.sin(tiempo * 13.7) * .25 : 0;
     // el portal de la habitación aparece con la apertura; al cerrarse la puerta se retira
     if (portalDe) {
       const op = suave(.04, .45, portalDe.abierto);
@@ -1091,7 +1165,8 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     // el resplandor del posproceso cede al final de la entrada: el hueco debe verse igual que la habitación
     // POOL luces reales para todos los focos: las que más aportan cerca de la cámara
     for (const fo of focos) fo.peso = fo.i / (1 + fo.p.distanceToSquared(cam.p) / (fo.d * fo.d));
-    const orden = focos.filter(fo => fo.i > 0).sort((x, y) => y.peso - x.peso);
+    const orden = focos.filter(fo => fo.i > 0 && fo !== luzFondo).sort((x, y) => y.peso - x.peso);
+    if (luzFondo.i > 0) orden.unshift(luzFondo);   // la puerta del fondo siempre con luz real: de lejos debe verse iluminada, no pintada
     luces.forEach((l, k) => { const fo = orden[k]; if (!fo) { l.intensity = 0; return; } l.position.copy(fo.p); l.color.copy(fo.c); l.distance = fo.d; l.intensity = fo.i; });
     if (ext.visible) moverParticulas(polvoExt, dt, null);
     if (int.visible) moverParticulas(polvoInt, dt, anim && !rm && anim.t > .8 ? { p: mundo(anim.d, 0, 1.4, -1), k: 1.6 * cl((anim.t - .8) / 1.2) } : null);
@@ -1165,6 +1240,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   // ponytail: reinicia el polvo interior tras cada entrada en vez de simular su regreso
   return {
     renderer, camera, scene, calidad, tamano, actualizar, render, entrar, salir, ponerEnPuerta, preescucha, rectPuertas, actualizarSala, terminarEntrada,
+    rafaga: () => RAFAGA.value, provocar: { ventisca: () => { proximaVentisca = 0; }, fugaz: () => { proximaFugaz = 0; } },   // para revisar y capturar
     uDePuerta, U_FIN, U_EXT, U_NAVE, PASO, reponerPolvo: () => reponerParticulas(polvoInt),
     cancelarMezcla: () => { mezcla = null; },
     depurar: () => ({ anim: anim && { t: +anim.t.toFixed(2), dur: anim.dur, avisado: anim.avisado }, mezcla: !!mezcla, cam: cam.p.toArray().map(v => +v.toFixed(2)) }),

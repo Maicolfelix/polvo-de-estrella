@@ -61,7 +61,7 @@ export function crearSalaMar({ tex, rm }) {
 
   // cuerdas: catenarias de muro a muro y del arco al antepecho; se tensan con el progreso
   const matCuerda = new THREE.MeshStandardMaterial({ color: 0x2c2520, roughness: .9 });
-  const matOro = new THREE.MeshStandardMaterial({ color: 0xc9a24a, roughness: .45, metalness: .6 });
+  const matOro = new THREE.MeshStandardMaterial({ color: 0x7a1418, roughness: .5, metalness: .4 });   // cordón rojo oscuro
   const CUERDAS = [
     [new V3(-ANCHO, 3.1, -1.6), new V3(ANCHO, 2.7, -2.9), .9, matCuerda],
     [new V3(-ANCHO, 2.2, -3.4), new V3(ANCHO, 2.6, -2.2), 1.1, matOro],

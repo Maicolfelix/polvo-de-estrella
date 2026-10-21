@@ -35,7 +35,7 @@ export const ATMOSFERAS = [
     g.lineWidth = 1;
     for (let k = 0; k < 7; k++) {
       const y = h * (.14 + k * .09), amp = h * .045 * (1 - p * .85) * (k % 2 ? -1 : 1), osc = Math.sin(t * .35 + k) * h * .008;
-      g.strokeStyle = k === 2 || k === 5 ? 'rgba(201,162,74,.38)' : 'rgba(236,230,220,.14)';
+      g.strokeStyle = k === 2 || k === 5 ? 'rgba(179,32,42,.42)' : 'rgba(236,230,220,.14)';
       g.beginPath(); g.moveTo(-20, y + osc); g.bezierCurveTo(w * .3, y - amp + osc, w * .7, y + amp - osc, w + 20, y - osc); g.stroke();
     }
   } },
