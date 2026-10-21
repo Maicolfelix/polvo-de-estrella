@@ -263,3 +263,14 @@ Con la escala adaptativa a 0,85 (1224×765) la nave también llegó a 72 fps. Lo
 **Pruebas (navegador integrado, 375×812).** `correrTransiciones()` 21/21; `correrSinSonido()` 6/6; `correrAmbiente()` 11/11 (sonido activado con un clic real en el texto de la llegada); `correr()` y `correrVolumen()` en la misma tanda: todo OK salvo la preescucha antes de corregir su comprobación. Fotogramas compuestos de las ocho puertas (escena + habitación recortada): coherentes de principio a fin.
 
 **Rendimiento.** Con el panel oculto no se puede medir la fluidez real (el navegador pinta una vez por segundo). Coste sincronizado con la GPU (mismo método que `medir()`, 1440×900, escala 1): llegada 22,6 ms frente a 19,9 ms antes de estos añadidos (incluye ~6 ms de sincronización). La escala adaptativa compensa en equipos más lentos. Sin probar en teléfono físico tras estos cambios.
+
+## 2026-10-22 · Sin botones arriba, sonido desde el principio, sin rayas oscuras en el cielo (rama `feat/acabado-visual`)
+
+**Pedido del artista.** Quitar «Canciones» y «Sin sonido»; que quien entre tenga sonido de una; quitar las líneas negras que parecían cables.
+
+**Cambios.**
+- Cabecera: solo la marca MAVO. Se quitaron el índice de canciones y el botón general de sonido (con su CSS). En las habitaciones siguen el altavoz y la barra de volumen del reproductor; el silencio ya no se recuerda entre visitas.
+- Sonido: al cargar se intenta arrancar el ambiente sin gesto (`intentarActivar` en `js/audio.js`); si el navegador lo permite, suena desde el principio. Si lo bloquea (todos los teléfonos y muchos ordenadores en la primera visita: es una regla del navegador, no se puede saltar), arranca con el primer toque, clic o tecla en cualquier parte, y solo entonces se ve el aviso. En el navegador de pruebas arrancó solo.
+- Cielo: las rayas negras eran los murciélagos vistos de canto; se quitaron. La lluvia pasa a mezcla aditiva: solo aclara, nunca se ve como una raya oscura sobre las nubes rojas.
+
+**Pruebas (navegador integrado, 375×812).** `correrAmbiente()`, `correrTransiciones()`, `correr()` y `correrVolumen()` en una tanda: 71/71. Sin teléfono físico.

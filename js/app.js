@@ -139,7 +139,6 @@ const espera = ms => new Promise(r => setTimeout(r, ms));
 async function entrar(i) {
   if (modo !== 'nave') return;
   modo = 'entrando';
-  cerrarIndice();
   pararPre(false);
   // si la puerta no está delante (teclado, índice), primero se coloca la cámara frente a ella
   if (Math.abs(uSuave - escena.uDePuerta(i)) > .45) {
@@ -171,7 +170,6 @@ function pintarHabitacion(i, fundido) {
   };
   atmos.poner(i, fundido);
   hab.classList.toggle('con-sala', i === 0);   // la habitación 1 se ve a través de la escena 3D
-  document.querySelectorAll('#listaIndice button').forEach((b, k) => b.setAttribute('aria-current', k === i));
   if (!fundido) return aplicar();
   hab.classList.add('cambiando');
   setTimeout(() => { aplicar(); hab.classList.remove('cambiando'); }, 450);
@@ -346,9 +344,7 @@ const silenciado = () => !A.activo || mudo || vol === 0;
 function pintarSonido() {
   const off = silenciado(), r = $('#vol');
   $('#avisoSonido').classList.toggle('ido', A.activo);
-  for (const b of [$('#btnSonido'), $('#mudo')]) b.classList.toggle('silencio', off);
-  $('#btnSonido').setAttribute('aria-pressed', !off);
-  $('#txtSonido').textContent = off ? 'Sin sonido' : 'Sonido';
+  $('#mudo').classList.toggle('silencio', off);
   $('#mudo').setAttribute('aria-pressed', off);
   $('#mudo').setAttribute('aria-label', off ? 'Activar sonido' : 'Silenciar');
   r.value = off ? 0 : vol;                                   // en silencio la barra se ve a cero…
@@ -361,11 +357,11 @@ function ponerVol(v) {
   guardar('pde-vol', v); guardar('pde-vol-ultimo', ultimoVol);
 }
 async function alternarMudo(forzar) {
-  if (!A.activo) { await A.activar(); mudo = false; A.setMudo(false); guardar('pde-mudo', '0'); if (vol === 0) ponerVol(ultimoVol); pintarSonido(); return; }
+  if (!A.activo) { await A.activar(); mudo = false; A.setMudo(false); if (vol === 0) ponerVol(ultimoVol); pintarSonido(); return; }
   const callar = forzar ?? !silenciado();
   if (callar) mudo = true;
   else { mudo = false; if (vol === 0) ponerVol(ultimoVol); }   // …y al reactivar vuelve al último nivel
-  A.setMudo(mudo); guardar('pde-mudo', mudo ? '1' : '0');
+  A.setMudo(mudo);   // solo para esta visita: al volver a entrar siempre hay sonido
   if (mudo && escuchando != null) pararPre();
   pintarSonido();
 }
@@ -376,21 +372,23 @@ $('#vol').addEventListener('input', async e => {
   if (v > 0 && mudo) { mudo = false; A.setMudo(false); }      // subir la barra reactiva el sonido (no la reproducción)
   pintarSonido();
 });
-$('#btnSonido').addEventListener('click', () => alternarMudo());
 $('#mudo').addEventListener('click', () => alternarMudo());
-// Sin elegir: el ambiente (viento, lluvia, truenos) arranca con el primer gesto real en cualquier parte, porque
-// los navegadores no dejan sonar antes. Si la persona lo silenció en otra visita, se respeta.
-// Los botones de sonido gestionan su propio primer toque (si no, el gesto activaría y el botón silenciaría).
-const MANDOS_SONIDO = '#btnSonido, #mudo, #vol';
+// Sonido desde el principio: al cargar se intenta arrancar el ambiente sin esperar a nada (algunos navegadores
+// lo permiten, sobre todo si la persona ya visitó la página). Si el navegador lo bloquea —todos los teléfonos y
+// la mayoría de los ordenadores en la primera visita—, arranca con el primer gesto real en cualquier parte, y
+// solo entonces se ve el aviso. Los mandos del reproductor gestionan su propio primer toque.
+const MANDOS_SONIDO = '#mudo, #vol';
 async function despertarSonido(e) {
   if (!e.isTrusted) return;
   pedirGiro();                                   // iOS solo da el giroscopio tras un gesto
   if (A.activo || e.target.closest?.(MANDOS_SONIDO)) return;
   for (const ev of ['pointerdown', 'keydown', 'touchend']) removeEventListener(ev, despertarSonido, true);
   await A.activar();
-  mudo = leer('pde-mudo') === '1'; A.setMudo(mudo); pintarSonido();
+  mudo = false; A.setMudo(false); pintarSonido();
 }
 for (const ev of ['pointerdown', 'keydown', 'touchend']) addEventListener(ev, despertarSonido, true);
+try { localStorage.removeItem('pde-mudo'); } catch {}   // ya no se recuerda el silencio entre visitas
+A.intentarActivar().then(ok => { if (ok) { mudo = false; A.setMudo(false); } pintarSonido(); $('#avisoSonido').classList.toggle('pendiente', !A.activo); });
 
 /* ---------- mirar alrededor: ratón en el ordenador, giro del teléfono ---------- */
 // La vista gira un poco hacia donde apunta el ratón o hacia donde se inclina el teléfono. Sobre una puerta,
@@ -418,25 +416,10 @@ addEventListener('orientationchange', () => { mira.base = null; });
 pintarSonido();
 
 
-/* ---------- índice de canciones ---------- */
-const indice = $('#indice'), btnIndice = $('#btnIndice');
-CANCIONES.forEach((c, i) => {
-  const li = document.createElement('li'), b = document.createElement('button');
-  b.innerHTML = '<span class="n"></span><span class="t"></span>';
-  b.querySelector('.n').textContent = c.n; b.querySelector('.t').textContent = c.titulo;
-  b.addEventListener('click', () => { cerrarIndice(); if (modo === 'habitacion') cambiar(i); else if (modo === 'nave') { irAPuerta(i); botones[i].focus({ preventScroll: true }); } });
-  li.appendChild(b); $('#listaIndice').appendChild(li);
-});
-function cerrarIndice() { indice.hidden = true; btnIndice.setAttribute('aria-expanded', false); }
-btnIndice.addEventListener('click', () => {
-  const abrir = indice.hidden; indice.hidden = !abrir; btnIndice.setAttribute('aria-expanded', abrir);
-  if (abrir) indice.querySelector('button').focus();
-});
-document.addEventListener('pointerdown', e => { if (!indice.hidden && !indice.contains(e.target) && e.target !== btnIndice && !btnIndice.contains(e.target)) cerrarIndice(); });
 $('#saltar').addEventListener('click', e => { e.preventDefault(); irAPuerta(0); botones[0].focus({ preventScroll: true }); });
 
 addEventListener('keydown', e => {
-  if (e.key === 'Escape') { if (!indice.hidden) { cerrarIndice(); btnIndice.focus(); return; } if (modo === 'habitacion') volver(); }
+  if (e.key === 'Escape' && modo === 'habitacion') volver();
   if (modo === 'habitacion' && e.key === ' ' && !e.target.closest('button,input,a')) { e.preventDefault(); $('#play').click(); }
 });
 
