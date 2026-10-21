@@ -274,3 +274,15 @@ Con la escala adaptativa a 0,85 (1224×765) la nave también llegó a 72 fps. Lo
 - Cielo: las rayas negras eran los murciélagos vistos de canto; se quitaron. La lluvia pasa a mezcla aditiva: solo aclara, nunca se ve como una raya oscura sobre las nubes rojas.
 
 **Pruebas (navegador integrado, 375×812).** `correrAmbiente()`, `correrTransiciones()`, `correr()` y `correrVolumen()` en una tanda: 71/71. Sin teléfono físico.
+
+## 2026-10-22 · Teléfono: mirar como una foto de 360°, sonido que sí arranca y carga más ligera (rama `feat/acabado-visual`)
+
+**Pedido del artista.** En el teléfono, que la cámara siga el movimiento del teléfono (como las fotos panorámicas); en el móvil no había sonido aunque pasara el rato; la carga tardaba.
+
+**Causa del silencio en el móvil.** El primer gesto que se escuchaba era el apoyo del dedo (`pointerdown`), que los navegadores no cuentan para el audio. `activar()` se quedaba esperando para siempre a `ctx.resume()` y además se retiraban los oyentes, así que ningún toque posterior lo volvía a intentar (y el botón de reproducir también quedaba bloqueado). Ahora `activar()` desbloquea los elementos dentro del gesto, nunca espera más de 0,7 s y devuelve si suena; la página escucha `pointerdown`, `pointerup`, `touchend`, `click` y `keydown` y sigue intentándolo, sin bloquear un intento con otro, hasta que suena. Al cargar se intenta sin gesto (donde el navegador lo permite suena desde el principio). Límite del navegador: en el teléfono hace falta al menos un toque (desplazar no cuenta); el aviso «Toca la pantalla para oír el ambiente» solo aparece si aún no suena.
+
+**Mirar en el teléfono.** La cámara sigue la orientación completa del teléfono (cuaternión, como `DeviceOrientationControls` de three.js) relativa a la postura inicial: hasta ~63° a los lados y ~29° arriba/abajo, suavizado. No sufre el bloqueo que daba leer solo la inclinación con el teléfono de pie. El oyente se registra desde el principio; en iOS los datos llegan tras aceptar el permiso en el primer toque. Al girar la pantalla se recentra. Comprobado con eventos simulados: girar 30° a la izquierda → la vista gira 30°; inclinar 20° hacia arriba → +20°.
+
+**Carga.** Todos los módulos se piden a la vez (`modulepreload`; antes se descubrían en cadena); los sombreadores se compilan con `compileAsync` (sin congelar la página donde el navegador lo permite); mapas de rugosidad a 512 px y mapas algo más comprimidos (texturas 2,2 → 1,6 MB); portada en WebP (335 → 39 KB; el PNG original se conserva). Total de la carga inicial en local: ~2,4 MB (antes ~3 MB); todos los módulos llegan en 0,45 s. Sin medir en una red móvil real.
+
+**Pruebas (navegador integrado, 375×812).** Ambiente, transiciones, pausa y volumen en una tanda: 71/71. Sin teléfono físico.

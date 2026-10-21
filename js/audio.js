@@ -79,20 +79,25 @@ function rampa(g, v, seg = .5, cuando = 0) {
   g.gain.setTargetAtTime(v, t, Math.max(.01, seg / 3));
 }
 
+// Arranca el audio dentro de un gesto. Devuelve si quedó sonando. Nunca se queda esperando: si el navegador no
+// cuenta el gesto (en el teléfono, apoyar el dedo o desplazar no cuentan; soltar un toque sí), devuelve false y
+// el siguiente gesto lo vuelve a intentar.
 export async function activar() {
   if (!ctx) crear();
-  await ctx.resume();
   if (!activo) {
-    // Safari/iOS: cada elemento debe reproducirse una vez dentro del gesto (en silencio)
+    // Safari/iOS: cada elemento debe reproducirse una vez dentro del gesto, antes de cualquier espera (en silencio)
     if (!pre.src) pre.src = fuentePre(0);
     if (!song.src) song.src = fuenteSong(0);
     const t = tokPre;
     pre.play().then(() => { if (t === tokPre) pre.pause(); }).catch(() => {});
     if (!quiere) song.play().catch(() => {});       // el evento 'play' la detiene al instante
   }
+  const reanudado = ctx.resume().then(() => true, () => false);
+  await Promise.race([reanudado, new Promise(r => setTimeout(r, 700))]);
+  if (ctx.state !== 'running') return false;
   activo = true;
   fundir(master, mudo ? 0 : 1, FUNDIDO.silencio);
-  return ctx;
+  return true;
 }
 // Intento sin gesto: si el navegador deja reanudar el audio, el ambiente suena desde el principio; si no, se
 // queda esperando (activar() lo arrancará con el primer gesto). Nunca bloquea.
