@@ -379,18 +379,6 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
     rosasP.forEach(([p, sc], k) => { m4.compose(p.clone().add(new V3(0, 0, .06)), q.setFromEuler(e.set(1.25 + (rnd() - .5) * .5, rnd() * 6.3, (rnd() - .5) * .4)), new V3(sc, sc, sc)); rm2.setMatrixAt(k, m4); });
     add(hm, rm2); }
 
-  /* ---------- murciélagos alrededor del campanario ---------- */
-  const N_MURC = 7, murc = new THREE.InstancedMesh((() => {
-    const g = new THREE.BufferGeometry();   // cuerpo y dos alas dentadas, en el plano XZ
-    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, .12, -.05, 0, -.1, .05, 0, -.1, 0, 0, .06, -.42, .04, .02, -.16, 0, -.08, 0, 0, .06, .42, .04, .02, .16, 0, -.08]), 3));
-    g.computeVertexNormals(); return g; })(), new THREE.ShaderMaterial({
-    side: THREE.DoubleSide, uniforms: { uT: { value: 0 } },
-    vertexShader: 'uniform float uT; void main(){ vec3 p = position; float f = float(gl_InstanceID) * 1.7; p.y += sin(uT * 17. + f) * abs(p.x) * .9; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(p, 1.); }',
-    fragmentShader: 'void main(){ gl_FragColor = vec4(.012, .006, .008, 1.); }',
-  }), N_MURC);
-  const vuelos = Array.from({ length: N_MURC }, () => ({ r: 5 + rnd() * 9, h: 20 + rnd() * 8, v: (.25 + rnd() * .3) * (rnd() < .5 ? -1 : 1), f: rnd() * 6.3, s: .8 + rnd() * .6 }));
-  murc.frustumCulled = false; add(murc);
-
   /* ---------- pétalos que el viento arrastra por el suelo (CPU: pocos) ---------- */
   const N_VUELO = MOVIL ? 14 : 26, vuelo = new THREE.InstancedMesh(petalo(.09, .06, .35, .01), matRosa, N_VUELO);
   const vuelan = Array.from({ length: N_VUELO }, () => ({ x: (rnd() - .5) * 14, z: 28 + rnd() * 14, v: .25 + rnd() * .45, f: rnd() * 6.3, giro: (rnd() - .5) * 4 }));
@@ -410,13 +398,6 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
         vuelo.setMatrixAt(k, m4);
       });
       vuelo.instanceMatrix.needsUpdate = true;
-      murc.material.uniforms.uT.value = rm ? 0 : t;
-      vuelos.forEach((b, k) => {
-        const a = b.f + t * b.v, y = b.h + Math.sin(t * .7 + b.f) * 1.5, x = Math.cos(a) * b.r, z = -3.2 + Math.sin(a) * b.r * .8;
-        const rumbo = Math.atan2(-Math.sin(a) * b.v, Math.cos(a) * b.v * .8);
-        m4.compose(tmpV.set(x, y, z), q.setFromEuler(e.set(Math.sin(t * 2 + b.f) * .25, rumbo, Math.sin(t * 1.3 + b.f) * .3)), uno.clone().multiplyScalar(b.s)); murc.setMatrixAt(k, m4);
-      });
-      murc.instanceMatrix.needsUpdate = true;
       llamas.material.uniforms.uT.value = rm ? 0 : t; goteo.material.uniforms.uT.value = rm ? 0 : t; llamas.material.uniforms.uR.value = ventisca;   // la ventisca agita las llamas
     },
     escalaPuntos(v) { llamas.material.uniforms.uEsc.value = v; goteo.material.uniforms.uEsc.value = v; },

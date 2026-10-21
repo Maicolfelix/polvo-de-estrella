@@ -94,6 +94,18 @@ export async function activar() {
   fundir(master, mudo ? 0 : 1, FUNDIDO.silencio);
   return ctx;
 }
+// Intento sin gesto: si el navegador deja reanudar el audio, el ambiente suena desde el principio; si no, se
+// queda esperando (activar() lo arrancará con el primer gesto). Nunca bloquea.
+export async function intentarActivar() {
+  if (activo) return true;
+  if (!ctx) crear();
+  ctx.resume().catch(() => {});
+  await new Promise(r => setTimeout(r, 350));
+  if (ctx.state !== 'running') return false;
+  activo = true;
+  fundir(master, mudo ? 0 : 1, FUNDIDO.silencio);
+  return true;
+}
 export const contexto = () => ctx;
 // estado de la mezcla (para verificación)
 export const niveles = () => ctx && ({

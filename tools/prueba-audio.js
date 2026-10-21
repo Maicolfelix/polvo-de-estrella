@@ -263,9 +263,9 @@ export async function correrAmbiente() {
   ok(A.niveles().viento < .002 && A.niveles().lluvia < .002 && sonando(A).join() === 'song', 'habitación: solo la canción; viento y lluvia en silencio (' + A.niveles().viento + ', ' + A.niveles().lluvia + ')');
   toque($('#volver')); await modo('nave'); await w(2500);
   ok(sonando(A).length === 0 && A.niveles().viento > 0, 'al volver: solo ambiente (' + A.niveles().viento + ')');
-  toque($('#btnSonido')); await w(400);
+  A.setMudo(true); await w(400);   // ya no hay botón de sonido en la nave: el silencio general se prueba directamente
   ok(A.niveles().master === 0, 'silencio: también calla el viento (master ' + A.niveles().master + ')');
-  toque($('#btnSonido')); await w(400);
+  A.setMudo(false); await w(400);
   ok(A.niveles().master === 1, 'reactivar: vuelve el ambiente');
   ok(!pedida(), 'tras todo el recorrido la instrumental sigue sin pedirse');
   return L.join('\n');

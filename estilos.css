@@ -45,19 +45,8 @@ button{font:inherit;color:inherit}
 .hud>*{pointer-events:auto}
 .marca{margin:0;font:400 italic 1.1rem/1 var(--serif);opacity:0;transition:opacity .6s}
 .marca b{font:500 .62rem/1 var(--sans);letter-spacing:.34em;color:var(--oro);font-style:normal;margin-right:.55rem}
-.hud-acciones{display:flex;gap:.5rem}
 body.en-habitacion .marca{opacity:0!important}
 
-/* ---------- índice ---------- */
-#indice{position:fixed;z-index:35;right:var(--borde);top:calc(max(14px,env(safe-area-inset-top)) + 52px);width:min(380px,calc(100vw - 32px));max-height:calc(100dvh - 90px);overflow:auto;
-  background:rgba(8,6,7,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--linea);border-radius:18px;padding:1.1rem 1.1rem .6rem}
-.indice-cab{margin:0 0 .6rem;font:400 italic 1.15rem/1 var(--serif);color:var(--hueso-2)}
-#indice ol{list-style:none;margin:0;padding:0}
-#indice li button{display:grid;grid-template-columns:2.2rem 1fr;align-items:baseline;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--linea);padding:.8rem .2rem;cursor:pointer;line-height:1.35}
-#indice li:first-child button{border-top:0}
-#indice li button:hover .t,#indice li button[aria-current="true"] .t{color:var(--hueso)}
-#indice .n{font:500 .7rem/1 var(--sans);letter-spacing:.2em;color:var(--oro)}
-#indice .t{font:500 .78rem/1.4 var(--sans);letter-spacing:.09em;color:var(--hueso-2)}
 
 /* ---------- llegada ---------- */
 /* la capilla queda a la vista en el centro: portada y título en una columna a la izquierda */
@@ -72,8 +61,10 @@ body.en-habitacion .marca{opacity:0!important}
 .artista{margin:0 0 1rem;font:500 .74rem/1 var(--sans);letter-spacing:.44em;color:var(--oro)}
 h1{margin:0;font:300 italic clamp(3rem,6.4vw,5.6rem)/.95 var(--serif);letter-spacing:-.01em}
 .llegada-sub{margin:1.1rem 0 2rem;color:var(--hueso-2);font-size:.98rem;line-height:1.6}
-.aviso-sonido{margin:0;font-size:.74rem;letter-spacing:.14em;color:var(--hueso-3);transition:opacity .6s}
-.aviso-sonido.ido{opacity:0}
+/* el aviso solo aparece si el navegador no dejó arrancar el sonido solo */
+.aviso-sonido{margin:0;font-size:.74rem;letter-spacing:.14em;color:var(--hueso-3);transition:opacity .6s;opacity:0}
+.aviso-sonido.pendiente{opacity:1}
+.aviso-sonido.pendiente.ido{opacity:0}
 .carga{display:flex;align-items:center;gap:.8rem;margin-top:1.4rem;font-size:.72rem;letter-spacing:.16em;color:var(--hueso-3);transition:opacity .6s}
 .carga-barra{width:120px;height:1px;background:var(--linea);overflow:hidden}
 .carga-barra i{display:block;height:100%;width:0;background:var(--oro);transition:width .3s}

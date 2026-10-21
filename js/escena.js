@@ -901,7 +901,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     for (let i = 0; i < n; i++) { const x = Math.random() * CAJA.x, y = Math.random() * CAJA.y, z = Math.random() * CAJA.z; pos.set([x, y, z, x, y, z], i * 6); lado[i * 2 + 1] = 1; }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('lado', new THREE.BufferAttribute(lado, 1));
     const m = new THREE.LineSegments(g, new THREE.ShaderMaterial({
-      uniforms: uLluvia, transparent: true, depthWrite: false, fog: false,
+      uniforms: uLluvia, transparent: true, depthWrite: false, fog: false, blending: THREE.AdditiveBlending,   // solo aclara: sobre las nubes nunca se ve como una raya oscura
       vertexShader: `uniform float uT, uR; uniform vec3 uCam, uCaja; attribute float lado; varying float vA, vX; ${FUERA}
         void main(){
           vec3 vel = vec3(1.1 + uR * 7., -10.5, .35);
@@ -911,7 +911,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
           float d = distance(p, uCam); vA = (1. - lado * .85) * smoothstep(19., 3., d) * smoothstep(.4, 1.6, d);
           gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.); }`,
       fragmentShader: `uniform float uF; varying float vA, vX;
-        void main(){ if (vX > .5) discard; gl_FragColor = vec4(vec3(.72, .62, .66) * (1. + uF * 3.), vA * (.32 + uF * .4)); }`,
+        void main(){ if (vX > .5) discard; gl_FragColor = vec4(vec3(.5, .42, .46) * (1. + uF * 3.), vA * (.4 + uF * .4)); }`,
     }));
     m.frustumCulled = false; m.renderOrder = 4; add(m); return m;
   })();
