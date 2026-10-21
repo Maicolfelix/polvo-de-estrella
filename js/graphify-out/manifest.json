@@ -18,9 +18,9 @@
     "semantic_hash": ""
   },
   "escena.js": {
-    "mtime": 1792566308.470981,
-    "seen": 1792569329.103545,
-    "ast_hash": "1378cadffcaab1bbf671fbf8683be7d1",
+    "mtime": 1792570342.2071974,
+    "seen": 1792570522.058524,
+    "ast_hash": "574a29feb71646e2f9b36d79e0cc387f",
     "semantic_hash": ""
   },
   "habitaciones.js": {
@@ -48,9 +48,9 @@
     "semantic_hash": ""
   },
   "primer-plano.js": {
-    "mtime": 1792566451.7959602,
-    "seen": 1792569329.103545,
-    "ast_hash": "c6739f64d45faf6fc0f76fb6a195558f",
+    "mtime": 1792570207.4307482,
+    "seen": 1792570522.058524,
+    "ast_hash": "e1739e38d5ca087b6afdbf3f3c364ddc",
     "semantic_hash": ""
   }
 }

@@ -194,6 +194,34 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
       }
     } }
 
+  /* ---------- charcos que reflejan la tormenta ---------- */
+  for (const [x, z, r, ry] of [[-1.7, 33.2, 1.2, .3], [2.3, 26.4, 1, 1.2], [-2.9, 19.5, 1.4, 2], [1.5, 14.2, .9, .7], [-.6, 9.8, 1.1, 1.6], [3.2, 36.4, .8, 2.4], [-3.7, 27.3, .9, .9], [.9, 21.5, .7, 2.8]]) {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(r * 2.2, r * 1.5).rotateX(-Math.PI / 2).rotateY(ry), M.charco);
+    m.position.set(x, .018, z); m.renderOrder = 1; add(m);
+  }
+
+  /* ---------- piedrecillas y cascotes ---------- */
+  { const n = MOVIL ? 320 : 640, g = new THREE.IcosahedronGeometry(1, 0), mat = new THREE.MeshStandardMaterial({ color: 0x3a3532, roughness: .95, flatShading: true });
+    const pie = new THREE.InstancedMesh(g, mat, n);
+    for (let k = 0; k < n; k++) {
+      // más densas junto a tumbas, rosas y escalinata; casi ninguna en el centro del camino
+      let x = (rnd() - .5) * 20, z = 3 + rnd() * 40;
+      if (Math.abs(x) < 1.4 && rnd() < .8) x += Math.sign(x || 1) * 2;
+      const sc = (.018 + rnd() * rnd() * .11) * (k < n * .1 ? 2.4 : 1);
+      m4.compose(new V3(x, sc * .3, z), q.setFromEuler(e.set(rnd() * 3, rnd() * 3, rnd() * 3)), new V3(sc * (1 + rnd()), sc * (.5 + rnd() * .5), sc * (1 + rnd())));
+      pie.setMatrixAt(k, m4);
+    }
+    pie.receiveShadow = true; add(pie);
+    // cascotes de piedra labrada caídos junto a las tumbas y al pie de la escalinata
+    const cas = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), M.piedra, 46);
+    for (let k = 0; k < 46; k++) {
+      const lado = rnd() < .5 ? -1 : 1, junto = k < 16, x = junto ? lado * (3.8 + rnd() * 2.2) : lado * (5 + rnd() * 6), z = junto ? 4 + rnd() * 3 : 8 + rnd() * 26;
+      const w = .15 + rnd() * .35;
+      m4.compose(new V3(x, w * .3, z), q.setFromEuler(e.set((rnd() - .5) * .8, rnd() * 6, (rnd() - .5) * .8)), new V3(w * (1 + rnd()), w * .6, w * (.6 + rnd())));
+      cas.setMatrixAt(k, m4);
+    }
+    cas.castShadow = cas.receiveShadow = true; add(cas); }
+
   /* ---------- hojas secas sueltas por la plaza ---------- */
   { const n = MOVIL ? 70 : 140, seca = new THREE.InstancedMesh(hojaG, new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: .9, side: THREE.DoubleSide }), n);
     for (let k = 0; k < n; k++) {

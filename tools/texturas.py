@@ -272,11 +272,14 @@ def grieta(n=1024, nombre='grieta'):
     alto = abombado * .7 + det * .25 + fino * .08 - peque * .18
     alto = np.where(grande, -.15 + det * .05, alto)
     tint = r.uniform(.78, 1.2, (70, 1))[id1]
-    base = np.array([.055, .044, .038])
+    base = np.array([.07, .056, .047])
     col = base * tint * (.62 + .7 * det[..., None]) * (.85 + .3 * fino[..., None])
     col *= 1 - .35 * np.clip((manchas[..., None] - .6) * 3, 0, 1)           # humedad oscura
     col = np.where(peque[..., None], col * .55, col)
-    col = col * (1 + .5 * np.clip((abombado[..., None] - .85) * 4, 0, 1) * (1 - grande[..., None]))  # bordes secos más claros
+    col = col * (1 + .9 * np.clip((abombado[..., None] - .8) * 4, 0, 1) * (1 - grande[..., None]))  # bordes secos más claros
+    motas = (fbm(n, .4, 50) > .78)[..., None]
+    col = np.where(motas, col * 1.35, col)                                 # grano de polvo y arena
+    col *= (.8 + .4 * fbm(n, 2.4, 51)[..., None])                         # manchas grandes de tono
     col = np.where(grande[..., None], np.array([.012, .009, .008]), col)
     rug = np.where(grande, 1., .78 + .15 * fino)
     guardar(nombre + '_col', srgb(col * 2.2))

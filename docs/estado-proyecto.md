@@ -202,3 +202,15 @@ Con la escala adaptativa a 0,85 (1224×765) la nave también llegó a 72 fps. Lo
 - Rendimiento: las nuevas rosas bajaban la llegada a 48 fps; con cabezas más ligeras (15 pétalos de 5×4) y 5 hojas por flor vuelve a **72 fps** a 1440×900 (desplazamiento 71 fps; 180 k triángulos en la llegada). GTX 1650, mismo método que arriba.
 
 **Pruebas.** `correrTransiciones()` 21/21 tras los cambios. Captura actualizada: `capturas/14-llegada-acercamiento-umbral.jpg`. Sin teléfono físico.
+
+## 2026-10-21 · Capilla completa, suelo con más vida y nave más realista (misma rama; PR #1)
+
+**Pedido del artista.** El suelo exterior seguía pobre; a la capilla le faltaba un pedazo a los lados y no le gustaba la parte de arriba de la puerta; dentro, cambiar el piso, que las lámparas iluminen abajo, que la puerta del fondo se vea y que las dos ventanas muestren el cielo y no un color fijo.
+
+**Cambios (`js/escena.js`, `js/primer-plano.js`, `tools/texturas.py`).**
+- Capilla: naves laterales bajas a cada lado (tejado de pizarra a un agua, lancetas, contrafuertes y alero), como en la referencia; la silueta ya no se ve cortada. Tímpano de piedra labrada con una estrella dorada y rayos en relieve en lugar de la imagen de la portada (de lejos se leía como un destello raro). La portada sigue en la llegada.
+- Suelo exterior: barro agrietado con más contraste, polvo y manchas; 8 charcos que reflejan el cielo real (nubes que se mueven y relámpagos) con onditas; 640 piedrecillas (320 en teléfono) y 46 cascotes de piedra junto a tumbas y escalinata.
+- Cielo compartido: el sombreador del cielo es ahora una función (`CIELO_GLSL`) que usan el cielo, las vidrieras y los charcos.
+- Nave: losas de piedra gastadas en lugar del mármol con vetas, alfombra carmesí con cenefa dorada hasta la puerta del fondo, charco de luz cálida bajo cada lámpara (y lámparas más intensas), dos apliques con llama junto a la puerta 9 y su luz sobre el muro del fondo, y vidrieras emplomadas que dejan ver la tormenta de detrás.
+
+**Medido (GTX 1650, 1440×900, rAF).** Llegada 72 fps, desplazamiento 72, umbral 48, nave 48: igual que antes de estos cambios. `correrTransiciones()` 21/21. Captura: `capturas/17-capilla-suelo-nave.jpg`. Sin teléfono físico.

@@ -71,6 +71,18 @@ function texturaGradiente(h = 64) {
   x.fillStyle = g; x.fillRect(0, 0, 4, h);
   return new THREE.CanvasTexture(c);
 }
+// alfombra de la nave: terciopelo carmesí gastado con cenefa dorada (se repite a lo largo)
+function texturaAlfombra() {
+  const c = document.createElement('canvas'); c.width = 256; c.height = 512;
+  const x = c.getContext('2d');
+  x.fillStyle = '#2a070b'; x.fillRect(0, 0, 256, 512);
+  for (let i = 0; i < 2600; i++) { x.fillStyle = `rgba(${Math.random() < .5 ? '70,12,18' : '12,3,4'},${Math.random() * .35})`; x.fillRect(Math.random() * 256, Math.random() * 512, 2, 3); }
+  x.strokeStyle = 'rgba(176,132,58,.75)'; x.lineWidth = 5; x.strokeRect(-10, -10, 34, 532); x.strokeRect(232, -10, 34, 532);
+  x.lineWidth = 2; x.strokeStyle = 'rgba(176,132,58,.45)'; x.beginPath(); x.moveTo(34, 0); x.lineTo(34, 512); x.moveTo(222, 0); x.lineTo(222, 512); x.stroke();
+  x.strokeStyle = 'rgba(150,110,50,.35)'; x.lineWidth = 2;
+  for (let y = 64; y < 512; y += 128) { x.beginPath(); x.moveTo(128, y - 40); x.lineTo(168, y); x.lineTo(128, y + 40); x.lineTo(88, y); x.closePath(); x.stroke(); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; return t;
+}
 function texturaPlaca(n) {
   const c = document.createElement('canvas'); c.width = 256; c.height = 150;
   const x = c.getContext('2d');
@@ -110,6 +122,31 @@ roughnessFactor *= ${alto > 0 ? `mix(1., .6, 1. - smoothstep(0., ${f(alto * .6)}
   mat.customProgramCacheKey = () => `env-${base}-${alto}-${fuerza}-${vetas}-${musgo}-${macro}`;
   mat.needsUpdate = true;
 }
+
+// Cielo de tormenta como función GLSL: lo usan el cielo, las vidrieras de la nave (dejan ver el cielo real
+// que hay detrás, con sus nubes y relámpagos) y los charcos de la plaza (lo reflejan).
+const CIELO_GLSL = `uniform float uT,uF; uniform vec3 uD,uFog;
+      float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+      float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+      float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
+      float fbm2(vec2 p){return n(p)*.6+n(p*2.03+vec2(1.7,9.2))*.4;}
+      vec3 cielo(vec3 d){ float y=d.y;
+        // tormenta carmesí: masas de nube iluminadas en rojo desde abajo, huecos casi negros
+        vec2 uv=d.xz/(max(y,0.)+.2)*1.25+vec2(uT*.022,uT*.008);   // las nubes avanzan a la vista
+        vec2 w=vec2(fbm2(uv*.6+uT*.012),fbm2(uv*.6+5.2-uT*.009));   // la deformación también cambia: las nubes se arremolinan
+        float c=fbm(uv+w*1.6+vec2(0.,uT*.006)); float c2=fbm(uv*2.1+w*2.4-vec2(uT*.035,0.));   // dos capas a distinta velocidad: se deforman al pasar
+        float nube=smoothstep(.3,.78,c*.7+c2*.45);
+        float borde=smoothstep(.52,.9,c2)*nube;
+        vec3 alto=vec3(.006,.002,.004), medio=vec3(.022,.004,.007), horiz=vec3(.1,.012,.016);   // entre nubes, casi negro
+        vec3 col=mix(horiz,medio,smoothstep(-.02,.22,y)); col=mix(col,alto,smoothstep(.2,.75,y));
+        vec3 rojo=vec3(.46,.035,.05)*(1.15-smoothstep(0.,.8,y)*.6);
+        col=mix(col, vec3(.01,.003,.005), nube*.9);
+        col+=rojo*borde*1.5+rojo*.22*nube*(1.-smoothstep(.0,.4,y));
+        float fl=pow(max(dot(d,normalize(uD)),0.),5.);
+        col+=vec3(.95,.8,.95)*uF*fl*(.35+nube*1.3)+vec3(.35,.12,.16)*uF*.2;
+        col=mix(uFog*1.1,col,smoothstep(-.06,.1,y));
+        return col; }
+`;
 
 // Viento en el sombreador (sin coste de CPU): un solo reloj compartido.
 //   'tarjeta': las capas de pinos se doblan por arriba (uv.y) en una onda que recorre el bosque.
@@ -156,6 +193,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   const scene = new THREE.Scene();
   const FOG = new THREE.Color(0x1a0a0c);
   scene.fog = new THREE.FogExp2(FOG, .0105);
+  const uCielo = { uT: { value: 0 }, uF: { value: 0 }, uD: { value: new V3(0, .3, -1) }, uFog: { value: FOG } };
   // zonas: el exterior y la nave se ocultan cuando la cámara no puede verlos (ahorra el sobredibujado)
   const ext = new THREE.Group(), int = new THREE.Group();
   scene.add(ext, int);
@@ -187,11 +225,33 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     suelo: pbr('suelo', { normal: 1.1, env: .3 }),
     tierra: pbr('grieta', { normal: 1.3, env: .15, color: 0xe6ddd2 }),          // barro seco agrietado de la plaza
     pizarra: pbr('pizarra', { normal: 1.2, env: .6 }),
-    marmol: pbr('marmol', { normal: .35, env: 1 }),
+    losa: pbr('suelo', { normal: 1.3, env: .3, color: 0x8f8780 }),   // losas de piedra gastadas de la nave
     hierro: new THREE.MeshStandardMaterial({ color: 0x16130f, metalness: .9, roughness: .42, envMapIntensity: .8 }),
     madera: new THREE.MeshStandardMaterial({ map: tex('puerta_col', true), normalMap: tex('puerta_nor'), roughnessMap: tex('puerta_rug'), metalnessMap: tex('puerta_met'), metalness: 1, roughness: 1, envMapIntensity: .6, normalScale: new V2(1.4, 1.4) }),
     vidrio: new THREE.MeshStandardMaterial({ color: 0x050304, roughness: .2, metalness: 0, emissive: 0x6a1812, emissiveIntensity: .55 }),
     vidrioCalido: new THREE.MeshStandardMaterial({ color: 0x050304, roughness: .2, emissive: 0xc06a2a, emissiveIntensity: .9 }),
+    // vidriera emplomada que deja ver el cielo de detrás (dirección de la vista a través del cristal)
+    ventana: new THREE.ShaderMaterial({ uniforms: uCielo, fog: false,
+      vertexShader: 'varying vec3 vW; varying vec2 vUv; void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
+      fragmentShader: `varying vec3 vW; varying vec2 vUv; ${CIELO_GLSL}
+        void main(){ vec3 d = normalize(vW - cameraPosition); d.y = max(d.y, .04);
+          vec3 c = cielo(d) * 1.25 + vec3(.012, .004, .006);
+          vec2 g = abs(fract(vUv * vec2(4.5, 6.)) - .5); float plomo = smoothstep(.43, .47, max(g.x, g.y));
+          gl_FragColor = vec4(mix(c, vec3(.008, .006, .006), plomo * .9), 1.); }` }),
+    // charco: agua oscura que refleja el cielo real (nubes y relámpagos), con onditas y borde irregular
+    charco: new THREE.ShaderMaterial({ uniforms: uCielo, transparent: true, depthWrite: false, fog: false,
+      vertexShader: 'varying vec3 vW; varying vec2 vUv; void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position, 1.); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
+      fragmentShader: `varying vec3 vW; varying vec2 vUv; ${CIELO_GLSL}
+        void main(){
+          vec2 q = vUv - .5; float r = length(q) * 2.;
+          float borde = 1. - smoothstep(.55, 1., r + (n(vW.xz * 1.7) - .5) * .7);
+          if (borde < .01) discard;
+          vec2 o = vec2(n(vW.xz * 6. + uT * .8), n(vW.xz * 6. - uT * .7 + 3.)) - .5;
+          vec3 nrm = normalize(vec3(o.x * .12, 1., o.y * .12));
+          vec3 v = normalize(vW - cameraPosition), rf = reflect(v, nrm); rf.y = max(rf.y, .02);
+          float fres = .25 + .75 * pow(1. - max(dot(-v, nrm), 0.), 4.);
+          vec3 c = mix(vec3(.006, .004, .004), cielo(rf) * 1.4, fres);
+          gl_FragColor = vec4(c, borde * .92); }` }),
     oro: new THREE.MeshStandardMaterial({ color: 0xd9a441, metalness: 1, roughness: .3, envMapIntensity: 1.6, emissive: 0x2a1404, emissiveIntensity: .5 }),
   };
 
@@ -287,6 +347,37 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       poner(M.vidrio, s > 0 ? vid.rotateY(Math.PI / 2).translate(7.21, B, z) : vid.rotateY(-Math.PI / 2).translate(-7.21, B, z), 1);
     }
   }
+  // naves laterales bajas con tejado a un agua, como en la referencia: completan la silueta a los lados
+  { const X0 = 7.2, X1 = 11.2, ALTO = 5.6, CUMBRE = 8.2, ZF = -1.2, ZB = -21.5;
+    const VEN = { w: .42, s: 2.1, R: .56 };
+    for (const s of [-1, 1]) {
+      // se construye ya espejado (escalar en negativo invertiría las caras)
+      const frente = new THREE.Shape([new V2(s * X0, 0), new V2(s * X1, 0), new V2(s * X1, ALTO), new V2(s * X0, CUMBRE)]);
+      frente.holes.push(new THREE.Path(contorno(s * 9.3, VEN, 1.5)));
+      poner(M.piedra, extruir(frente, .7).translate(0, B, ZF - .7), 3);
+      poner(M.vidrio, new THREE.ShapeGeometry(new THREE.Shape(contorno(s * 9.3, VEN, 1.5))).translate(0, B, ZF - .45), 1);
+      poner(M.piedra, extruir(anillo(s * 9.3, { w: .56, s: 2.1, R: .72 }, VEN, 1.5), .16).translate(0, B, ZF), 1);
+      // muro exterior con lancetas y contrafuertes
+      const largo = ZF - ZB, muro = new THREE.Shape([new V2(0, 0), new V2(largo, 0), new V2(largo, ALTO), new V2(0, ALTO)]);
+      const zs = [-5.2, -10.2, -15.2];
+      for (const z of zs) muro.holes.push(new THREE.Path(contorno(ZF - z, VEN, 1.5)));
+      poner(M.piedra, extruir(muro, .6).rotateY(Math.PI / 2).translate(s > 0 ? X1 - .6 : -X1, B, ZF), 3);
+      for (const z of zs) {
+        const v = new THREE.ShapeGeometry(new THREE.Shape(contorno(0, VEN, 1.5))).rotateY(s * Math.PI / 2).translate(s * (X1 + .01), B, z);
+        poner(M.vidrio, v, 1);
+      }
+      for (const z of [-2.7, -7.7, -12.7, -17.7, -21.1]) {
+        poner(M.piedra, caja(.7, 4.6, .9, s * (X1 + .35), B + 2.3, z), 1.6);
+        poner(M.piedra, new THREE.BoxGeometry(.9, .5, .9).rotateZ(s * .5).translate(s * (X1 + .3), B + 4.75, z), 1);
+      }
+      poner(M.piedra, caja(X1 - X0, ALTO, .6, s * (X0 + X1) / 2, B + ALTO / 2, ZB + .3), 2.4);   // cierre trasero
+      // tejado de pizarra a un agua y su alero de piedra
+      const ang = Math.atan2(CUMBRE - ALTO, X1 - X0), lt = Math.hypot(CUMBRE - ALTO, X1 - X0) + .7;
+      poner(M.pizarra, new THREE.BoxGeometry(lt, .22, ZF - ZB + .8).rotateZ(s * -ang).translate(s * (X0 + X1) / 2 + s * .15, B + (ALTO + CUMBRE) / 2 + .2, (ZF + ZB) / 2), 2);
+      poner(M.piedra, caja(.5, .3, ZF - ZB + .6, s * (X1 + .15), B + ALTO + .02, (ZF + ZB) / 2), 1.2);
+    }
+  }
+
   // muro trasero con el hueco de la puerta 9
   const P9 = { w: 1.0, s: 2.9, R: 1.35 };
   const trasero = new THREE.Shape([new V2(-7.2, -.05), new V2(7.2, -.05), new V2(7.2, 11), new V2(0, 17.4), new V2(-7.2, 11)]);
@@ -359,14 +450,20 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     faroles.push(foco(s * 4.7, 2.66, 4.7, 0xffa25a, 13, 7));
     halo(s * 4.7, 2.66, 4.7, 1.6, 0xffa25a);
   }
-  // portal: tímpano con la portada del álbum, dintel y hojas de la puerta principal
+  // portal: tímpano de piedra labrada (una estrella dorada de la que salen rayos en relieve), dintel y hojas.
+  // Antes llevaba la portada como imagen: de lejos se leía como un destello raro sobre la puerta.
   const TIMP = new THREE.Shape(arco(0, 3.7, UMBRAL.w, UMBRAL.R).map(p => new V2(p.x, Math.max(p.y, 4.02))));
-  const gT = new THREE.ShapeGeometry(TIMP);
-  { const p = gT.attributes.position, uv = gT.attributes.uv, ap = altoArco(UMBRAL.w, UMBRAL.R) - .32;
-    for (let i = 0; i < p.count; i++) uv.setXY(i, (p.getX(i) + UMBRAL.w) / (2 * UMBRAL.w), .2 + (p.getY(i) - 4.02) / ap * .62); }
-  const portada = loader.load('img/portada.png'); portada.colorSpace = THREE.SRGBColorSpace; portada.anisotropy = ANISO;
-  const matTimp = new THREE.MeshStandardMaterial({ map: portada, emissiveMap: portada, emissive: 0xffffff, emissiveIntensity: .32, roughness: .3, metalness: .25, envMapIntensity: 1.2 });
-  const timpano = new THREE.Mesh(gT.translate(0, B, -.62), matTimp); timpano.receiveShadow = true; add(timpano);
+  const altoT = altoArco(UMBRAL.w, UMBRAL.R) - .32, cy = 4.02 + altoT * .42;
+  poner(M.piedra, new THREE.ExtrudeGeometry(TIMP, { depth: .1, bevelEnabled: false, curveSegments: 20 }).translate(0, B, -.74), 1);
+  for (let k = 0; k < 11; k++) {   // rayos en abanico, de distinta longitud
+    const a = Math.PI * (.06 + .88 * k / 10), largo = .55 + (k % 2 ? .2 : .45);
+    const g = new THREE.BoxGeometry(largo, .055, .06).translate(.42 + largo / 2, 0, 0).rotateZ(a).translate(0, B + cy, -.62);
+    poner(M.piedra, g, .6);
+  }
+  { const e = new THREE.Shape(); for (let k = 0; k <= 10; k++) { const a = Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? .14 : .34; e[k ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r); }
+    poner(M.oro, new THREE.ExtrudeGeometry(e, { depth: .06, bevelEnabled: true, bevelSize: .025, bevelThickness: .025, bevelSegments: 1 }).translate(0, B + cy, -.62), 1);
+    const aro = new THREE.Shape().absarc(0, 0, .44, 0, Math.PI * 2, false); aro.holes.push(new THREE.Path().absarc(0, 0, .38, 0, Math.PI * 2, true));
+    poner(M.piedra, extruir(aro, .07).translate(0, B + cy, -.64), .5); }
   const hojasPortal = [];
   for (const s of [-1, 1]) {
     const piv = new THREE.Group(); piv.position.set(s * UMBRAL.w, B, -.83);
@@ -409,7 +506,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     poner(M.muro, g, 2.6);
     for (const d of puertasDef) if (d.lado === s) {
       const v = new THREE.ShapeGeometry(new THREE.Shape(contorno(0, { w: .42, s: 1.5, R: .56 }, 5.1))).rotateY(Math.PI / 2).translate(s * (IW + .45), B, d.z);
-      poner(M.vidrio, v, 1);
+      poner(M.ventana, v, 1);   // desde la nave, las vidrieras dejan ver la tormenta
       const anillo2 = extruir(anillo(0, { w: .52, s: 1.5, R: .66 }, { w: .42, s: 1.5, R: .56 }, 5.1), .1).rotateY(Math.PI / 2).translate(s < 0 ? -IW : IW - .1, B, d.z);
       poner(M.piedra, anillo2, 1);
     }
@@ -425,14 +522,38 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     poner(M.piedra, extruir(new THREE.Shape([...arco(0, 0, IW, 5), ...arco(0, 0, IW - .26, 4.74).reverse()]), .3).translate(0, B + 8, z - .15), 1.2);
   }
   poner(M.muro, extruir(new THREE.Shape([...arco(0, 0, IW + .3, 5.3), ...arco(0, 0, IW, 5).reverse()]), LEN).translate(0, B + 8, Z1), 2.6);
-  poner(M.marmol, new THREE.PlaneGeometry(IW * 2, LEN).rotateX(-Math.PI / 2).translate(0, B + .003, (Z0 + Z1) / 2), 3);
-  for (const x of [-2.25, 2.25]) poner(M.vidrio, new THREE.ShapeGeometry(new THREE.Shape(contorno(x, LAN9, 3.7))).translate(0, B, -23.6), 1);
+  poner(M.losa, new THREE.PlaneGeometry(IW * 2, LEN).rotateX(-Math.PI / 2).translate(0, B + .003, (Z0 + Z1) / 2), 2.2);
+  // alfombra a lo largo de la nave, hasta la puerta del fondo
+  { const t = texturaAlfombra(); t.repeat.set(1, (LEN - 1.4) / 3.2);
+    const alf = new THREE.Mesh(new THREE.PlaneGeometry(1.7, LEN - 1.4).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ map: t, roughness: 1, color: 0xb8a8a8 }));
+    alf.position.set(0, B + .01, (Z0 + Z1) / 2 - .2); alf.receiveShadow = true; add(alf); }
+  for (const x of [-2.25, 2.25]) poner(M.ventana, new THREE.ShapeGeometry(new THREE.Shape(contorno(x, LAN9, 3.7))).translate(0, B, -23.6), 1);
   // lámparas colgantes de hierro
   const lamparas = [-5.5, -10.9, -16.3, -21].map(z => {
     poner(M.hierro, new THREE.CylinderGeometry(.015, .015, 7.8, 6).translate(0, B + 4.6 + 3.9, z), 1);
     poner(M.hierro, new THREE.TorusGeometry(.55, .025, 8, 40).rotateX(Math.PI / 2).translate(0, B + 4.6, z), 1);
     for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; poner(M.hierro, new THREE.CylinderGeometry(.008, .008, 1.1, 4).rotateZ(.46).rotateY(a).translate(Math.cos(a) * .27, B + 5.1, z - Math.sin(a) * .27), 1); }
-    return foco(0, B + 4.6, z, 0xffd2aa, 12);
+    return foco(0, B + 4.6, z, 0xffd2aa, 10);
+  });
+  // charco de luz cálida bajo cada lámpara: se ve aunque esa lámpara no tenga una de las luces reales
+  const charcoLuz = texturaRadial([[0, 'rgba(255,255,255,.85)'], [.45, 'rgba(255,255,255,.25)'], [1, 'rgba(255,255,255,0)']]);
+  for (const { p } of lamparas) {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 5.2).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: charcoLuz, color: 0xffb070, transparent: true, opacity: .32, blending: THREE.AdditiveBlending, depthWrite: false }));
+    m.position.set(p.x, B + .02, p.z); add(m);
+    m.material.opacity = .22;
+  }
+  // la luz de los apliques sobre el muro del fondo: la puerta 9 se distingue desde la entrada de la nave
+  { const lavado = new THREE.Mesh(new THREE.PlaneGeometry(6.5, 5.5), new THREE.MeshBasicMaterial({ map: charcoLuz, color: 0xff9a55, transparent: true, opacity: .3, blending: THREE.AdditiveBlending, depthWrite: false }));
+    lavado.position.set(0, B + 2.4, Z1 + .03); add(lavado); }
+  // la puerta del fondo: dos apliques con llama a los lados y su luz en el suelo
+  const apliques = [-1, 1].map(s => {
+    const x = s * 1.75, y = B + 2.5, z = Z1 + .2;
+    poner(M.hierro, caja(.05, .05, .32, x, y + .1, z + .14), 1);
+    const llama = new THREE.Mesh(new THREE.BoxGeometry(.14, .22, .14), M.vidrioCalido); llama.position.set(x, y, z + .3); add(llama);
+    const hl = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color: 0xffa860, transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false, fog: false })); hl.position.set(x, y, z + .32); hl.scale.setScalar(.9); add(hl);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(3, 3).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: charcoLuz, color: 0xff9a50, transparent: true, opacity: .28, blending: THREE.AdditiveBlending, depthWrite: false }));
+    m.position.set(x * .6, B + .021, z + 1.4); add(m);
+    return foco(x, y, z + .45, 0xffa860, 7, 5);
   });
   const bulbos = new THREE.InstancedMesh(new THREE.SphereGeometry(.05, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffd7a0 }), 24);
   { const m = new THREE.Matrix4(); let k = 0; for (const { p } of lamparas) for (let a = 0; a < 6; a++) { m.makeTranslation(p.x + Math.cos(a * Math.PI / 3) * .55, p.y + .06, p.z + Math.sin(a * Math.PI / 3) * .55); bulbos.setMatrixAt(k++, m); } }
@@ -508,29 +629,10 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   /* ===================== CIELO, NIEBLA, RAYOS, PARTÍCULAS ===================== */
   const cielo = new THREE.Mesh(new THREE.SphereGeometry(900, 48, 24), new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
-    uniforms: { uT: { value: 0 }, uF: { value: 0 }, uD: { value: new V3(0, .3, -1) }, uFog: { value: FOG } },
+    uniforms: uCielo,
     vertexShader: 'varying vec3 vD; void main(){ vD = position; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }',
-    fragmentShader: `varying vec3 vD; uniform float uT,uF; uniform vec3 uD,uFog;
-      float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-      float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
-      float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
-      float fbm2(vec2 p){return n(p)*.6+n(p*2.03+vec2(1.7,9.2))*.4;}
-      void main(){ vec3 d=normalize(vD); float y=d.y;
-        // tormenta carmesí: masas de nube iluminadas en rojo desde abajo, huecos casi negros
-        vec2 uv=d.xz/(max(y,0.)+.2)*1.25+vec2(uT*.022,uT*.008);   // las nubes avanzan a la vista
-        vec2 w=vec2(fbm2(uv*.6+uT*.012),fbm2(uv*.6+5.2-uT*.009));   // la deformación también cambia: las nubes se arremolinan
-        float c=fbm(uv+w*1.6+vec2(0.,uT*.006)); float c2=fbm(uv*2.1+w*2.4-vec2(uT*.035,0.));   // dos capas a distinta velocidad: se deforman al pasar
-        float nube=smoothstep(.3,.78,c*.7+c2*.45);
-        float borde=smoothstep(.52,.9,c2)*nube;
-        vec3 alto=vec3(.006,.002,.004), medio=vec3(.022,.004,.007), horiz=vec3(.1,.012,.016);   // entre nubes, casi negro
-        vec3 col=mix(horiz,medio,smoothstep(-.02,.22,y)); col=mix(col,alto,smoothstep(.2,.75,y));
-        vec3 rojo=vec3(.46,.035,.05)*(1.15-smoothstep(0.,.8,y)*.6);
-        col=mix(col, vec3(.01,.003,.005), nube*.9);
-        col+=rojo*borde*1.5+rojo*.22*nube*(1.-smoothstep(.0,.4,y));
-        float fl=pow(max(dot(d,normalize(uD)),0.),5.);
-        col+=vec3(.95,.8,.95)*uF*fl*(.35+nube*1.3)+vec3(.35,.12,.16)*uF*.2;
-        col=mix(uFog*1.1,col,smoothstep(-.06,.1,y));
-        gl_FragColor=vec4(col,1.); }`,
+    fragmentShader: `varying vec3 vD; ${CIELO_GLSL}
+      void main(){ gl_FragColor=vec4(cielo(normalize(vD)),1.); }`,
   }));
   cielo.renderOrder = 10;   // después de lo opaco: lo tapado no se calcula
   add(cielo);
@@ -649,7 +751,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     // solo lo que refleja (metal, oro, mármol, diamantes, tímpano) lleva mapa de entorno: en la piedra,
     // la madera y el suelo apenas se notaba y costaba en cada píxel
     const env = pm.fromScene(es, .04).texture;
-    scene.traverse(o => { const m = o.material; if (m?.isMeshStandardMaterial && (m.metalness > .2 || m === M.marmol)) m.envMap = env; }); }
+    scene.traverse(o => { const m = o.material; if (m?.isMeshStandardMaterial && m.metalness > .2) m.envMap = env; }); }
 
   // rayo: textura dibujada en cada descarga
   const rayoCanvas = document.createElement('canvas'); rayoCanvas.width = 256; rayoCanvas.height = 1024;
@@ -976,7 +1078,8 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       d.charco.material.opacity = .16 + d.brillo * .35 + d.abierto * .3;
       d.foco.p.copy(mundo(d, 0, .9, .7)); d.foco.i = dentro ? 1 + d.brillo * 2.4 + d.abierto * 1.2 : 0;
     }
-    lamparas.forEach(l => l.i = dentro || cam.p.z < 1.5 ? 12 : 0);
+    lamparas.forEach(l => l.i = dentro || cam.p.z < 1.5 ? 16 : 0);
+    apliques.forEach(l => l.i = dentro ? 5 + Math.sin(tiempo * 8 + l.p.x) * .3 : 0);
     // el portal de la habitación aparece con la apertura; al cerrarse la puerta se retira
     if (portalDe) {
       const op = suave(.04, .45, portalDe.abierto);
