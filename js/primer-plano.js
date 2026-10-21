@@ -7,7 +7,7 @@
 // tallos); en la CPU solo unos pocos pétalos que el viento arrastra por el suelo.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { mecer } from './escena.js';
+import { mecer, arco } from './escena.js';
 
 const V3 = THREE.Vector3, V2 = THREE.Vector2;
 
@@ -346,6 +346,51 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
     }
     seca.receiveShadow = true; add(seca); }
 
+  /* ---------- rosales trepadores por la capilla ---------- */
+  // Tallo pegado a la piedra que sube serpenteando, hojas a lo largo y rosas que asoman. Sin viento (están
+  // sujetos al muro): materiales propios, copias de los de las rosas sin el balanceo.
+  { const hojaM = matHoja.clone(), rosaM = matRosa.clone(), talloM = matTallo.clone();
+    const tubos = [], hojasP = [], rosasP = [];
+    const ruta = pts => {
+      const c = new THREE.CatmullRomCurve3(pts), L = c.getLength();
+      tubos.push(new THREE.TubeGeometry(c, Math.max(8, L * 10 | 0), .024, 5, false).toNonIndexed());
+      for (let s = 0; s < L; s += .11) { const t = s / L, p = c.getPointAt(t); hojasP.push([p, 1.3 + rnd() * .9]); if (rnd() < .24) rosasP.push([p, 1 + rnd() * .7]); }
+      // ramitas que salen a los lados
+      for (let k = 0; k < L / .9; k++) { const t = rnd(), p = c.getPointAt(t), lado = rnd() < .5 ? -1 : 1, q2 = [];
+        for (let j = 0; j < 5; j++) q2.push(p.clone().add(new V3(lado * j * .09, (rnd() - .3) * j * .05, 0)));
+        const c2 = new THREE.CatmullRomCurve3(q2); tubos.push(new THREE.TubeGeometry(c2, 6, .009, 3, false).toNonIndexed());
+        for (let j = 1; j < 5; j++) hojasP.push([c2.getPointAt(j / 4), .7 + rnd() * .5]); }
+    };
+    const sube = (x, z, y0, y1, ancho, f) => { const pts = []; for (let k = 0; k <= 16; k++) { const t = k / 16; pts.push(new V3(x + Math.sin(t * 6.5 + f) * ancho + Math.sin(t * 17 + f * 2) * ancho * .25, y0 + t * (y1 - y0), z)); } ruta(pts); };
+    for (const s of [-1, 1]) {
+      sube(s * 5.5, .04, .1, 8.6, .35, rnd() * 6);                 // fachada, junto al pórtico
+      sube(s * 6.4, .04, .1, 5.2, .25, rnd() * 6);
+      sube(s * 7.65, .76, .05, 7.2, .3, rnd() * 6);                // contrafuerte de la esquina
+      sube(s * 8.3, -1.16, .05, 4.6, .25, rnd() * 6);              // nave lateral
+      sube(s * 10.5, -1.16, .05, 5.2, .3, rnd() * 6);
+      sube(s * 3.75, 1.46, .05, 6.8, .2, rnd() * 6);               // costado del pórtico
+    }
+    // una guirnalda que sigue el arco exterior del pórtico
+    ruta(arco(0, 1.02 + 4.21, 2.75, 3.5, 20).map(p => new V3(p.x, p.y, 1.47)));
+    fijo(mergeGeometries(tubos), talloM);
+    const hm = new THREE.InstancedMesh(hojaG, hojaM, hojasP.length);
+    hojasP.forEach(([p, sc], k) => { m4.compose(p.clone().add(new V3(0, 0, .03)), q.setFromEuler(e.set((rnd() - .5) * .8, (rnd() - .5) * .9, rnd() * 6.3)), new V3(sc, sc, sc)); hm.setMatrixAt(k, m4); });
+    const rm2 = new THREE.InstancedMesh(rosas.geometry, rosaM, rosasP.length);
+    rosasP.forEach(([p, sc], k) => { m4.compose(p.clone().add(new V3(0, 0, .06)), q.setFromEuler(e.set(1.25 + (rnd() - .5) * .5, rnd() * 6.3, (rnd() - .5) * .4)), new V3(sc, sc, sc)); rm2.setMatrixAt(k, m4); });
+    add(hm, rm2); }
+
+  /* ---------- murciélagos alrededor del campanario ---------- */
+  const N_MURC = 7, murc = new THREE.InstancedMesh((() => {
+    const g = new THREE.BufferGeometry();   // cuerpo y dos alas dentadas, en el plano XZ
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, .12, -.05, 0, -.1, .05, 0, -.1, 0, 0, .06, -.42, .04, .02, -.16, 0, -.08, 0, 0, .06, .42, .04, .02, .16, 0, -.08]), 3));
+    g.computeVertexNormals(); return g; })(), new THREE.ShaderMaterial({
+    side: THREE.DoubleSide, uniforms: { uT: { value: 0 } },
+    vertexShader: 'uniform float uT; void main(){ vec3 p = position; float f = float(gl_InstanceID) * 1.7; p.y += sin(uT * 17. + f) * abs(p.x) * .9; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(p, 1.); }',
+    fragmentShader: 'void main(){ gl_FragColor = vec4(.012, .006, .008, 1.); }',
+  }), N_MURC);
+  const vuelos = Array.from({ length: N_MURC }, () => ({ r: 5 + rnd() * 9, h: 20 + rnd() * 8, v: (.25 + rnd() * .3) * (rnd() < .5 ? -1 : 1), f: rnd() * 6.3, s: .8 + rnd() * .6 }));
+  murc.frustumCulled = false; add(murc);
+
   /* ---------- pétalos que el viento arrastra por el suelo (CPU: pocos) ---------- */
   const N_VUELO = MOVIL ? 14 : 26, vuelo = new THREE.InstancedMesh(petalo(.09, .06, .35, .01), matRosa, N_VUELO);
   const vuelan = Array.from({ length: N_VUELO }, () => ({ x: (rnd() - .5) * 14, z: 28 + rnd() * 14, v: .25 + rnd() * .45, f: rnd() * 6.3, giro: (rnd() - .5) * 4 }));
@@ -365,6 +410,13 @@ export function crearPrimerPlano({ add, poner, M, MOVIL }) {
         vuelo.setMatrixAt(k, m4);
       });
       vuelo.instanceMatrix.needsUpdate = true;
+      murc.material.uniforms.uT.value = rm ? 0 : t;
+      vuelos.forEach((b, k) => {
+        const a = b.f + t * b.v, y = b.h + Math.sin(t * .7 + b.f) * 1.5, x = Math.cos(a) * b.r, z = -3.2 + Math.sin(a) * b.r * .8;
+        const rumbo = Math.atan2(-Math.sin(a) * b.v, Math.cos(a) * b.v * .8);
+        m4.compose(tmpV.set(x, y, z), q.setFromEuler(e.set(Math.sin(t * 2 + b.f) * .25, rumbo, Math.sin(t * 1.3 + b.f) * .3)), uno.clone().multiplyScalar(b.s)); murc.setMatrixAt(k, m4);
+      });
+      murc.instanceMatrix.needsUpdate = true;
       llamas.material.uniforms.uT.value = rm ? 0 : t; goteo.material.uniforms.uT.value = rm ? 0 : t; llamas.material.uniforms.uR.value = ventisca;   // la ventisca agita las llamas
     },
     escalaPuntos(v) { llamas.material.uniforms.uEsc.value = v; goteo.material.uniforms.uEsc.value = v; },

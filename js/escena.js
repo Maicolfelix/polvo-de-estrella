@@ -144,6 +144,16 @@ const CIELO_GLSL = `uniform float uT,uF,uFugaP; uniform vec3 uD,uFog,uFugaA,uFug
         col+=rojo*borde*1.5+rojo*.22*nube*(1.-smoothstep(.0,.4,y));
         float fl=pow(max(dot(d,normalize(uD)),0.),5.);
         col+=vec3(.95,.8,.95)*uF*fl*(.35+nube*1.3)+vec3(.35,.12,.16)*uF*.2;
+        // luna: disco pálido con mares y cráteres, teñido de rojo por la tormenta; las nubes la tapan al pasar
+        { vec3 dl = normalize(vec3(-.2, .42, -1.)); float cd = dot(d, dl);
+          vec3 ex = normalize(cross(dl, vec3(0., 1., 0.))), ey = cross(ex, dl);
+          vec2 lc = vec2(dot(d, ex), dot(d, ey)) * 32.;
+          float disco = smoothstep(.99935, .9995, cd);
+          float mares = fbm2(lc * 1.6 + 3.) * .55 + n(lc * 5.) * .25 + n(lc * 11.) * .12;
+          vec3 lunaC = vec3(1., .84, .82) * (.3 + .5 * smoothstep(.3, .75, mares)) * (.45 + .55 * sqrt(max(0., 1. - dot(lc, lc) * .9)));   // mares oscuros y borde en penumbra
+          float tapa = smoothstep(.25, .8, nube);
+          col = mix(col, lunaC, disco * (1. - tapa * .8));
+          col += vec3(.95, .42, .4) * pow(max(cd, 0.), 1400.) * .35 * (1. - tapa * .6) + vec3(.55, .12, .14) * pow(max(cd, 0.), 70.) * .3 * (1. - tapa * .4); }
         // estrella fugaz: un trazo sobre el arco entre A y B; la cabeza avanza con uFugaP y la cola se apaga
         if (uFugaP > 0. && uFugaP < 1.) {
           vec3 nf = normalize(cross(uFugaA, uFugaB)); float dl = abs(dot(d, nf));
@@ -670,7 +680,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     });
     // tras la puerta: un pasillo corto de piedra iluminado desde dentro con el color de la canción
     // (lo que se ve al entreabrirla; su luz sale por la puerta al suelo de la nave). Al entrar, el hueco
-    // pasa a mostrar la habitación preparada (portal, ver `portalHab`). La puerta 1 da a la sala del mar.
+    // pasa a mostrar la habitación preparada (recortada en la página, ver `huecoPantalla`). La puerta 1 da a la sala del mar.
     const altoHab = dim.s + ap;
     let matVest = null, fondo = null;
     if (d.i !== 0) {
@@ -991,6 +1001,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
 
   /* ===================== ESTADO Y ANIMACIÓN ===================== */
   let tiempo = 0, uActual = 0, anim = null, mezcla = null, retenido = false; // retenido: la cámara se queda dentro de la habitación
+  const mirada = { x: 0, y: 0, ox: 0, oy: 0 };
   let rayo = null, proximoRayo = 1.5, ventisca = null, proximaVentisca = 12, proximaFugaz = 4;
   const cam = { p: new V3(), t: new V3() };
   const tmp = new V3();
@@ -1006,7 +1017,6 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     renderer.getDrawingBufferSize(tamPortal);
     rtPortal.setSize(Math.round(tamPortal.x * .6), Math.round(tamPortal.y * .6));
     portal.material.uniforms.uRes.value.copy(tamPortal);
-    portalHab.material.uniforms.uRes.value.copy(tamPortal);
     primerPlano.escalaPuntos(pr); salpicaduras.material.uniforms.uEsc.value = pr;
   }
   function tamano(w, h) {
@@ -1031,38 +1041,34 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
 
   const mundo = (d, x, y, z) => d.marco.localToWorld(new V3(x, y, z));
 
-  // Habitaciones 2–9: el hueco de la puerta es un portal que muestra la atmósfera de la canción alineada con la
-  // pantalla (la misma imagen que dibuja el lienzo de la habitación). Cuando la cámara llega, el hueco llena la
-  // pantalla y la habitación 2D lo releva sin salto. El sombreador deshace el tono ACES de la salida para que
-  // los colores coincidan con los del lienzo.
-  let atmosTex = null, portalDe = null, cierre = null, subir = false;
-  const portalHab = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false, fog: false,
-    uniforms: { tMap: { value: null }, uRes: { value: new V2(1, 1) }, uOp: { value: 0 }, uExp: { value: renderer.toneMappingExposure } },
-    vertexShader: 'void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }',
-    fragmentShader: `uniform sampler2D tMap; uniform vec2 uRes; uniform float uOp, uExp;
-      vec3 rrtInv(vec3 y){ // inversa de RRTAndODTFit de three.js
-        vec3 a = .983729 * y - 1., b = .432951 * y - .0245786, c = .238081 * y + .000090537;
-        return (-b - sqrt(max(b * b - 4. * a * c, 0.))) / (2. * a); }
-      void main(){
-        vec3 c = clamp(texture2D(tMap, gl_FragCoord.xy / uRes).rgb, 0., .985);
-        const mat3 OUTINV = mat3(.643038, .059269, .005962, .311187, .931436, .063929, .045775, .009295, .930118);
-        const mat3 ININV = mat3(1.764741, -.147028, -.036337, -.675778, 1.160252, -.162436, -.088963, -.013224, 1.198773);
-        vec3 v = ININV * rrtInv(OUTINV * c) * .6 / uExp;
-        gl_FragColor = vec4(max(v, 0.), uOp); }`,
-  }));
+  // Habitaciones 2–9: la habitación (su lienzo 2D, tal cual) se muestra en la página recortada con la forma que
+  // tiene el hueco de la puerta en pantalla (ver `huecoPantalla` y app.js). Así no depende de copiar el lienzo a
+  // la GPU ni de convertir colores, y se ve igual en cualquier dispositivo. Cuando la cámara llega, el hueco
+  // llena la pantalla y el recorte desaparece.
+  let cierre = null;
   const finalEntrada = d => [mundo(d, 0, 1.62, d.i === 0 ? -.87 : .39), mundo(d, 0, 1.62, -4)];
-  function ponerPortal(d, lienzo) {
-    if (d.i === 0) return;
-    if (!atmosTex && lienzo) { atmosTex = new THREE.CanvasTexture(lienzo); atmosTex.colorSpace = THREE.SRGBColorSpace; portalHab.material.uniforms.tMap.value = atmosTex; }
-    if (!atmosTex || portalDe === d) return;
-    portalHab.geometry.dispose();
-    portalHab.geometry = new THREE.ShapeGeometry(new THREE.Shape(contorno(0, d.dim)), 24).translate(0, 0, -.06);
-    d.marco.add(portalHab); portalDe = d;
+  // contorno del hueco de la puerta i en píxeles de pantalla y lo alineada que está la cámara con él (0..1);
+  // null si parte del hueco queda detrás de la cámara (la cámara ya lo está cruzando: pantalla completa)
+  const proyHueco = new V3();
+  function huecoPantalla(i, w, h) {
+    const d = puertas[i]; if (!d || d.i === 0) return null;
+    camera.updateMatrixWorld(); d.marco.updateMatrixWorld();
+    // la cámara está en el umbral (delante del hueco, centrada y muy cerca): la habitación ocupa la pantalla
+    const lc = d.marco.worldToLocal(cam.p.clone());
+    if (lc.z < .75 && Math.abs(lc.x) < d.dim.w * .9) return null;
+    const pts = [];
+    for (const q of contorno(0, d.dim)) {
+      proyHueco.set(q.x, q.y, -.03); d.marco.localToWorld(proyHueco);
+      const enVista = proyHueco.clone().applyMatrix4(camera.matrixWorldInverse);
+      if (enVista.z > -camera.near * 2) return { pts: [], alin: 0, abierto: d.abierto };   // fuera de vista: no se muestra
+      proyHueco.project(camera); pts.push([(proyHueco.x * .5 + .5) * w, (-proyHueco.y * .5 + .5) * h]);
+    }
+    const normal = mundo(d, 0, 1.2, 1).sub(mundo(d, 0, 1.2, 0)), mira = cam.t.clone().sub(cam.p).normalize();
+    return { pts, alin: Math.max(0, -normal.dot(mira)), abierto: d.abierto };
   }
   function entrar(i, lienzo) {
     const d = puertas[i];
-    ponerPortal(d, lienzo); cierre = null;
+    cierre = null;
     const p0 = cam.p.clone(), t0 = cam.t.clone();
     const pf = mundo(d, 0, 1.62, 2.1), tf = mundo(d, 0, 1.55, 0);
     const [pin, tin] = finalEntrada(d);
@@ -1076,7 +1082,6 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   // que se desvanece encima) y retrocede a su sitio en la nave; la puerta se cierra después
   function salir(i) {
     const d = puertas[i];
-    ponerPortal(d);
     d.abierto = d.objetivo = 1; d.objetivoBrillo = 1;
     cierre = { d, en: performance.now() + (rm ? 300 : 900) };
     const [pin, tin] = finalEntrada(d);
@@ -1088,7 +1093,6 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   function ponerEnPuerta(i) {
     puertas.forEach((q, k) => { q.abierto = q.objetivo = k === i ? 1 : 0; q.objetivoBrillo = k === i ? 1 : 0; });
     retenido = true; cierre = null;
-    ponerPortal(puertas[i]);
     const [pin, tin] = finalEntrada(puertas[i]); cam.p.copy(pin); cam.t.copy(tin);
   }
 
@@ -1193,6 +1197,9 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       }
     }
     camera.position.copy(cam.p); camera.lookAt(cam.t);
+    // mirar alrededor (ratón o giro del teléfono): la vista gira un poco hacia donde se apunta
+    mirada.x += (mirada.ox - mirada.x) * cl(dt * 3.2); mirada.y += (mirada.oy - mirada.y) * cl(dt * 3.2);
+    if (!rm && (mirada.x || mirada.y)) { const k = cam.p.z < -.6 ? .55 : 1; camera.rotateY(-mirada.x * .34 * k); camera.rotateX(-mirada.y * .15 * k); }
     const dentro = cam.p.z < -.6;
     // zonas: lo que no puede verse desde aquí no se dibuja
     ext.visible = cam.p.z > -7; int.visible = cam.p.z < 12;
@@ -1240,14 +1247,6 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     }
     lamparas.forEach(l => l.i = dentro || cam.p.z < 1.5 ? 16 : 0);
     luzFondo.i = dentro ? 9 + Math.sin(tiempo * 8) * .35 + Math.sin(tiempo * 13.7) * .25 : 0;
-    // el portal de la habitación aparece con la apertura; al cerrarse la puerta se retira
-    if (portalDe) {
-      const op = suave(.04, .45, portalDe.abierto);
-      portalHab.material.uniforms.uOp.value = op;
-      portalHab.visible = op > 0;
-      if (op > 0 && (subir = !subir)) atmosTex.needsUpdate = true;   // subir el lienzo cuesta: uno de cada dos fotogramas basta
-      if (op === 0 && !anim && !retenido && !mezcla) { portalDe.marco.remove(portalHab); portalDe = null; }
-    }
     // el resplandor del posproceso cede al final de la entrada: el hueco debe verse igual que la habitación
     // POOL luces reales para todos los focos: las que más aportan cerca de la cámara
     for (const fo of focos) fo.peso = fo.i / (1 + fo.p.distanceToSquared(cam.p) / (fo.d * fo.d));
@@ -1328,7 +1327,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
 
   // ponytail: reinicia el polvo interior tras cada entrada en vez de simular su regreso
   return {
-    renderer, camera, scene, calidad, tamano, actualizar, render, entrar, salir, ponerEnPuerta, preescucha, rectPuertas, actualizarSala, terminarEntrada,
+    renderer, camera, scene, calidad, tamano, huecoPantalla, mirar: (x, y) => { mirada.ox = x; mirada.oy = y; }, actualizar, render, entrar, salir, ponerEnPuerta, preescucha, rectPuertas, actualizarSala, terminarEntrada,
     rafaga: () => RAFAGA.value, provocar: { ventisca: () => { proximaVentisca = 0; }, fugaz: () => { proximaFugaz = 0; } },   // para revisar y capturar
     uDePuerta, U_FIN, U_EXT, U_NAVE, PASO, reponerPolvo: () => reponerParticulas(polvoInt),
     cancelarMezcla: () => { mezcla = null; },

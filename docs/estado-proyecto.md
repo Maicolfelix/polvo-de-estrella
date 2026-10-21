@@ -246,3 +246,20 @@ Con la escala adaptativa a 0,85 (1224×765) la nave también llegó a 72 fps. Lo
 - Sonido de lluvia: ruido rosa muy filtrado (220 Hz–2,6 kHz) con un repiqueteo de gotas sueltas; cede como el viento ante la preescucha y calla en las habitaciones; respeta silencio y volumen.
 
 **Medido (GTX 1650, 1440×900, rAF, pantalla de 144 Hz).** Con escala 1: 48 fps en llegada, escalinata y nave (el fotograma queda algo por encima de 13,9 ms y la sincronía lo lleva al siguiente escalón). Con la escala adaptativa a 0,85: 72 fps en llegada, escalinata y nave. Pruebas: `correrAmbiente()` 11/11 (incluye lluvia en la nave y silencio en la habitación), `correrTransiciones()` 21/21, `correr()` 22/22. Sin teléfono físico; nada escuchado.
+
+## 2026-10-22 · Sonido sin elegir, transiciones de puertas para cualquier dispositivo, luna, mirar alrededor y rosales en la capilla (rama `feat/acabado-visual`)
+
+**Pedidos del artista.** Que no haya que elegir el sonido al entrar (ya solo hay ambiente); arreglar las transiciones de las puertas con las imágenes de fondo, que salían mal en dos dispositivos; una luna; que al mover el ratón o el teléfono se vea alrededor; más lianas de rosas en la capilla.
+
+**Cambios.**
+- Sonido: se quitaron «Entrar con sonido» y «Sin sonido». El ambiente arranca con el primer gesto real en cualquier parte (los navegadores no dejan sonar antes); un aviso discreto lo indica y desaparece. Si la persona silenció en otra visita (`pde-mudo`), se respeta. Los mandos de sonido gestionan su propio primer toque.
+- Transiciones 2–9: ya no se copia el lienzo de la habitación a la GPU ni se convierten colores (era la parte que dependía del dispositivo). La habitación 2D se muestra en la página recortada (`clip-path`) con el contorno del hueco de la puerta proyectado en pantalla (`huecoPantalla` en `js/escena.js`, `recortarHueco` en `js/app.js`); aparece a medida que la puerta se abre y la cámara se alinea, y llena la pantalla en el umbral. La salida hace lo inverso. Además es más ligero en teléfono (sin subir un lienzo a pantalla completa en cada fotograma).
+- Luna en el cielo (función del cielo): disco con mares y borde en penumbra, halo rojo, y las nubes la tapan al pasar; se ve también en vidrieras y charcos.
+- Mirar alrededor: con el ratón (ordenador) o inclinando el teléfono (giroscopio; en iOS se pide permiso en el primer toque) la vista gira hasta ~19° a los lados y ~8° arriba/abajo, menos dentro de la nave. Sobre una puerta la vista se queda quieta; en las transiciones y con movimiento reducido, al frente.
+- Rosales trepadores por la fachada, los contrafuertes, las naves laterales, los costados del pórtico y en guirnalda por el arco, con hojas, ramitas y rosas (sin balanceo: están sujetos al muro). Siete murciélagos rodean el campanario.
+- Corrección: tras visitar una habitación antes de que arrancase el sonido, el viento quedaba en silencio para siempre (`salirCancion` sin audio no restauraba su nivel).
+- Pruebas: el modo `?captura` arranca su bucle por temporizador (con el panel oculto no arrancaba); la comprobación de la letra usa la clase `listo`; la de la preescucha mira el factor del viento (las ventiscas al azar la hacían inestable).
+
+**Pruebas (navegador integrado, 375×812).** `correrTransiciones()` 21/21; `correrSinSonido()` 6/6; `correrAmbiente()` 11/11 (sonido activado con un clic real en el texto de la llegada); `correr()` y `correrVolumen()` en la misma tanda: todo OK salvo la preescucha antes de corregir su comprobación. Fotogramas compuestos de las ocho puertas (escena + habitación recortada): coherentes de principio a fin.
+
+**Rendimiento.** Con el panel oculto no se puede medir la fluidez real (el navegador pinta una vez por segundo). Coste sincronizado con la GPU (mismo método que `medir()`, 1440×900, escala 1): llegada 22,6 ms frente a 19,9 ms antes de estos añadidos (incluye ~6 ms de sincronización). La escala adaptativa compensa en equipos más lentos. Sin probar en teléfono físico tras estos cambios.

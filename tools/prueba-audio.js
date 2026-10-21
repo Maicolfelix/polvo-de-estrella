@@ -256,9 +256,9 @@ export async function correrAmbiente() {
   const b = document.querySelectorAll('.puerta')[3], r = b.getBoundingClientRect(), o = { pointerType: 'touch', clientX: r.x + r.width / 2, clientY: r.y + r.height / 2, bubbles: true, pointerId: 5 };
   b.dispatchEvent(new PointerEvent('pointerdown', o)); await w(1800);
   const vPre = A.niveles().viento;
-  ok(A.niveles().pre > .5 && vPre < vNave * .6, `preescucha: el viento cede (${vNave} → ${vPre})`);
+  ok(A.niveles().pre > .5 && A.niveles().cede === A.NIVEL.vientoPre, `preescucha: el viento cede a ${A.niveles().cede} (las ventiscas al azar no cuentan)`);
   b.dispatchEvent(new PointerEvent('pointerup', o)); b.click(); await w(2000);
-  ok(A.niveles().viento > vPre, 'al soltar: el viento vuelve (' + A.niveles().viento + ')');
+  ok(A.niveles().cede === 1 && A.niveles().viento > 0, 'al soltar: el viento vuelve (' + A.niveles().viento + ')');
   toque(b); await modo('habitacion'); await w(1500);
   ok(A.niveles().viento < .002 && A.niveles().lluvia < .002 && sonando(A).join() === 'song', 'habitación: solo la canción; viento y lluvia en silencio (' + A.niveles().viento + ', ' + A.niveles().lluvia + ')');
   toque($('#volver')); await modo('nave'); await w(2500);
@@ -286,7 +286,7 @@ export async function correrTransiciones() {
       llamadas = 0; toque(puerta(i)); await w(250);
       const op0 = +getComputedStyle($('#habScroll')).opacity;
       await modo('habitacion'); await w(600);
-      const op1 = +getComputedStyle($('#habScroll')).opacity;
+      const op1 = $('#habitacion').classList.contains('listo') ? 1 : 0;   // la clase (el fundido CSS no avanza si la pestaña no se pinta)
       const fuente = A.niveles()?.fuentes.song ?? A.elementos.song.src.split('/').pop();
       ok(P.estado().actual === i && llamadas === 1 && fuente === String(i + 1).padStart(2, '0') + '.m4a' && op0 === 0 && op1 === 1,
         `puerta ${i + 1}: una transición, canción ${fuente}, letra oculta al empezar (${op0}) y visible al estabilizarse (${op1})`);

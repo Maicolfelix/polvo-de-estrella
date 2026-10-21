@@ -99,7 +99,7 @@ export const contexto = () => ctx;
 export const niveles = () => ctx && ({
   master: master.gain.value, cancion: volG.gain.value,   // sin redondeo: el silencio debe ser 0 exacto
   pre: +preG.gain.value.toFixed(3),
-  song: +songG.gain.value.toFixed(3), viento: +vientoG.gain.value.toFixed(3), lluvia: +lluviaG.gain.value.toFixed(3),
+  song: +songG.gain.value.toFixed(3), viento: +vientoG.gain.value.toFixed(3), lluvia: +lluviaG.gain.value.toFixed(3), cede: cedeViento,
   sonando: { pre: !pre.paused, song: !song.paused },
   fuentes: { pre: pre.src.split('/').pop(), song: song.src.split('/').pop() },
 });
@@ -214,7 +214,7 @@ export function cambiarCancion(i) {
 export function salirCancion() {
   enHabitacion = false; tokCambio++; cambiando = false;
   quiere = false; marcar(); avisar();
-  if (!ctx) { song.pause(); return; }
+  if (!ctx) { song.pause(); cedeViento = 1; return; }   // sin audio aún: el ambiente queda listo para cuando arranque
   rampa(songG, 0, .5);                       // cola breve de 0,5 s, luego parada real
   setTimeout(() => { if (!quiere) song.pause(); }, 550);
   ceder(1, 2.5);                             // al volver solo regresa el ambiente

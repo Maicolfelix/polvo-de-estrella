@@ -1,50 +1,39 @@
-// Fotogramas intermedios de la entrada por una puerta (lienzo WebGL), enviados a tools/receptor-capturas.mjs.
+// Fotogramas intermedios de la entrada por una puerta, enviados a tools/receptor-capturas.mjs.
 // Uso en la consola (página con ?captura):
 //   const f = await import('/tools/fotogramas-entrada.js'); await f.fotogramas(3, 'despues')
-// Avanza la animación real (reloj de pared) con un bucle síncrono, prepara la atmósfera como lo hace la app
-// y, al final, mide cuánto difiere el último fotograma del lienzo de la habitación (relevo sin salto).
+// Avanza la animación real (reloj de pared) con un bucle síncrono y compone lo que ve la persona: la escena 3D
+// y, encima, la habitación 2D recortada con la forma del hueco de la puerta y la opacidad que le da la app.
 const espera = ms => new Promise(r => setTimeout(r, ms));
 export async function fotogramas(i, prefijo, instantes = [0, .3, .6, .9, 1.2, 1.5, 1.8, 2.1]) {
   const { escena, atmos } = window.__pde, lienzo = escena.renderer.domElement, u = escena.uDePuerta(i);
-  const hab = document.querySelector('#atmos');
+  const hab = document.querySelector('#atmos'), gl = escena.renderer.getContext(), px = new Uint8Array(4);
   scrollTo(0, u * innerHeight);
   for (let k = 0; k < 90; k++) escena.actualizar(1 / 30, u);
   atmos.poner(i); atmos.dibujar(1 / 60, 0, false);
+  // misma regla que recortarHueco() en app.js
+  const comp = document.createElement('canvas'); comp.width = innerWidth; comp.height = innerHeight;
+  const g = comp.getContext('2d');
+  const componer = () => {
+    g.drawImage(lienzo, 0, 0, comp.width, comp.height);
+    if (!i) return comp.toDataURL('image/jpeg', .82);
+    const h = escena.huecoPantalla(i, innerWidth, innerHeight);
+    const op = !h ? 1 : Math.min(1, Math.max(0, (h.abierto - .04) / .4)) * Math.min(1, Math.max(0, (h.alin - .55) / .3));
+    g.save(); g.globalAlpha = op;
+    if (h) { g.beginPath(); h.pts.forEach(([x, y], k) => k ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.clip(); }
+    g.drawImage(hab, 0, 0, comp.width, comp.height); g.restore();
+    return comp.toDataURL('image/jpeg', .82);
+  };
+  const paso = () => { escena.actualizar(1 / 60, u); if (i) atmos.dibujar(1 / 60, 0, false); escena.render(); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); };
   const fotos = [];
   escena.entrar(i, hab);
   const t0 = performance.now();
-  let negros = 0, n = 0;
-  const px = new Uint8Array(4), gl = escena.renderer.getContext();
-  for (const t of instantes) {
-    while ((performance.now() - t0) / 1000 < t) {
-      escena.actualizar(1 / 60, u); if (i) atmos.dibujar(1 / 60, 0, false); escena.render();
-      gl.readPixels(lienzo.width >> 1, lienzo.height >> 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); n++;
-      if (px[0] + px[1] + px[2] === 0) negros++;
-    }
-    escena.actualizar(1 / 60, u); if (i) atmos.dibujar(1 / 60, 0, false); escena.render();
-    fotos.push([t.toFixed(1), lienzo.toDataURL('image/jpeg', .82)]);
-  }
-  // relevo: el último fotograma frente al lienzo 2D de la habitación (las habitaciones 2–9)
-  let diferencia = null;
-  if (i) {
-    const c = document.createElement('canvas'); c.width = 160; c.height = 100; const g = c.getContext('2d', { willReadFrequently: true });
-    g.drawImage(lienzo, 0, 0, 160, 100); const a = g.getImageData(0, 0, 160, 100).data;
-    g.drawImage(hab, 0, 0, 160, 100); const b = g.getImageData(0, 0, 160, 100).data;
-    let s = 0; for (let k = 0; k < a.length; k += 4) s += Math.abs(a[k] - b[k]) + Math.abs(a[k + 1] - b[k + 1]) + Math.abs(a[k + 2] - b[k + 2]);
-    diferencia = +(s / (160 * 100 * 3)).toFixed(2);   // media por canal, 0–255
-    fotos.push(['hab', hab.toDataURL('image/jpeg', .82)]);
-  }
+  for (const t of instantes) { while ((performance.now() - t0) / 1000 < t) paso(); paso(); fotos.push([t.toFixed(1), componer()]); }
   escena.terminarEntrada(true);
-  escena.render(); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);   // las capturas JPEG bloquean el siguiente fotograma: se absorbe antes de salir
-  escena.salir(i);
-  // vuelta a la nave: también se capturan fotogramas de la salida
-  const t1 = performance.now(), salida = [], tiempos = [];
-  for (const t of [.3, .9, 1.5]) {
-    while ((performance.now() - t1) / 1000 < t) { const a = performance.now(); escena.actualizar(1 / 60, u); const b = performance.now(); if (i) atmos.dibujar(1 / 60, 0, false); const c = performance.now(); escena.render(); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); tiempos.push([b - a, c - b, performance.now() - c].map(v => +v.toFixed(0))); }
-    fotos.push(['s' + t.toFixed(1), lienzo.toDataURL('image/jpeg', .82)]); salida.push(escena.depurar().cam);
-  }
+  paso(); escena.salir(i);
+  const t1 = performance.now();
+  for (const t of [.3, .9, 1.5, 2.1]) { while ((performance.now() - t1) / 1000 < t) paso(); paso(); fotos.push(['s' + t.toFixed(1), componer()]); }
   for (let k = 0; k < 120; k++) escena.actualizar(1 / 30, u);
   for (const [t, d] of fotos) await fetch(`http://127.0.0.1:8766/?n=${prefijo}-p${i + 1}-${t.replace('.', '_')}`, { method: 'POST', body: d });
   await espera(50);
-  return { puerta: i + 1, fotogramas: n, negros, diferencia, salida, tiempos: tiempos.slice(0, 6) };
+  return fotos.length;
 }
