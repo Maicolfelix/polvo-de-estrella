@@ -1,14 +1,14 @@
 {
   "app.js": {
-    "mtime": 1792604373.4502933,
-    "seen": 1792604635.7280731,
-    "ast_hash": "d380aae7b60d173cc29432e35721c23f",
+    "mtime": 1792605531.5375187,
+    "seen": 1792605743.6768286,
+    "ast_hash": "ee9e919ee825eea4a225c1a25c93c03c",
     "semantic_hash": ""
   },
   "audio.js": {
-    "mtime": 1792604373.4522998,
-    "seen": 1792604635.7280731,
-    "ast_hash": "a37b42feeadb76c79445b69a023f1fb3",
+    "mtime": 1792605292.4658077,
+    "seen": 1792605743.6768286,
+    "ast_hash": "244c116adc128826f0f877720c2cbf92",
     "semantic_hash": ""
   },
   "datos.js": {
@@ -18,9 +18,9 @@
     "semantic_hash": ""
   },
   "escena.js": {
-    "mtime": 1792604394.286893,
-    "seen": 1792604635.7280731,
-    "ast_hash": "d5f7cc9b0b3bdf62adca87598ab37543",
+    "mtime": 1792605416.012177,
+    "seen": 1792605743.6768286,
+    "ast_hash": "4be4c341eafc384d0bae5346d6c96086",
     "semantic_hash": ""
   },
   "habitaciones.js": {

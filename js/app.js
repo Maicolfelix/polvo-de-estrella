@@ -27,7 +27,7 @@ const escena = crearEscena({
   canvas: $('#gl'), rm: RM, adaptar: !CAPTURA,
   alProgreso: p => { $('#cargaBarra').style.width = Math.round(p * 100) + '%'; $('#cargaTxt').textContent = `Preparando el lugar · ${Math.round(p * 100)}%`; },
   alCargar: () => {
-    cargado = true;
+    cargado = performance.now();   // instante en que el lugar está listo (medido en tools/medir-rendimiento.js)
     $('#carga').classList.add('lista');
   },
   alRayo: (f, d, dentro) => { if (modo === 'nave') A.trueno(f, d, dentro); },
@@ -311,7 +311,7 @@ let activando = false;
 $('#play').addEventListener('click', async () => {
   if (activando) return;                       // toques repetidos mientras se desbloquea el audio
   if (!A.activo) { activando = true; try { await A.activar(); pintarSonido(); } finally { activando = false; } }
-  A.playPausa();
+  A.playPausa();   // aunque el audio no arrancara, el reproductor sigue respondiendo
 });
 song.addEventListener('loadedmetadata', () => $('#duracion').textContent = fmt(song.duration));
 let arrastrando = false;
@@ -378,41 +378,50 @@ $('#mudo').addEventListener('click', () => alternarMudo());
 // la mayoría de los ordenadores en la primera visita—, arranca con el primer gesto real en cualquier parte, y
 // solo entonces se ve el aviso. Los mandos del reproductor gestionan su propio primer toque.
 const MANDOS_SONIDO = '#mudo, #vol';
+// Se escuchan todos los gestos que un navegador puede contar (soltar un toque, clic, tecla); se sigue intentando
+// hasta que suena de verdad. Antes, el primer apoyo del dedo (que no cuenta) apagaba los intentos para siempre.
+const GESTOS = ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'];
+// Sin bloqueo entre intentos: en un toque, el apoyo del dedo no cuenta pero el soltarlo sí, y ese segundo intento
+// no debe quedar esperando al primero.
 async function despertarSonido(e) {
   if (!e.isTrusted) return;
   pedirGiro();                                   // iOS solo da el giroscopio tras un gesto
   if (A.activo || e.target.closest?.(MANDOS_SONIDO)) return;
-  for (const ev of ['pointerdown', 'keydown', 'touchend']) removeEventListener(ev, despertarSonido, true);
-  await A.activar();
-  mudo = false; A.setMudo(false); pintarSonido();
+  if (await A.activar()) { for (const ev of GESTOS) removeEventListener(ev, despertarSonido, true); mudo = false; A.setMudo(false); }
+  pintarSonido();
 }
-for (const ev of ['pointerdown', 'keydown', 'touchend']) addEventListener(ev, despertarSonido, true);
+for (const ev of GESTOS) addEventListener(ev, despertarSonido, true);
 try { localStorage.removeItem('pde-mudo'); } catch {}   // ya no se recuerda el silencio entre visitas
+$('#avisoSonido').textContent = HOVER ? 'Haz clic en cualquier lugar para oír el ambiente' : 'Toca la pantalla para oír el ambiente';
 A.intentarActivar().then(ok => { if (ok) { mudo = false; A.setMudo(false); } pintarSonido(); $('#avisoSonido').classList.toggle('pendiente', !A.activo); });
 
 /* ---------- mirar alrededor: ratón en el ordenador, giro del teléfono ---------- */
 // La vista gira un poco hacia donde apunta el ratón o hacia donde se inclina el teléfono. Sobre una puerta,
 // la vista se queda quieta (si no, la puerta se movería bajo el cursor).
-const mira = { x: 0, y: 0, base: null };
+const mira = { x: 0, y: 0, giro: false };
 addEventListener('pointermove', e => {
   if (e.pointerType !== 'mouse' || e.target.closest?.('.puerta')) return;
   mira.x = e.clientX / innerWidth * 2 - 1; mira.y = e.clientY / innerHeight * 2 - 1;
 }, { passive: true });
 document.addEventListener('mouseleave', () => { mira.x = mira.y = 0; });
+// En el teléfono, como una foto de 360°: la cámara sigue el giro real del teléfono (orientación completa, sin el
+// bloqueo que da leer solo la inclinación cuando se sostiene de pie). Android lo da sin pedir; iOS pide permiso
+// en el primer toque.
+const anguloPantalla = () => (screen.orientation?.angle ?? window.orientation ?? 0);
 function alGirar(e) {
-  if (e.beta == null) return;
-  const vertical = innerHeight >= innerWidth, a = vertical ? e.gamma : e.beta, b = vertical ? e.beta : -e.gamma;
-  if (!mira.base) mira.base = [a, b];
-  mira.x = Math.max(-1, Math.min(1, (a - mira.base[0]) / 28)); mira.y = Math.max(-1, Math.min(1, (b - mira.base[1]) / 28));
+  if (e.alpha == null || e.beta == null) return;
+  mira.giro = true;
+  escena.orientar(e.alpha, e.beta, e.gamma, anguloPantalla());
 }
 let giroPedido = false;
 function pedirGiro() {
   if (giroPedido || !window.DeviceOrientationEvent || HOVER) return;
   giroPedido = true;
   const pide = DeviceOrientationEvent.requestPermission;
-  (pide ? pide.call(DeviceOrientationEvent) : Promise.resolve('granted')).then(r => { if (r === 'granted') addEventListener('deviceorientation', alGirar); }).catch(() => {});
+  if (pide) pide.call(DeviceOrientationEvent).then(r => { if (r === 'granted') addEventListener('deviceorientation', alGirar); }).catch(() => {});
 }
-addEventListener('orientationchange', () => { mira.base = null; });
+if (!HOVER && window.DeviceOrientationEvent) addEventListener('deviceorientation', alGirar);   // desde el principio; en iOS los datos llegan tras aceptar el permiso
+addEventListener('orientationchange', () => escena.recentrar());
 pintarSonido();
 
 
@@ -453,7 +462,8 @@ function tick(now) {
   if (modo !== 'nave') { if (!salaMar) atmos.dibujar(dt, progreso(), RM); actualizarLetra(); }
 
   recortarHueco();
-  escena.mirar(modo === 'nave' && !RM ? mira.x : 0, modo === 'nave' && !RM ? mira.y : 0);   // en las transiciones, la vista al frente
+  escena.mirarActiva(modo === 'nave' && !RM);   // en las transiciones, la vista al frente
+  if (!mira.giro) escena.mirar(mira.x, mira.y);
   // interfaz según el recorrido
   const a = cl(u / .55);
   llegada.style.opacity = (1 - a).toFixed(3);
@@ -478,7 +488,7 @@ function tick(now) {
 if (CAPTURA) setTimeout(() => tick(performance.now()), 0); else requestAnimationFrame(tick);   // en ?captura arranca aunque la pestaña no se pinte
 
 // para pruebas desde la consola
-window.__pde = { escena, A, atmos, entrar, volver, cambiar, actualizarLetra, estado: () => ({ modo, actual, escuchando, u: uSuave }) };
+window.__pde = { escena, A, atmos, cargado: () => cargado, entrar, volver, cambiar, actualizarLetra, estado: () => ({ modo, actual, escuchando, u: uSuave }) };
 // revisión local: renderiza un punto del recorrido y lo envía a tools/receptor-capturas.mjs
 if (CAPTURA) {
   const enviar = (n, lienzo) => fetch('http://127.0.0.1:8766/?n=' + n, { method: 'POST', body: lienzo.toDataURL('image/jpeg', .9) }).then(r => r.text());

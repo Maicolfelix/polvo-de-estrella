@@ -945,16 +945,21 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   const lucesFuera = [luna, contra, relampago];
   let fuera = true;
   const ponerFuera = v => { if (v !== fuera) { fuera = v; lucesFuera.forEach(l => l.visible = v); } };
-  function precompilar() {
+  // compileAsync lanza todas las compilaciones a la vez y, donde el navegador lo permite (KHR_parallel_shader_compile),
+  // sin congelar la página mientras terminan: en teléfonos era el tramo más largo de la carga. Los programas se
+  // eligen en el momento de la llamada, así que el estado de las luces puede restaurarse enseguida.
+  async function precompilar() {
     const vis = [ext.visible, int.visible]; ext.visible = int.visible = true;
-    for (const v of [false, true]) { ponerFuera(v); renderer.compile(scene, camera); }
+    const esperas = [];
+    for (const v of [false, true]) { ponerFuera(v); esperas.push(renderer.compileAsync(scene, camera)); }
     [ext.visible, int.visible] = vis;
-    // la sala del mar también (antes congelaba 1,6 s la primera apertura): se compila y se dibuja una vez
-    renderer.compile(sala.escena, sala.camara);
+    // la sala del mar también (antes congelaba 1,6 s la primera apertura)
+    esperas.push(renderer.compileAsync(sala.escena, sala.camara));
+    await Promise.all(esperas).catch(() => {});
     renderer.shadowMap.needsUpdate = sala.sombraSucia();
     renderer.setRenderTarget(rtPortal); renderer.render(sala.escena, sala.camara); renderer.setRenderTarget(null);
   }
-  manager.onLoad = () => { precompilar(); calidad.lista = performance.now() + 2000; alCargar?.(); };
+  manager.onLoad = async () => { await precompilar(); calidad.lista = performance.now() + 2000; alCargar?.(); };
 
   /* ===================== POSTPROCESO ===================== */
   const composer = new EffectComposer(renderer);
@@ -1001,7 +1006,21 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
 
   /* ===================== ESTADO Y ANIMACIÓN ===================== */
   let tiempo = 0, uActual = 0, anim = null, mezcla = null, retenido = false; // retenido: la cámara se queda dentro de la habitación
-  const mirada = { x: 0, y: 0, ox: 0, oy: 0 };
+  // mirar alrededor: ángulos (radianes) hacia los que gira la vista; ratón o giro del teléfono
+  const mirada = { yaw: 0, pitch: 0, oyaw: 0, opitch: 0, activa: true, giro: false };
+  const G = Math.PI / 180, qGiro = new THREE.Quaternion(), qBase = new THREE.Quaternion(), qPant = new THREE.Quaternion(), eGiro = new THREE.Euler();
+  const qAjuste = new THREE.Quaternion(-Math.SQRT1_2, 0, 0, Math.SQRT1_2), ejeZ = new V3(0, 0, 1), dirGiro = new V3();
+  let hayBase = false;
+  function orientar(alpha, beta, gamma, pantalla) {
+    // la misma composición que DeviceOrientationControls de three.js, relativa a la postura inicial
+    eGiro.set(beta * G, alpha * G, -gamma * G, 'YXZ');
+    qGiro.setFromEuler(eGiro).multiply(qAjuste).multiply(qPant.setFromAxisAngle(ejeZ, -pantalla * G));
+    if (!hayBase) { qBase.copy(qGiro).invert(); hayBase = true; }
+    dirGiro.set(0, 0, -1).applyQuaternion(qBase.clone().multiply(qGiro));
+    mirada.giro = true;
+    mirada.oyaw = cl(Math.atan2(-dirGiro.x, -dirGiro.z), -1.1, 1.1);   // hasta ~63° a cada lado
+    mirada.opitch = cl(Math.asin(cl(dirGiro.y, -1, 1)), -.5, .5);
+  }
   let rayo = null, proximoRayo = 1.5, ventisca = null, proximaVentisca = 12, proximaFugaz = 4;
   const cam = { p: new V3(), t: new V3() };
   const tmp = new V3();
@@ -1198,8 +1217,9 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     }
     camera.position.copy(cam.p); camera.lookAt(cam.t);
     // mirar alrededor (ratón o giro del teléfono): la vista gira un poco hacia donde se apunta
-    mirada.x += (mirada.ox - mirada.x) * cl(dt * 3.2); mirada.y += (mirada.oy - mirada.y) * cl(dt * 3.2);
-    if (!rm && (mirada.x || mirada.y)) { const k = cam.p.z < -.6 ? .55 : 1; camera.rotateY(-mirada.x * .34 * k); camera.rotateX(-mirada.y * .15 * k); }
+    const oy = mirada.activa ? mirada.oyaw : 0, op = mirada.activa ? mirada.opitch : 0;
+    mirada.yaw += (oy - mirada.yaw) * cl(dt * (mirada.giro ? 7 : 3.2)); mirada.pitch += (op - mirada.pitch) * cl(dt * (mirada.giro ? 7 : 3.2));
+    if (!rm && (mirada.yaw || mirada.pitch)) { const k = cam.p.z < -.6 ? .6 : 1; camera.rotateY(mirada.yaw * k); camera.rotateX(mirada.pitch * k); }
     const dentro = cam.p.z < -.6;
     // zonas: lo que no puede verse desde aquí no se dibuja
     ext.visible = cam.p.z > -7; int.visible = cam.p.z < 12;
@@ -1327,7 +1347,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
 
   // ponytail: reinicia el polvo interior tras cada entrada en vez de simular su regreso
   return {
-    renderer, camera, scene, calidad, tamano, huecoPantalla, mirar: (x, y) => { mirada.ox = x; mirada.oy = y; }, actualizar, render, entrar, salir, ponerEnPuerta, preescucha, rectPuertas, actualizarSala, terminarEntrada,
+    renderer, camera, scene, calidad, tamano, huecoPantalla, mirar: (x, y) => { mirada.oyaw = -x * .34; mirada.opitch = -y * .15; }, orientar, recentrar: () => { hayBase = false; }, mirarActiva: v => { mirada.activa = v; }, actualizar, render, entrar, salir, ponerEnPuerta, preescucha, rectPuertas, actualizarSala, terminarEntrada,
     rafaga: () => RAFAGA.value, provocar: { ventisca: () => { proximaVentisca = 0; }, fugaz: () => { proximaFugaz = 0; } },   // para revisar y capturar
     uDePuerta, U_FIN, U_EXT, U_NAVE, PASO, reponerPolvo: () => reponerParticulas(polvoInt),
     cancelarMezcla: () => { mezcla = null; },

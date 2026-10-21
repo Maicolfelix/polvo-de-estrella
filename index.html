@@ -9,6 +9,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,300;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="estilos.css">
+<!-- todos los módulos se piden a la vez (sin esto se descubrían uno tras otro: varias idas y vueltas en el teléfono) -->
+<link rel="modulepreload" href="vendor/three/three.module.min.js">
+<link rel="modulepreload" href="js/app.js"><link rel="modulepreload" href="js/escena.js"><link rel="modulepreload" href="js/audio.js">
+<link rel="modulepreload" href="js/primer-plano.js"><link rel="modulepreload" href="js/sala-mar.js"><link rel="modulepreload" href="js/habitaciones.js">
+<link rel="modulepreload" href="js/datos.js"><link rel="modulepreload" href="js/letras.js"><link rel="modulepreload" href="js/tiempos.js">
+<link rel="modulepreload" href="vendor/three/addons/postprocessing/EffectComposer.js"><link rel="modulepreload" href="vendor/three/addons/postprocessing/RenderPass.js">
+<link rel="modulepreload" href="vendor/three/addons/postprocessing/OutputPass.js"><link rel="modulepreload" href="vendor/three/addons/utils/BufferGeometryUtils.js">
+<link rel="modulepreload" href="vendor/three/addons/postprocessing/Pass.js"><link rel="modulepreload" href="vendor/three/addons/postprocessing/ShaderPass.js"><link rel="modulepreload" href="vendor/three/addons/postprocessing/MaskPass.js">
+<link rel="modulepreload" href="vendor/three/addons/shaders/CopyShader.js"><link rel="modulepreload" href="vendor/three/addons/shaders/OutputShader.js">
 <script type="importmap">{ "imports": { "three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/addons/" } }</script>
 </head>
 <body>
@@ -27,7 +36,7 @@
 <div class="aviso" id="aviso" role="status" aria-live="polite"></div>
 
 <section id="llegada" aria-labelledby="titulo-album">
-  <div class="llegada-portada"><img src="img/portada.png" alt="Portada de Polvo de estrella, de MAVO" width="426" height="416"></div>
+  <div class="llegada-portada"><img src="img/portada.webp" alt="Portada de Polvo de estrella, de MAVO" width="426" height="416" fetchpriority="high"></div>
   <div class="llegada-texto">
     <p class="artista">MAVO</p>
     <h1 id="titulo-album">Polvo de estrella</h1>
