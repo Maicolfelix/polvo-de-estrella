@@ -171,9 +171,10 @@ function pintarHabitacion(i, fundido) {
   hab.classList.add('cambiando');
   setTimeout(() => { fondo.poner(i); aplicar(); hab.classList.remove('cambiando'); }, 450);
 }
-// La habitación 2D se muestra en la página recortada con la forma del hueco de la puerta (calculada en cada
-// fotograma por la escena) y aparece a medida que la puerta se abre y la cámara se alinea con ella. Al cruzar,
-// el recorte cubre la pantalla y desaparece. Igual en cualquier dispositivo: es el mismo lienzo de la habitación.
+// Mientras la puerta se abre, lo que se ve por el hueco es la escena 3D (la imagen de la habitación tras las hojas).
+// La habitación 2D viva aparece solo cuando la cámara cruza el umbral, fundiéndose sobre esa misma imagen, y al
+// volver se funde igual. Antes se recortaba con la forma del hueco y aparecía encima de las hojas a medio abrir:
+// las hojas se veían transparentes y salían dos imágenes a la vez.
 let huecoDe = -1;
 function mostrarHueco(i) {
   clearTimeout(mostrarHueco.t);
@@ -182,17 +183,12 @@ function mostrarHueco(i) {
   recortarHueco();
 }
 function quitarHueco() {
-  huecoDe = -1; hab.classList.remove('hueco'); hab.style.clipPath = ''; hab.style.opacity = '';
+  huecoDe = -1; hab.classList.remove('hueco'); hab.style.opacity = '';
 }
 function recortarHueco() {
   if (huecoDe < 0) return;
   const h = escena.huecoPantalla(huecoDe, innerWidth, innerHeight);
-  if (!h) { hab.style.clipPath = ''; hab.style.opacity = 1; return; }   // la cámara ya cruza el hueco
-  hab.style.clipPath = `polygon(${h.pts.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(',')})`;
-  // solo cuando las hojas ya están contra el muro: antes taparía las hojas (se veían transparentes) y doblaría
-  // la imagen del fondo del pasillo, que ya muestra la habitación
-  const ve = Math.min(1, Math.max(0, (h.abierto - .8) / .18)) * Math.min(1, Math.max(0, (h.alin - .55) / .3));
-  hab.style.opacity = ve.toFixed(3);
+  hab.style.opacity = h ? 0 : 1;   // null: la cámara ya cruza el hueco
 }
 function abrirHabitacion(i) {
   escena.terminarEntrada();

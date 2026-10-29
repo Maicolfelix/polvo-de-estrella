@@ -108,17 +108,27 @@ void main(){
       suma += m * subir(q, 70., .25, t, .14) * vec3(1., .85, .7) * .55;
     }
   }
-  vec3 c = texture2D(uImg, vec2(q.x + d.x, 1. - (q.y + d.y))).rgb;
+  vec3 c = texture2D(uImg, q + d).rgb;   // la imagen se sube sin voltear: fila 0 = arriba
   float lum = dot(c, vec3(.299, .587, .114));
   c = c * mul + c * brillo * smoothstep(.15, .7, lum) + suma;
   c += (h1(vS * 913. + fract(t) * 17.) - .5) * .018;   // grano fino: la imagen nunca queda quieta del todo
   gl_FragColor = vec4(c, 1.);
 }`;
 
+const ruta = i => `img/hab/${String(i + 1).padStart(2, '0')}.webp`;
+// Imagen de cada habitación decodificada fuera del hilo principal (createImageBitmap) y compartida con la escena
+// (la imagen tras cada puerta). Antes se decodificaba y volteaba al subirla, justo al abrir la puerta: tirón.
+// En el teléfono, a 1280 px de ancho (cabe de sobra en su pantalla y ocupa la mitad de memoria).
+const ANCHO = Math.min(1672, innerWidth < 760 ? 1280 : 1672), imagenes = [];
+export function imagenHab(i) {
+  return imagenes[i] ||= self.createImageBitmap
+    ? fetch(ruta(i)).then(r => r.blob()).then(b => createImageBitmap(b, { resizeWidth: ANCHO, resizeHeight: Math.round(ANCHO * 941 / 1672), resizeQuality: 'high' }))
+    : new Promise((ok, mal) => { const im = new Image(); im.onload = () => im.decode().then(() => ok(im), () => ok(im)); im.onerror = mal; im.src = ruta(i); });
+}
+
 export function crearFondo(lienzo, rm) {
   const gl = lienzo.getContext('webgl', { antialias: false, alpha: true, powerPreference: 'low-power' });
   let mx = 0, my = 0, actual = -1, activo = false, t = 0, rayo = 0, proximoRayo = 3, pulso = 0, aspecto = 1672 / 941;
-  const ruta = i => `img/hab/${String(i + 1).padStart(2, '0')}.webp`;
   const medir = () => {
     const k = Math.min(devicePixelRatio || 1, innerWidth < 760 ? 1.25 : 1);
     lienzo.width = Math.round(innerWidth * k); lienzo.height = Math.round(innerHeight * k);
@@ -139,26 +149,19 @@ export function crearFondo(lienzo, rm) {
   const U = n => gl.getUniformLocation(prog, n);
   const uCover = U('uCover'), uT = U('uT'), uPulso = U('uPulso'), uRayo = U('uRayo'), uN = U('uN'), uR = U('uR'), uP = U('uP');
   gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   for (const [p, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, p, v);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 1, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, new Uint8Array([5, 4, 5]));
-  const imagenes = [];
-  const cargar = i => imagenes[i] ||= Object.assign(new Image(), { src: ruta(i), decoding: 'async' });
   let texLista = false;
   function subirImagen(i) {
-    const im = cargar(i);
     texLista = false; fondoCSS(i);   // mientras la textura sube, la imagen quieta (nunca un hueco negro)
     gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
-    const listo = () => {
+    imagenHab(i).then(im => {
       if (actual !== i) return;
-      aspecto = im.naturalWidth / im.naturalHeight;
+      aspecto = im.width / im.height;
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im);
       texLista = true;
-    };
-    if (im.complete && im.naturalWidth) listo(); else im.addEventListener('load', listo, { once: true });
+    }, () => {});   // sin imagen: se queda la quieta de CSS
   }
-  // las imágenes se piden al terminar la carga, una tras otra: entrar en cualquier puerta ya no espera a la red
-  addEventListener('load', () => setTimeout(() => ZONAS.forEach((_, i) => setTimeout(() => cargar(i), i * 400)), 2500), { once: true });
 
   function zonas(i) {
     const R = new Float32Array(N * 4), P = new Float32Array(N * 2);

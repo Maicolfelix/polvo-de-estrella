@@ -109,7 +109,7 @@ body.esperando .desliza{opacity:0}
 @keyframes llega{from{opacity:0;transform:translateY(18px);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
 .rm #habitacion.listo .hab-num,.rm #habitacion.listo .hab-titulo,.rm #habitacion.listo .letra{animation:none}
 /* mientras asoma por el hueco de la puerta: sin fundido propio ni toques (la escena manda la opacidad) */
-#habitacion.hueco{transition:none;pointer-events:none}
+#habitacion.hueco{transition:opacity .4s ease;pointer-events:none}
 #habitacion.visible{opacity:1}
 /* fondo: la imagen viva de la habitación, oscurecida hacia el lado de la letra */
 .hab-fondo{position:absolute;inset:0;width:100%;height:100%;transition:opacity .45s}

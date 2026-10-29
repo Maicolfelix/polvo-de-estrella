@@ -7,7 +7,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { CANCIONES } from './datos.js';
 import { crearPrimerPlano } from './primer-plano.js';
 import { crearCuervos } from './cuervos.js';
-import { FOCO } from './habitaciones.js';
+import { FOCO, imagenHab } from './habitaciones.js';
 
 const V2 = THREE.Vector2, V3 = THREE.Vector3;
 const cl = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -262,7 +262,6 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   const loader = new THREE.TextureLoader(manager);
   const ANISO = Math.min(8, renderer.capabilities.getMaxAnisotropy());
   const cache = {};
-  const cargaHab = new THREE.TextureLoader();
   function tex(n, color = false, ext = 'jpg') {
     if (cache[n]) return cache[n];
     const t = loader.load(`tex/${n}.${ext}`);
@@ -677,6 +676,33 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   M.piedraFondo = M.piedra.clone(); Object.assign(M.piedraFondo, { emissive: new THREE.Color(0xff9050), emissiveMap: tex('piedra_col', true), emissiveIntensity: .08 });
   envejecer(M.piedraFondo, { base: B, alto: 1.1, fuerza: .22, vetas: .14, musgo: 0, macro: .25 });
   const charcoTex = texturaRadial([[0, 'rgba(255,255,255,.9)'], [.5, 'rgba(255,255,255,.25)'], [1, 'rgba(255,255,255,0)']]);
+  // lo que hay tras cada puerta, vivo: la imagen de la habitación ondula como aire caliente, la luz de su color
+  // late desde el fondo y una franja de brillo la barre despacio. Un solo programa para las nueve.
+  const UT_HAB = { value: 0 };
+  const VERT_UV = 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }';
+  const FRAG_HAB = `uniform sampler2D map; uniform vec2 uRep, uOff; uniform vec3 uLuz; uniform float uT, uB, uMov; varying vec2 vUv;
+    void main() {
+      vec2 q = vUv;
+      vec2 o = vec2(sin(q.y * 16. + uT * 1.1) * .0025 + sin(q.y * 41. - uT * 1.9) * .001, sin(q.x * 12. + uT * .8) * .002) * uMov;
+      vec2 uv = uOff + (q + o) * uRep; uv.y = 1. - uv.y;   // la imagen llega sin voltear (fila 0 = arriba)
+      vec3 c = texture2D(map, uv).rgb;
+      float centro = max(0., 1. - length((q - vec2(.5, .42)) * vec2(1.5, 1.)));
+      float late = 1. + .25 * sin(uT * 1.6) * uMov;
+      float banda = pow(max(0., sin(q.y * 3.1 - uT * .55 + q.x * 1.5)), 14.) * uMov;
+      c = c * (.85 + .25 * centro * late) + uLuz * (centro * centro * .07 * late + banda * .05);   // con más, los colores claros velaban la imagen
+      gl_FragColor = vec4(c * uB, 1.);
+    }`;
+  // rayos de luz que salen por la rendija: nacen finos y se abren con la puerta; se mueven despacio
+  const FRAG_RAYOS = `uniform vec3 uLuz; uniform float uT, uA, uK, uMov; varying vec2 vUv;
+    void main() {
+      vec2 p = vUv - vec2(.5, 0.);
+      float ancho = .006 + uA * .12, x = abs(p.x);
+      float nucleo = exp(-x / ancho * 3.);   // solo junto a la rendija: más ancho velaba las hojas
+      float ang = p.x / (p.y + .4);
+      float rayos = .6 + .4 * sin(ang * 23. + uT * .5 * uMov) * sin(ang * 9.3 - uT * .3 * uMov);
+      float alto = smoothstep(1., .45, p.y) * smoothstep(0., .05, p.y);
+      gl_FragColor = vec4(uLuz, nucleo * rayos * alto * uK);
+    }`;
   const puertas = puertasDef.map(d => {
     const c = CANCIONES[d.i], luz = new THREE.Color(c.luz), dim = d.dim;
     const marco = new THREE.Group();
@@ -712,12 +738,17 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     // Al entrar, el hueco pasa a mostrar la habitación viva (recortada en la página, ver `huecoPantalla`).
     // Cargador aparte, sin el gestor de carga: no retrasa la entrada a la web.
     const altoHab = dim.s + ap;
-    const img = cargaHab.load(`img/hab/${String(d.i + 1).padStart(2, '0')}.webp`);
-    img.colorSpace = THREE.SRGBColorSpace;
+    // (la imagen llega después de la carga, ver `cargarImagenesHab`)
+    const img = new THREE.Texture(); img.colorSpace = THREE.SRGBColorSpace; img.flipY = false;
     const Wv = dim.w * 2 + .1, Hv = altoHab + .1, rx = Math.min(1, (Wv / Hv) / (1672 / 941));   // «cover» centrado en el foco
-    img.repeat.set(rx, 1); img.offset.set(cl(FOCO[d.i] - rx / 2, 0, 1 - rx), 0);
-    const matPared = new THREE.MeshBasicMaterial({ map: img, color: 0x000000, fog: false });
+    const matPared = new THREE.ShaderMaterial({ vertexShader: VERT_UV, fragmentShader: FRAG_HAB, uniforms: {
+      map: { value: img }, uRep: { value: new V2(rx, 1) }, uOff: { value: new V2(cl(FOCO[d.i] - rx / 2, 0, 1 - rx), 0) },
+      uLuz: { value: luz }, uT: UT_HAB, uB: { value: 0 }, uMov: { value: rm ? 0 : 1 } } });
     marco.add(new THREE.Mesh(new THREE.PlaneGeometry(Wv, Hv).translate(0, Hv / 2, -.14), matPared));
+    const rayos = new THREE.Mesh(new THREE.PlaneGeometry(dim.w * 4.4, altoHab * 1.2).translate(0, altoHab * .6, .13), new THREE.ShaderMaterial({
+      vertexShader: VERT_UV, fragmentShader: FRAG_RAYOS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+      uniforms: { uLuz: { value: luz }, uT: UT_HAB, uA: { value: 0 }, uK: { value: 0 }, uMov: { value: rm ? 0 : 1 } } }));
+    marco.add(rayos);
     // luz que se escapa por debajo y su reflejo en el mármol
     const rendija = new THREE.Mesh(new THREE.BoxGeometry(dim.w * 2 - .04, .012, .02), new THREE.MeshBasicMaterial({ color: luz }));
     rendija.position.set(0, .006, .03); marco.add(rendija);
@@ -748,7 +779,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       const l = marco.localToWorld(new V3(-1.1, 2.3, 1.1)); foco(l.x, l.y, l.z, 0xffa860, 4.5, 1.8);   // llama del farol
       const hl = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color: 0xffa860, transparent: true, opacity: .5, blending: THREE.AdditiveBlending, depthWrite: false, fog: false })); hl.position.set(-1.1, 2.3, 1.02); hl.scale.setScalar(.7); marco.add(hl);
     }
-    return { ...d, c, luz, marco, hojas, matPared, rendija, charco, ap, abierto: 0, objetivo: 0, brillo: 0, objetivoBrillo: 0, foco: foco(0, 0, 0, luz, 6) };
+    return { ...d, c, luz, marco, hojas, img, matPared, rayos, rendija, charco, ap, abierto: 0, objetivo: 0, brillo: 0, objetivoBrillo: 0, foco: foco(0, 0, 0, luz, 6) };
   });
 
   destino = ext;
@@ -976,7 +1007,19 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     [ext.visible, int.visible] = vis;
     await Promise.all(esperas).catch(() => {});
   }
-  manager.onLoad = async () => { await precompilar(); calidad.lista = performance.now() + 2000; alCargar?.(); };
+  // compilar no basta: cada estado (fuera, umbral, nave) pide aún algún programa propio y sube sus texturas la
+  // primera vez que se dibuja, y eso daba un tirón de 300–400 ms justo al cruzar al castillo. Se dibuja una vez
+  // en cada tramo del recorrido mientras sigue la pantalla de carga.
+  function calentar() {
+    puertas.forEach(d => d.rayos.visible = true);
+    for (const u of [U_EXT - 1.35, U_EXT - .1, U_EXT + .2, U_NAVE, U_NAVE + 4 * PASO, U_FIN]) { actualizar(1 / 60, u); render(); }
+    actualizar(1 / 60, 0); sombraPrincipal = true;
+  }
+  // imágenes de las habitaciones para el fondo de cada puerta: tras la carga, una tras otra, ya decodificadas
+  function cargarImagenesHab() {
+    puertas.forEach((d, k) => setTimeout(() => imagenHab(d.i).then(bm => { d.img.image = bm; d.img.needsUpdate = true; renderer.initTexture(d.img); }, () => {}), 1500 + k * 350));
+  }
+  manager.onLoad = async () => { await precompilar(); calentar(); calidad.lista = performance.now() + 2000; alCargar?.(); cargarImagenesHab(); };
 
   /* ===================== POSTPROCESO ===================== */
   const composer = new EffectComposer(renderer);
@@ -1074,10 +1117,8 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
 
   const mundo = (d, x, y, z) => d.marco.localToWorld(new V3(x, y, z));
 
-  // Habitaciones: la habitación (su vídeo, tal cual) se muestra en la página recortada con la forma que
-  // tiene el hueco de la puerta en pantalla (ver `huecoPantalla` y app.js). Así no depende de copiar el lienzo a
-  // la GPU ni de convertir colores, y se ve igual en cualquier dispositivo. Cuando la cámara llega, el hueco
-  // llena la pantalla y el recorte desaparece.
+  // Habitaciones: mientras la puerta se abre se ve la imagen 3D tras las hojas; la habitación viva (la página)
+  // aparece al cruzar el umbral (`huecoPantalla` devuelve null), fundida sobre esa misma imagen (ver app.js).
   let cierre = null;
   const finalEntrada = d => [mundo(d, 0, 1.62, .39), mundo(d, 0, 1.62, -4)];
   // contorno del hueco de la puerta i en píxeles de pantalla y lo alineada que está la cámara con él (0..1);
@@ -1194,7 +1235,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
 
   const bezier = (o, a, c, b, s) => o.copy(a).multiplyScalar((1 - s) ** 2).addScaledVector(c, 2 * (1 - s) * s).addScaledVector(b, s * s);
   function actualizar(dt, u, { usarScroll = true } = {}) {
-    tiempo += dt; uActual = u;
+    tiempo += dt; uActual = u; UT_HAB.value = tiempo;
     if (!rm) {
       // ventisca: cada 20–45 s, una racha de 4–7 s que sube y baja suave
       proximaVentisca -= dt;
@@ -1276,7 +1317,9 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       const ang = cl(d.abierto) * 1.8;
       // todas se abren hacia la nave, hasta quedar contra el derrame del muro: el hueco queda libre para la cámara
       d.hojas.forEach(({ piv, s }) => piv.rotation.y = s * Math.min(ang, 1.52));
-      d.matPared.color.setScalar(.3 + d.brillo * .3 + d.abierto * .4);   // la habitación se enciende al abrir
+      d.matPared.uniforms.uB.value = .3 + d.brillo * .3 + d.abierto * .4;   // la habitación se enciende al abrir
+      const k = (d.brillo * .22 + Math.sin(Math.PI * cl(d.abierto)) * .35) * cl((cam.p.distanceTo(d.marco.position) - 1.6) / 2.4), ru = d.rayos.material.uniforms;   // se apagan al acercarse: de cerca velaban la imagen
+      ru.uA.value = cl(d.abierto); ru.uK.value = k; d.rayos.visible = k > .004;
       d.charco.material.opacity = .16 + d.brillo * .35 + d.abierto * .3;
       // la luz de cada puerta está dentro de su pasillo: sale por el hueco al abrirse
       d.foco.p.copy(mundo(d, 0, 1.5, -.9)); d.foco.i = dentro ? .8 + d.brillo * 3 + d.abierto * 2.5 : 0;
