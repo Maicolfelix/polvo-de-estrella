@@ -9,7 +9,7 @@ export async function fotogramas(i, prefijo, instantes = [0, .3, .6, .9, 1.2, 1.
   const hab = document.querySelector('#fondo'), gl = escena.renderer.getContext(), px = new Uint8Array(4);
   scrollTo(0, u * innerHeight);
   for (let k = 0; k < 90; k++) escena.actualizar(1 / 30, u);
-  fondo.poner(i); await new Promise(r => hab.readyState >= 2 ? r() : hab.addEventListener('loadeddata', r, { once: true }));
+  fondo.poner(i); await espera(800);   // la imagen de la habitación sube como textura
   // misma regla que recortarHueco() en app.js
   const comp = document.createElement('canvas'); comp.width = innerWidth; comp.height = innerHeight;
   const g = comp.getContext('2d');

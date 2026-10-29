@@ -510,7 +510,7 @@ function tick(now) {
     escena.render();
     colocarPuertas();
   }
-  if (modo !== 'nave') { fondo.dibujar(dt, A.elementos.song.paused ? 0 : A.pulso()); actualizarLetra(); }
+  if (modo !== 'nave') { fondo.dibujar(dt, A.elementos.song.paused ? 0 : A.pulso(), mira.x, mira.y); actualizarLetra(); }
 
   recortarHueco();
   escena.mirarActiva(modo === 'nave' && !RM);   // en las transiciones, la vista al frente

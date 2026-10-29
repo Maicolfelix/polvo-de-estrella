@@ -117,7 +117,7 @@ void main(){
 
 export function crearFondo(lienzo, rm) {
   const gl = lienzo.getContext('webgl', { antialias: false, alpha: true, powerPreference: 'low-power' });
-  let actual = -1, activo = false, t = 0, rayo = 0, proximoRayo = 3, pulso = 0, aspecto = 1672 / 941;
+  let mx = 0, my = 0, actual = -1, activo = false, t = 0, rayo = 0, proximoRayo = 3, pulso = 0, aspecto = 1672 / 941;
   const ruta = i => `img/hab/${String(i + 1).padStart(2, '0')}.webp`;
   const medir = () => {
     const k = Math.min(devicePixelRatio || 1, innerWidth < 760 ? 1.25 : 1);
@@ -172,7 +172,8 @@ export function crearFondo(lienzo, rm) {
       actual = i; zonas(i); subirImagen(i);
     },
     parar() { activo = false; },
-    dibujar(dt, golpe) {
+    // mx, my: hacia dónde mira la persona (ratón, −1..1): el fondo se desplaza un poco, como si tuviera fondo
+    dibujar(dt, golpe, ox = 0, oy = 0) {
       if (!activo || actual < 0 || !texLista) return;
       if (lienzo.style.background) lienzo.style.background = '';
       if (!rm) t += dt;
@@ -185,7 +186,8 @@ export function crearFondo(lienzo, rm) {
       const ap = lienzo.width / lienzo.height, z = rm ? 1 : 1.035 + .025 * Math.sin(t * .11);
       let sx = 1 / z, sy = 1 / z;
       if (ap < aspecto) sx *= ap / aspecto; else sy *= aspecto / ap;
-      const fx = FOCO[actual] + (rm ? 0 : Math.sin(t * .07) * .01), fy = .5 + (rm ? 0 : Math.sin(t * .09) * .008);
+      mx += (ox - mx) * Math.min(1, dt * 2.5); my += (oy - my) * Math.min(1, dt * 2.5);
+      const fx = FOCO[actual] + (rm ? 0 : Math.sin(t * .07) * .01 + mx * .018), fy = .5 + (rm ? 0 : Math.sin(t * .09) * .008 + my * .012);
       gl.uniform4f(uCover, sx, sy, Math.min(1 - sx, Math.max(0, fx - sx / 2)), Math.min(1 - sy, Math.max(0, fy - sy / 2)));
       gl.uniform1f(uT, t); gl.uniform1f(uPulso, rm ? 0 : pulso); gl.uniform1f(uRayo, rayo);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
