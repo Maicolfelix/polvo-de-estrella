@@ -698,7 +698,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       p.x += sin(t * .5 + fase * 6.) * .14; p.z += cos(t * .37 + fase * 4.) * .12;
       vec4 mv = modelViewMatrix * vec4(p, 1.);
       gl_Position = projectionMatrix * mv;
-      gl_PointSize = uTam * (.5 + fract(fase * 13.)) / -mv.z;
+      gl_PointSize = min(7., uTam * (.5 + fract(fase * 13.)) / -mv.z);   // de cerca no se vuelven manchas
       vA = (.35 + .65 * (.5 + .5 * sin(t * 1.3 + fase * 9.))) * smoothstep(0., .5, p.y) * smoothstep(uH, uH - .8, p.y);
     }`;
   const FRAG_POLVO = `uniform vec3 uLuz; uniform float uK; varying float vA;
@@ -714,7 +714,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   const FRAG_HAB = `uniform sampler2D map; uniform vec2 uRep, uOff; uniform vec3 uLuz; uniform float uT, uB, uMov; varying vec2 vUv;
     void main() {
       vec2 q = vUv;
-      vec2 o = vec2(sin(q.y * 16. + uT * 1.1) * .0025 + sin(q.y * 41. - uT * 1.9) * .001, sin(q.x * 12. + uT * .8) * .002) * uMov;
+      vec2 o = vec2(sin(q.y * 9. + uT * .9) * .0012, sin(q.x * 7. + uT * .7) * .001) * uMov;   // apenas: más ondulaba los bordes
       vec2 uv = uOff + (q + o) * uRep; uv.y = 1. - uv.y;   // la imagen llega sin voltear (fila 0 = arriba)
       vec3 c = texture2D(map, uv).rgb;
       float centro = max(0., 1. - length((q - vec2(.5, .42)) * vec2(1.5, 1.)));

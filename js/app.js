@@ -152,7 +152,10 @@ async function entrar(i) {
   $('#ayuda').style.opacity = 0;
   if (A.activo) A.rafaga(RM ? 1 : 2.6, RM ? .35 : 1);
   A.entrarCancion(i, RM ? .25 : 1.15);          // sin sonido: solo carga, no suena
-  pintarHabitacion(i, false); mostrarHueco(i);   // la habitación ya suena y se mueve: asoma por el hueco mientras se abre
+  pintarHabitacion(i, false); mostrarHueco(i);   // la habitación ya suena y se mueve, aún invisible
+  // con la puerta casi abierta y la cámara aún lejos, la habitación viva llega sobre todo (desenfocada y encendida,
+  // y se asienta): la imagen 3D del fondo solo se ve de lejos, como parte de la sala, nunca quieta a pantalla completa
+  setTimeout(() => { if (huecoDe === i && modo === 'entrando') { revelado = true; recortarHueco(); } }, RM ? 0 : 1000);
   await escena.entrar(i);
   abrirHabitacion(i);
 }
@@ -171,24 +174,24 @@ function pintarHabitacion(i, fundido) {
   hab.classList.add('cambiando');
   setTimeout(() => { fondo.poner(i); aplicar(); hab.classList.remove('cambiando'); }, 450);
 }
-// Mientras la puerta se abre, lo que se ve por el hueco es la escena 3D (la imagen de la habitación tras las hojas).
-// La habitación 2D viva aparece solo cuando la cámara cruza el umbral, fundiéndose sobre esa misma imagen, y al
-// volver se funde igual. Antes se recortaba con la forma del hueco y aparecía encima de las hojas a medio abrir:
+// Mientras la puerta empieza a abrirse se ve la escena 3D (la sala tras las hojas). Después la habitación viva llega
+// a pantalla completa con un fundido desenfocado (estilos.css: `.hueco` / `.llegando`); al volver se va igual en
+// cuanto la cámara sale del umbral. Antes se recortaba con la forma del hueco encima de las hojas a medio abrir:
 // las hojas se veían transparentes y salían dos imágenes a la vez.
-let huecoDe = -1;
+let huecoDe = -1, revelado = false;
 function mostrarHueco(i) {
   clearTimeout(mostrarHueco.t);
-  huecoDe = i; hab.hidden = false;
+  huecoDe = i; revelado = false; hab.hidden = false;
   hab.classList.add('hueco', 'visible'); hab.classList.remove('listo');
   recortarHueco();
 }
 function quitarHueco() {
-  huecoDe = -1; hab.classList.remove('hueco'); hab.style.opacity = '';
+  huecoDe = -1; revelado = false; hab.classList.remove('hueco', 'llegando');
 }
 function recortarHueco() {
   if (huecoDe < 0) return;
   const h = escena.huecoPantalla(huecoDe, innerWidth, innerHeight);
-  hab.style.opacity = h ? 0 : 1;   // null: la cámara ya cruza el hueco
+  hab.classList.toggle('llegando', revelado || !h);   // null: la cámara está en el umbral
 }
 function abrirHabitacion(i) {
   escena.terminarEntrada();
