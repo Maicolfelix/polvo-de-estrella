@@ -195,11 +195,13 @@ function subir(g, seg, retraso = 0) {
 function detenerPreYa() { tokPre++; if (ctx) silenciarYa(preG); pre.pause(); }
 
 export function cargarCancion(i) {
-  if (cancionSong !== i) { cancionSong = i; song.src = fuenteSong(i); song.load(); }
+  // si la carga falló (red cortada, servidor caído) se vuelve a pedir: si no, se quedaría muda para siempre
+  if (cancionSong !== i || song.error) { cancionSong = i; song.src = fuenteSong(i); song.load(); }
 }
 export function reproducir() {
   quiere = true; marcar(); avisar();
   if (cambiando) return;                     // el cambio en curso la arrancará
+  if (song.error) { const t = song.currentTime; song.load(); song.currentTime = t; }
   song.play().catch(() => {});
   subir(songG, .08);                         // entrada de 80 ms: sin chasquido
 }

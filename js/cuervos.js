@@ -32,7 +32,7 @@ function cuerpoCuervo() {
   return g;
 }
 
-export function crearCuervos({ centro, cuantos = 14 }) {
+export function crearCuervos({ centro, cuantos = 6 }) {
   const geo = cuerpoCuervo();
   const fase = new Float32Array(cuantos).map(() => Math.random() * 100);
   geo.setAttribute('fase', new THREE.InstancedBufferAttribute(fase, 1));
@@ -52,9 +52,10 @@ export function crearCuervos({ centro, cuantos = 14 }) {
   };
   const malla = new THREE.InstancedMesh(geo, mat, cuantos);
   malla.frustumCulled = false;   // se mueven por todo el cielo; son pocos triángulos
+  // pocos y repartidos: cada uno arranca en su tramo del círculo, a distinta distancia y altura (nunca en bandada)
   const aves = Array.from({ length: cuantos }, (_, i) => ({
-    r: 6 + Math.random() * 10, h: 7 + Math.random() * 8, v: (.11 + Math.random() * .09) * (i % 4 ? 1 : -1),
-    a: Math.random() * Math.PI * 2, dr: Math.random() * 6, esc: 1.1 + Math.random() * .7,
+    r: 8 + (i % 3) * 6 + Math.random() * 3, h: 5 + ((i * 5) % cuantos) / cuantos * 12 + Math.random() * 1.5, v: (.08 + Math.random() * .05) * (i % 3 ? 1 : -1),
+    a: (i + Math.random() * .4) / cuantos * Math.PI * 2, dr: Math.random() * 6, esc: 1.1 + Math.random() * .6,
   }));
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), p = new THREE.Vector3(), s = new THREE.Vector3();
   function actualizar(t, dt) {
