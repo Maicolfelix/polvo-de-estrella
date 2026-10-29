@@ -676,9 +676,40 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   M.piedraFondo = M.piedra.clone(); Object.assign(M.piedraFondo, { emissive: new THREE.Color(0xff9050), emissiveMap: tex('piedra_col', true), emissiveIntensity: .08 });
   envejecer(M.piedraFondo, { base: B, alto: 1.1, fuerza: .22, vetas: .14, musgo: 0, macro: .25 });
   const charcoTex = texturaRadial([[0, 'rgba(255,255,255,.9)'], [.5, 'rgba(255,255,255,.25)'], [1, 'rgba(255,255,255,0)']]);
-  // lo que hay tras cada puerta, vivo: la imagen de la habitación ondula como aire caliente, la luz de su color
-  // late desde el fondo y una franja de brillo la barre despacio. Un solo programa para las nueve.
+  // Tras cada puerta, un lugar y no una foto: una sala oscura con fondo, cuyas paredes recogen la luz del color
+  // de la canción; al fondo, la imagen de la habitación (ondula como aire caliente y se funde en la penumbra por
+  // los bordes); polvo luminoso que flota y haces de luz que se mueven. Con la paralaje de la cámara se lee la
+  // profundidad. Los mismos programas sirven a las nueve puertas.
   const UT_HAB = { value: 0 };
+  const VERT_P = 'varying vec3 vP; void main() { vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }';
+  const FRAG_SALA = `uniform sampler2D piedra; uniform vec3 uLuz; uniform float uT, uB, uD, uMov; varying vec3 vP;
+    void main() {
+      float prof = clamp(-vP.z / uD, 0., 1.);                  // 0 junto a la puerta, 1 al fondo
+      float ondas = .5 + .5 * sin(vP.y * 2.3 + vP.z * 3. - uT * .7 * uMov) * sin(vP.x * 1.7 + uT * .4 * uMov);
+      vec2 st = abs(vP.x) > 1.6 ? vP.zy : vP.xz;              // paredes laterales / suelo y techo
+      float roca = texture2D(piedra, st * .45).r;
+      vec3 c = uLuz * (.015 + .16 * pow(prof, 2.)) * (.7 + .3 * ondas) * (.35 + roca * 1.1);   // penumbra: la luz viene del fondo
+      gl_FragColor = vec4(c * uB, 1.);
+    }`;
+  const VERT_POLVO = `attribute float fase; uniform float uT, uMov, uH, uTam; varying float vA;
+    void main() {
+      vec3 p = position; float t = uT * uMov;
+      p.y = mod(p.y + t * (.07 + .07 * fract(fase * 7.)), uH);
+      p.x += sin(t * .5 + fase * 6.) * .14; p.z += cos(t * .37 + fase * 4.) * .12;
+      vec4 mv = modelViewMatrix * vec4(p, 1.);
+      gl_Position = projectionMatrix * mv;
+      gl_PointSize = uTam * (.5 + fract(fase * 13.)) / -mv.z;
+      vA = (.35 + .65 * (.5 + .5 * sin(t * 1.3 + fase * 9.))) * smoothstep(0., .5, p.y) * smoothstep(uH, uH - .8, p.y);
+    }`;
+  const FRAG_POLVO = `uniform vec3 uLuz; uniform float uK; varying float vA;
+    void main() { float d = length(gl_PointCoord - .5); gl_FragColor = vec4(uLuz * 1.5, smoothstep(.5, 0., d) * vA * uK); }`;
+  const FRAG_HAZ = `uniform vec3 uLuz; uniform float uT, uK, uMov; varying vec2 vUv;
+    void main() {
+      float t = uT * uMov;
+      float s = .55 + .45 * sin(vUv.x * 17. + t * .35) * sin(vUv.x * 6.3 - t * .22 + vUv.y * 1.5);
+      float a = s * smoothstep(0., .35, vUv.x) * smoothstep(1., .65, vUv.x) * smoothstep(0., .45, vUv.y) * (1. - vUv.y * .35);
+      gl_FragColor = vec4(uLuz, a * uK * .22);
+    }`;
   const VERT_UV = 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }';
   const FRAG_HAB = `uniform sampler2D map; uniform vec2 uRep, uOff; uniform vec3 uLuz; uniform float uT, uB, uMov; varying vec2 vUv;
     void main() {
@@ -690,6 +721,9 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       float late = 1. + .25 * sin(uT * 1.6) * uMov;
       float banda = pow(max(0., sin(q.y * 3.1 - uT * .55 + q.x * 1.5)), 14.) * uMov;
       c = c * (.85 + .25 * centro * late) + uLuz * (centro * centro * .07 * late + banda * .05);   // con más, los colores claros velaban la imagen
+      // los bordes se pierden en la penumbra de la sala: sin marco recortado
+      float vin = smoothstep(0., .3, min(q.x, 1. - q.x)) * smoothstep(0., .22, min(q.y, 1. - q.y));
+      c = mix(uLuz * .07, c, vin * vin * (3. - 2. * vin));
       gl_FragColor = vec4(c * uB, 1.);
     }`;
   // rayos de luz que salen por la rendija: nacen finos y se abren con la puerta; se mueven despacio
@@ -733,18 +767,34 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       marco.add(piv);
       return { piv, s };
     });
-    // tras la puerta, pegada a las hojas, la propia imagen de la habitación llenando el hueco: por la rendija, al
-    // entreabrir y al abrir se ve lo mismo que dentro (antes, un pasillo de piedra con paredes de color plano).
-    // Al entrar, el hueco pasa a mostrar la habitación viva (recortada en la página, ver `huecoPantalla`).
-    // Cargador aparte, sin el gestor de carga: no retrasa la entrada a la web.
+    // la sala tras la puerta (ver los sombreadores de arriba). Cabe entre el muro de la nave y la nave lateral
+    // (2 m; más honda, junto a la fachada asomaba tras otros volúmenes) y no toca la de la puerta vecina del mismo lado (4,4 m). La imagen llega tras la carga
+    // (`cargarImagenesHab`); al entrar, al cruzar el umbral se funde encima la habitación viva (app.js).
     const altoHab = dim.s + ap;
-    // (la imagen llega después de la carga, ver `cargarImagenesHab`)
+    const Ws = 3.4, Hs = altoHab + 1.5, Ds = 2, z0 = -.14, mov = { value: rm ? 0 : 1 }, uB = { value: 0 }, uK = { value: 0 };
+    const sala = new THREE.Group(); marco.add(sala);
+    sala.add(new THREE.Mesh(mergeGeometries([
+      new THREE.PlaneGeometry(Ds, Hs).rotateY(Math.PI / 2).translate(-Ws / 2, Hs / 2, z0 - Ds / 2),
+      new THREE.PlaneGeometry(Ds, Hs).rotateY(-Math.PI / 2).translate(Ws / 2, Hs / 2, z0 - Ds / 2),
+      new THREE.PlaneGeometry(Ws, Ds).rotateX(-Math.PI / 2).translate(0, 0, z0 - Ds / 2),
+      new THREE.PlaneGeometry(Ws, Ds).rotateX(Math.PI / 2).translate(0, Hs, z0 - Ds / 2),
+    ]), new THREE.ShaderMaterial({ vertexShader: VERT_P, fragmentShader: FRAG_SALA,
+      uniforms: { piedra: { value: tex('piedra_col', true) }, uLuz: { value: luz }, uT: UT_HAB, uB, uD: { value: Ds }, uMov: mov } })));
     const img = new THREE.Texture(); img.colorSpace = THREE.SRGBColorSpace; img.flipY = false;
-    const Wv = dim.w * 2 + .1, Hv = altoHab + .1, rx = Math.min(1, (Wv / Hv) / (1672 / 941));   // «cover» centrado en el foco
-    const matPared = new THREE.ShaderMaterial({ vertexShader: VERT_UV, fragmentShader: FRAG_HAB, uniforms: {
+    const rx = Math.min(1, (Ws / Hs) / (1672 / 941));   // «cover» centrado en el foco de la imagen
+    sala.add(new THREE.Mesh(new THREE.PlaneGeometry(Ws, Hs).translate(0, Hs / 2, z0 - Ds), new THREE.ShaderMaterial({ vertexShader: VERT_UV, fragmentShader: FRAG_HAB, uniforms: {
       map: { value: img }, uRep: { value: new V2(rx, 1) }, uOff: { value: new V2(cl(FOCO[d.i] - rx / 2, 0, 1 - rx), 0) },
-      uLuz: { value: luz }, uT: UT_HAB, uB: { value: 0 }, uMov: { value: rm ? 0 : 1 } } });
-    marco.add(new THREE.Mesh(new THREE.PlaneGeometry(Wv, Hv).translate(0, Hv / 2, -.14), matPared));
+      uLuz: { value: luz }, uT: UT_HAB, uB, uMov: mov } })));
+    { const n = MOVIL ? 40 : 70, pos = new Float32Array(n * 3), fase = new Float32Array(n);
+      for (let k = 0; k < n; k++) { pos.set([(Math.random() - .5) * Ws * .85, Math.random() * Hs, z0 - .25 - Math.random() * (Ds - .4)], k * 3); fase[k] = Math.random() * 10; }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('fase', new THREE.BufferAttribute(fase, 1));
+      const polvo = new THREE.Points(g, new THREE.ShaderMaterial({ vertexShader: VERT_POLVO, fragmentShader: FRAG_POLVO, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+        uniforms: { uLuz: { value: luz }, uT: UT_HAB, uK, uMov: mov, uH: { value: Hs }, uTam: { value: .05 * innerHeight * Math.min(devicePixelRatio, 2) / 1.4 } } }));
+      polvo.frustumCulled = false; sala.add(polvo); }
+    // dos haces que bajan desde lo alto del fondo, cruzados
+    sala.add(new THREE.Mesh(mergeGeometries([-1, 1].map(s => new THREE.PlaneGeometry(1.1, Hs * 1.25).rotateX(-.45).rotateY(s * .35).translate(s * .55, Hs * .5, z0 - Ds * .55))),
+      new THREE.ShaderMaterial({ vertexShader: VERT_UV, fragmentShader: FRAG_HAZ, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+        uniforms: { uLuz: { value: luz }, uT: UT_HAB, uK, uMov: mov } })));
     const rayos = new THREE.Mesh(new THREE.PlaneGeometry(dim.w * 4.4, altoHab * 1.2).translate(0, altoHab * .6, .13), new THREE.ShaderMaterial({
       vertexShader: VERT_UV, fragmentShader: FRAG_RAYOS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
       uniforms: { uLuz: { value: luz }, uT: UT_HAB, uA: { value: 0 }, uK: { value: 0 }, uMov: { value: rm ? 0 : 1 } } }));
@@ -779,7 +829,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       const l = marco.localToWorld(new V3(-1.1, 2.3, 1.1)); foco(l.x, l.y, l.z, 0xffa860, 4.5, 1.8);   // llama del farol
       const hl = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color: 0xffa860, transparent: true, opacity: .5, blending: THREE.AdditiveBlending, depthWrite: false, fog: false })); hl.position.set(-1.1, 2.3, 1.02); hl.scale.setScalar(.7); marco.add(hl);
     }
-    return { ...d, c, luz, marco, hojas, img, matPared, rayos, rendija, charco, ap, abierto: 0, objetivo: 0, brillo: 0, objetivoBrillo: 0, foco: foco(0, 0, 0, luz, 6) };
+    return { ...d, c, luz, marco, hojas, img, sala, uB, uK, rayos, rendija, charco, ap, abierto: 0, objetivo: 0, brillo: 0, objetivoBrillo: 0, foco: foco(0, 0, 0, luz, 6) };
   });
 
   destino = ext;
@@ -1002,6 +1052,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   // eligen en el momento de la llamada, así que el estado de las luces puede restaurarse enseguida.
   async function precompilar() {
     const vis = [ext.visible, int.visible]; ext.visible = int.visible = true;
+    puertas.forEach(d => d.rayos.visible = d.sala.visible = true);
     const esperas = [];
     for (const v of [false, true]) { ponerFuera(v); esperas.push(renderer.compileAsync(scene, camera)); }
     [ext.visible, int.visible] = vis;
@@ -1011,7 +1062,6 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   // primera vez que se dibuja, y eso daba un tirón de 300–400 ms justo al cruzar al castillo. Se dibuja una vez
   // en cada tramo del recorrido mientras sigue la pantalla de carga.
   function calentar() {
-    puertas.forEach(d => d.rayos.visible = true);
     for (const u of [U_EXT - 1.35, U_EXT - .1, U_EXT + .2, U_NAVE, U_NAVE + 4 * PASO, U_FIN]) { actualizar(1 / 60, u); render(); }
     actualizar(1 / 60, 0); sombraPrincipal = true;
   }
@@ -1279,7 +1329,8 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     if (!rm && (mirada.yaw || mirada.pitch)) { const k = cam.p.z < -.6 ? .6 : 1; camera.rotateY(mirada.yaw * k); camera.rotateX(mirada.pitch * k); }
     const dentro = cam.p.z < -.6;
     // zonas: lo que no puede verse desde aquí no se dibuja
-    ext.visible = cam.p.z > -7; int.visible = cam.p.z < 12;
+    // ya dentro de la nave, fuera no se ve nada (y sus volúmenes tapaban la sala tras las puertas 1 y 2)
+    ext.visible = cam.p.z > -1.2; int.visible = cam.p.z < 12;
     ponerFuera(cam.p.z > -.6);
     if (cierre && ahora > cierre.en) { cierre.d.objetivo = 0; cierre.d.objetivoBrillo = 0; cierre = null; }
 
@@ -1317,7 +1368,9 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       const ang = cl(d.abierto) * 1.8;
       // todas se abren hacia la nave, hasta quedar contra el derrame del muro: el hueco queda libre para la cámara
       d.hojas.forEach(({ piv, s }) => piv.rotation.y = s * Math.min(ang, 1.52));
-      d.matPared.uniforms.uB.value = .3 + d.brillo * .3 + d.abierto * .4;   // la habitación se enciende al abrir
+      d.uB.value = .3 + d.brillo * .3 + d.abierto * .4;   // la sala se enciende al abrir
+      d.uK.value = .4 + d.brillo * .3 + d.abierto * .3;
+      d.sala.visible = d.abierto > .005 || d.brillo > .01;   // cerrada no se ve: no se dibuja
       const k = (d.brillo * .22 + Math.sin(Math.PI * cl(d.abierto)) * .35) * cl((cam.p.distanceTo(d.marco.position) - 1.6) / 2.4), ru = d.rayos.material.uniforms;   // se apagan al acercarse: de cerca velaban la imagen
       ru.uA.value = cl(d.abierto); ru.uK.value = k; d.rayos.visible = k > .004;
       d.charco.material.opacity = .16 + d.brillo * .35 + d.abierto * .3;
