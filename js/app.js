@@ -1,7 +1,7 @@
 import { CANCIONES } from './datos.js';
 import * as A from './audio.js';
 import { crearEscena } from './escena.js';
-import { crearAtmosfera } from './habitaciones.js';
+import { crearFondo } from './habitaciones.js';
 import { lineasPresentacion } from './letras.js';
 import { TIEMPOS } from './tiempos.js';
 
@@ -40,7 +40,7 @@ function medir() {
 }
 addEventListener('resize', medir);
 medir();
-const atmos = crearAtmosfera($('#atmos'));
+const fondo = crearFondo($('#fondo'), RM);
 
 /* ---------- puertas accesibles sobre la escena ---------- */
 const botones = CANCIONES.map((c, i) => {
@@ -152,9 +152,8 @@ async function entrar(i) {
   $('#ayuda').style.opacity = 0;
   if (A.activo) A.rafaga(RM ? 1 : 2.6, RM ? .35 : 1);
   A.entrarCancion(i, RM ? .25 : 1.15);          // sin sonido: solo carga, no suena
-  atmos.poner(i); atmos.dibujar(1 / 60, 0, RM);   // la habitación queda preparada antes de abrir la puerta
-  if (i !== 0) { pintarHabitacion(i, false); mostrarHueco(i); }   // asoma por el hueco de la puerta mientras se abre
-  await escena.entrar(i, $('#atmos'));
+  pintarHabitacion(i, false); mostrarHueco(i);   // la habitación ya suena y se mueve: asoma por el hueco mientras se abre
+  await escena.entrar(i);
   abrirHabitacion(i);
 }
 function pintarHabitacion(i, fundido) {
@@ -168,11 +167,9 @@ function pintarHabitacion(i, fundido) {
     $('#seek').value = 0; pintarRango($('#seek'));
     $('#tiempo').textContent = '0:00';
   };
-  atmos.poner(i, fundido);
-  hab.classList.toggle('con-sala', i === 0);   // la habitación 1 se ve a través de la escena 3D
-  if (!fundido) return aplicar();
+  if (!fundido) { fondo.poner(i); return aplicar(); }
   hab.classList.add('cambiando');
-  setTimeout(() => { aplicar(); hab.classList.remove('cambiando'); }, 450);
+  setTimeout(() => { fondo.poner(i); aplicar(); hab.classList.remove('cambiando'); }, 450);
 }
 // La habitación 2D se muestra en la página recortada con la forma del hueco de la puerta (calculada en cada
 // fotograma por la escena) y aparece a medida que la puerta se abre y la cámara se alinea con ella. Al cruzar,
@@ -198,8 +195,7 @@ function recortarHueco() {
 function abrirHabitacion(i) {
   escena.terminarEntrada();
   actual = i;
-  if (i !== 0) { quitarHueco(); hab.classList.add('visible'); }   // el recorte ya llenaba la pantalla: sin fundido
-  else pintarHabitacion(i, false);
+  quitarHueco(); hab.classList.add('visible');   // el recorte ya llenaba la pantalla: sin fundido
   hab.hidden = false;
   document.body.classList.add('en-habitacion');
   requestAnimationFrame(() => hab.classList.add('visible'));
@@ -233,19 +229,21 @@ function volver() {
   botones[i].classList.add('visitada');
   document.body.classList.remove('en-habitacion');
   capa.inert = llegada.inert = false;
-  if (i !== 0) {
-    // la habitación vuelve a encogerse al hueco de la puerta mientras la cámara retrocede, y se apaga al cerrarse
-    mostrarHueco(i);
-    mostrarHueco.t = setTimeout(() => { if (huecoDe === i && modo !== 'entrando' && modo !== 'habitacion') { quitarHueco(); hab.classList.remove('visible'); hab.hidden = true; } }, RM ? 500 : 2600);
-  } else hab.classList.remove('visible', 'listo');
-  setTimeout(() => { if (i === 0) hab.hidden = true; modo = 'nave'; botones[i].focus({ preventScroll: true }); }, RM ? 420 : 900);
+  // la habitación vuelve a encogerse al hueco de la puerta mientras la cámara retrocede, y se apaga al cerrarse
+  mostrarHueco(i);
+  mostrarHueco.t = setTimeout(() => { if (huecoDe === i && modo !== 'entrando' && modo !== 'habitacion') { quitarHueco(); hab.classList.remove('visible'); hab.hidden = true; fondo.parar(); } }, RM ? 500 : 2600);
+  setTimeout(() => { modo = 'nave'; botones[i].focus({ preventScroll: true }); }, RM ? 420 : 900);
 }
 
 /* ---------- letra sincronizada ---------- */
 // El único reloj es el del reproductor (song.currentTime): pausar congela, buscar actualiza al instante.
 const SILENCIO = 1.2;   // tras el final de una línea, segundos que sigue marcada antes de apagarse
 const habScroll = $('#habScroll'), btnSeguir = $('#seguir');
-const sync = { lineas: [], tiempos: null, activa: -1, seguir: true, propio: 0 };
+const sync = { lineas: [], tiempos: null, activa: -1, pausa: -1, seguir: true, propio: 0, desde: 0, hasta: 0, t0: null };
+// puntos que laten en los silencios largos (intro e instrumentales), como en Apple Music
+const pausa = document.createElement('span');
+pausa.className = 'pausa'; pausa.setAttribute('aria-hidden', 'true'); pausa.innerHTML = '<i></i><i></i><i></i>';
+const PAUSA_MIN = 3.5;   // segundos de silencio a partir de los que se muestran
 function pintarLetra(n) {
   const cont = $('#letra'), t = TIEMPOS[n] || null;
   cont.replaceChildren(...lineasPresentacion(n).map((txt, i) => {
@@ -255,10 +253,11 @@ function pintarLetra(n) {
     el.dataset.i = i;
     return el;
   }));
-  Object.assign(sync, { lineas: [...cont.children], tiempos: t, activa: -1, seguir: true });
+  Object.assign(sync, { lineas: [...cont.children], tiempos: t, activa: -1, pausa: -1, seguir: true, t0: null });
+  marcarDistancias(-1);
   cont.classList.toggle('sincronizada', !!t);
   btnSeguir.hidden = true;
-  $('#habNota').textContent = t ? 'Letra sincronizada automáticamente · pendiente de revisión a oído' : 'Letra sin sincronizar';
+  $('#habNota').textContent = t ? '' : 'Letra sin sincronizar';
 }
 function lineaActiva(tm) {
   const L = sync.tiempos?.lineas; if (!L) return -1;
@@ -266,24 +265,66 @@ function lineaActiva(tm) {
   for (let i = 0; i < L.length; i++) if (L[i] && L[i][0] <= tm) k = i;   // nunca una línea futura
   return k >= 0 && tm <= L[k][1] + SILENCIO ? k : -1;
 }
+// desplazamiento propio con frenado suave (el «smooth» del navegador es brusco y no se puede afinar)
 function centrar(el) {
   const r = el.getBoundingClientRect(), c = habScroll.getBoundingClientRect();
-  const y = habScroll.scrollTop + r.top - c.top - c.height * .36;
+  const y = Math.max(0, habScroll.scrollTop + r.top - c.top - c.height * .34);
   sync.propio = performance.now();
-  habScroll.scrollTo({ top: Math.max(0, y), behavior: RM ? 'auto' : 'smooth' });
+  if (RM) { habScroll.scrollTop = y; sync.t0 = null; return; }
+  Object.assign(sync, { desde: habScroll.scrollTop, hasta: y, t0: performance.now() });
+}
+function deslizar(now) {
+  if (sync.t0 == null) return;
+  const k = Math.min(1, (now - sync.t0) / 950);
+  habScroll.scrollTop = sync.desde + (sync.hasta - sync.desde) * (1 - (1 - k) ** 4);
+  if (k === 1) sync.t0 = null;
+}
+// cada línea sabe a qué distancia está de la que suena: la letra se desenfoca y apaga hacia los lados
+function marcarDistancias(k) {
+  const ref = k >= 0 ? k : sync.pausa;
+  sync.lineas.forEach((el, i) => {
+    el.style.setProperty('--d', ref < 0 ? 0 : Math.min(4, Math.abs(i - ref)));
+    el.classList.toggle('pasada', ref >= 0 && i < ref);
+  });
+}
+// siguiente línea cantada después de tm (índice) o -1
+function siguienteLinea(tm) {
+  const L = sync.tiempos.lineas;
+  for (let i = 0; i < L.length; i++) if (L[i] && L[i][0] > tm) return i;
+  return -1;
 }
 function actualizarLetra() {
+  deslizar(performance.now());
   if (!sync.tiempos) return;
-  const k = lineaActiva(song.currentTime);
-  if (k === sync.activa) return;
+  const tm = song.currentTime, k = lineaActiva(tm);
+  // silencio largo: los puntos aparecen donde entrará la siguiente línea y se llenan hasta que llega
+  let p = -1;
+  if (k < 0) { const nx = siguienteLinea(tm); if (nx >= 0) { const prev = nx > 0 ? (sync.tiempos.lineas.slice(0, nx).filter(Boolean).at(-1)?.[1] ?? 0) : 0; if (sync.tiempos.lineas[nx][0] - prev >= PAUSA_MIN) p = nx; } }
+  if (p >= 0) { const L = sync.tiempos.lineas[p], ini = p > 0 ? (sync.tiempos.lineas.slice(0, p).filter(Boolean).at(-1)?.[1] ?? 0) + SILENCIO : 0; pausa.style.setProperty('--lleno', Math.min(1, Math.max(0, (tm - ini) / Math.max(.1, L[0] - ini))).toFixed(3)); }
+  if (k === sync.activa && p === sync.pausa) return;
   sync.lineas[sync.activa]?.classList.remove('activa');
   sync.activa = k;
+  if (p !== sync.pausa) {
+    sync.pausa = p;
+    if (p >= 0) { sync.lineas[p].before(pausa); pausa.classList.add('ver'); if (sync.seguir) centrar(pausa); }
+    else pausa.classList.remove('ver');
+  }
+  marcarDistancias(k);
   if (k < 0) return;
   sync.lineas[k].classList.add('activa');
   if (sync.seguir) centrar(sync.lineas[k]);
 }
+// tocar una línea lleva la canción a ese verso
+$('#letra').addEventListener('click', e => {
+  const el = e.target.closest('.linea'); const L = sync.tiempos?.lineas[+el?.dataset.i];
+  if (!L || !song.duration) return;
+  song.currentTime = L[0];
+  sync.seguir = true; btnSeguir.hidden = true;
+  centrar(el);
+});
 // desplazamiento manual: suspende el seguimiento hasta pulsar «Seguir canción»
 function manual() {
+  sync.t0 = null;
   if (!sync.tiempos || !sync.seguir) return;
   sync.seguir = false; btnSeguir.hidden = false;
 }
@@ -330,7 +371,6 @@ $('#seek').addEventListener('change', () => arrastrando = false);
 $('#anterior').addEventListener('click', () => cambiar(actual - 1));
 $('#siguiente').addEventListener('click', () => cambiar(actual + 1));
 $('#volver').addEventListener('click', volver);
-const progreso = () => song.duration ? song.currentTime / song.duration : 0;
 
 /* ---------- sonido: silencio y volumen ---------- */
 // Volumen de la canción 0–100 %, como un reproductor normal. Silenciar no pierde el nivel:
@@ -447,7 +487,7 @@ addEventListener('keydown', e => {
 
 /* ---------- bucle ---------- */
 const ESTACIONES_RM = [0, 1.7, 3.5, 4.3, ...CANCIONES.map((_, i) => escena.uDePuerta(i))];
-let sala30 = false, uObjetivo = 0, uSuave = 0, uRM = 0, uRMdestino = 0, uPrevio = 0, ultimo = performance.now();
+let uObjetivo = 0, uSuave = 0, uRM = 0, uRMdestino = 0, uPrevio = 0, ultimo = performance.now();
 const ayuda = $('#ayuda');
 ayuda.textContent = HOVER ? 'Deja el cursor sobre una puerta para escuchar · Haz clic para entrar' : 'Mantén pulsada una puerta para escuchar · Tócala para entrar';
 
@@ -465,14 +505,12 @@ function tick(now) {
   }
   const vel = Math.abs(u - uPrevio) / Math.max(dt, .001); uPrevio = u;
 
-  const salaMar = actual === 0 && modo !== 'nave';   // la habitación 1 es la sala 3D del mar
-  if (modo !== 'habitacion') {
+  if (modo !== 'habitacion') {   // dentro de una habitación la escena 3D no se dibuja: solo vídeo y letra
     escena.actualizar(dt, u);
-    if (salaMar) escena.actualizarSala(dt, progreso());
     escena.render();
     colocarPuertas();
-  } else if (salaMar && (sala30 = !sala30)) { escena.actualizarSala(dt * 2, progreso()); escena.render(); }   // detrás de la letra basta con 30 fps
-  if (modo !== 'nave') { if (!salaMar) atmos.dibujar(dt, progreso(), RM); actualizarLetra(); }
+  }
+  if (modo !== 'nave') { fondo.dibujar(dt, A.elementos.song.paused ? 0 : A.pulso()); actualizarLetra(); }
 
   recortarHueco();
   escena.mirarActiva(modo === 'nave' && !RM);   // en las transiciones, la vista al frente
@@ -501,7 +539,7 @@ function tick(now) {
 if (CAPTURA) setTimeout(() => tick(performance.now()), 0); else requestAnimationFrame(tick);   // en ?captura arranca aunque la pestaña no se pinte
 
 // para pruebas desde la consola
-window.__pde = { escena, A, atmos, cargado: () => cargado, entrar, volver, cambiar, actualizarLetra, estado: () => ({ modo, actual, escuchando, u: uSuave }) };
+window.__pde = { escena, A, fondo, cargado: () => cargado, entrar, volver, cambiar, actualizarLetra, estado: () => ({ modo, actual, escuchando, u: uSuave }) };
 // revisión local: renderiza un punto del recorrido y lo envía a tools/receptor-capturas.mjs
 if (CAPTURA) {
   const enviar = (n, lienzo) => fetch('http://127.0.0.1:8766/?n=' + n, { method: 'POST', body: lienzo.toDataURL('image/jpeg', .9) }).then(r => r.text());
@@ -511,9 +549,5 @@ if (CAPTURA) {
     for (let i = 0; i < pasos; i++) escena.actualizar(1 / 30, u);
     escena.render();
     return enviar(n, $('#gl'));
-  };
-  window.__pde.fotoHab = (n, i, p, pasos = 90) => {
-    atmos.poner(i); for (let k = 0; k < pasos; k++) atmos.dibujar(1 / 30, p, RM);
-    return enviar(n, $('#atmos'));
   };
 }

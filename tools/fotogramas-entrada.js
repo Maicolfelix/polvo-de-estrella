@@ -5,17 +5,16 @@
 // y, encima, la habitación 2D recortada con la forma del hueco de la puerta y la opacidad que le da la app.
 const espera = ms => new Promise(r => setTimeout(r, ms));
 export async function fotogramas(i, prefijo, instantes = [0, .3, .6, .9, 1.2, 1.5, 1.8, 2.1]) {
-  const { escena, atmos } = window.__pde, lienzo = escena.renderer.domElement, u = escena.uDePuerta(i);
-  const hab = document.querySelector('#atmos'), gl = escena.renderer.getContext(), px = new Uint8Array(4);
+  const { escena, fondo } = window.__pde, lienzo = escena.renderer.domElement, u = escena.uDePuerta(i);
+  const hab = document.querySelector('#fondo'), gl = escena.renderer.getContext(), px = new Uint8Array(4);
   scrollTo(0, u * innerHeight);
   for (let k = 0; k < 90; k++) escena.actualizar(1 / 30, u);
-  atmos.poner(i); atmos.dibujar(1 / 60, 0, false);
+  fondo.poner(i); await new Promise(r => hab.readyState >= 2 ? r() : hab.addEventListener('loadeddata', r, { once: true }));
   // misma regla que recortarHueco() en app.js
   const comp = document.createElement('canvas'); comp.width = innerWidth; comp.height = innerHeight;
   const g = comp.getContext('2d');
   const componer = () => {
     g.drawImage(lienzo, 0, 0, comp.width, comp.height);
-    if (!i) return comp.toDataURL('image/jpeg', .82);
     const h = escena.huecoPantalla(i, innerWidth, innerHeight);
     const op = !h ? 1 : Math.min(1, Math.max(0, (h.abierto - .04) / .4)) * Math.min(1, Math.max(0, (h.alin - .55) / .3));
     g.save(); g.globalAlpha = op;
@@ -23,9 +22,9 @@ export async function fotogramas(i, prefijo, instantes = [0, .3, .6, .9, 1.2, 1.
     g.drawImage(hab, 0, 0, comp.width, comp.height); g.restore();
     return comp.toDataURL('image/jpeg', .82);
   };
-  const paso = () => { escena.actualizar(1 / 60, u); if (i) atmos.dibujar(1 / 60, 0, false); escena.render(); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); };
+  const paso = () => { escena.actualizar(1 / 60, u); escena.render(); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); };
   const fotos = [];
-  escena.entrar(i, hab);
+  escena.entrar(i);
   const t0 = performance.now();
   for (const t of instantes) { while ((performance.now() - t0) / 1000 < t) paso(); paso(); fotos.push([t.toFixed(1), componer()]); }
   escena.terminarEntrada(true);

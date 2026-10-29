@@ -2,7 +2,7 @@
 // pre: inicio PROVISIONAL del fragmento (tools/fragmentos.py), pendiente de revisión a oído.
 export const CANCIONES = [
 {
-  n: '01', titulo: 'SI NO ESTOY A TU LADO', luz: '#9fd0ea', pre: 24,
+  n: '01', titulo: 'SI NO ESTOY A TU LADO', luz: '#e0505c', pre: 24,
   letra: `This is Mavo
 A veces yo quisiera saber la verdad de
 La razones por la cual no me eligen a mí
@@ -45,7 +45,7 @@ El miedo está guardado
 Me tienes enredado`
 },
 {
-  n: '02', titulo: 'TU SILUETA NO ME DAÑA', luz: '#e9c6c0', pre: 55,
+  n: '02', titulo: 'TU SILUETA NO ME DAÑA', luz: '#a9bce0', pre: 55,
   letra: `Mujer de labios rojos
 Dimensión en sus ojos
 Aún yo sigo roto esperándote
@@ -69,7 +69,7 @@ Ahora se está nublando mi corazón
 Y yo te sigo cantando hasta quedarme sin voz`
 },
 {
-  n: '03', titulo: 'POR QUE ESTAS TAN BIEN DESPUES DE DEJARME TAN MAL', luz: '#e2483b', pre: 73,
+  n: '03', titulo: 'POR QUE ESTAS TAN BIEN DESPUES DE DEJARME TAN MAL', luz: '#ff9a48', pre: 73,
   letra: `Ereesss todooooo lo que yo quissseeee
 
 Donde tú estabas
@@ -97,7 +97,7 @@ Tu siempre serás todo pa mi, aunque lo pueda negar aunque ya no estés aquí
 Siempre te voy a buscar aunque esté en otro país.`
 },
 {
-  n: '04', titulo: 'SE ACABA EL VERANO', luz: '#f0a65a', pre: 82,
+  n: '04', titulo: 'SE ACABA EL VERANO', luz: '#ff7448', pre: 82,
   letra: `He dejado cosas tiradas por el tiempo
 Que por su reflejo puedo conocerlo
 Pero en mi pasado he sido cruel y terco
@@ -124,7 +124,7 @@ Dime si tú no quieres que sea yo
 Quiero estar dentro de tu corazón`
 },
 {
-  n: '05', titulo: 'TODOLOLO', luz: '#ffb98c', pre: 114,
+  n: '05', titulo: 'TODOLOLO', luz: '#ffb05a', pre: 114,
   letra: `Todololo
 Todololo
 Todo lo que tú quieras
@@ -161,7 +161,7 @@ Todololo
 Todololo`
 },
 {
-  n: '06', titulo: 'DEBERIA SER UN SUEÑO MAS', luz: '#e2b553', pre: 40,
+  n: '06', titulo: 'DEBERIA SER UN SUEÑO MAS', luz: '#ff6c58', pre: 40,
   letra: `Como a mí me gustaría que tú y yo
 Estuviéramos juntos toda la eternidad
 Toda la eternidad
@@ -184,7 +184,7 @@ Estuviéramos juntos toda la eternidad
 Toda la eternidad`
 },
 {
-  n: '07', titulo: 'QUE PASARíA?', luz: '#b6a9ea', pre: 68,
+  n: '07', titulo: 'QUE PASARíA?', luz: '#ff4a32', pre: 68,
   letra: `poco a poco sigo creyendo
 Poco a poco sigo cambiando
 
@@ -217,7 +217,7 @@ Que pasaría si era mentira
 Que pasa ?`
 },
 {
-  n: '08', titulo: 'ESTO ES REAL', luz: '#ffe3cc', pre: 101,
+  n: '08', titulo: 'ESTO ES REAL', luz: '#ffbe62', pre: 101,
   letra: `Esto es reaal
 Tú me llevas a querer amar
 Donde no dan ganas de dudar
@@ -258,7 +258,7 @@ Y aún te tengo aunque desperté
 Solo pienso en volverte a ver`
 },
 {
-  n: '09', titulo: 'THE LAST OF US (MAVO)', luz: '#cfe0ff', pre: 50,
+  n: '09', titulo: 'THE LAST OF US (MAVO)', luz: '#ffd690', pre: 50,
   letra: `Así de bajito para que me escuches cuando cante en tu oído, destino agridulce
 
 Míra al cielo un ratico hay estrellas en el norte que dicen mi apellido y otra gritan tu nombre

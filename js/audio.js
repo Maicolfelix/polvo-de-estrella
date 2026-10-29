@@ -13,7 +13,7 @@ export const elementos = { pre, song, amb };
 // viento: 1 en la nave; cede ante la preescucha y calla dentro de una habitación (la canción manda)
 export const NIVEL = { pre: 1, viento: .16, trueno: .5, vientoPre: .3, lluvia: .55 };   // lluvia: ganancia del archivo de ambiente (ya mezclado a −20 dBFS RMS)
 
-let ctx, master, preG, songG, vientoG, vientoF, cancionPre = -1, cancionSong = -1;
+let analizador, graves, mediaGraves = 0, picoGraves = .05, ctx, master, preG, songG, vientoG, vientoF, cancionPre = -1, cancionSong = -1;
 let tokPre = 0, tokSong = 0; // cada pausa diferida solo actúa si nadie volvió a usar esa fuente
 let cedeViento = 1, ultimoViento = [0, 420], lluviaG = null, ultimaLluvia = 0;
 export let activo = false;
@@ -50,6 +50,8 @@ function crear() {
   volG = ctx.createGain(); volG.gain.value = volCancion;
   ctx.createMediaElementSource(song).connect(volG).connect(songG);
   songG.connect(master);
+  // derivación para el pulso del fondo (solo escucha: no cambia lo que suena)
+  analizador = ctx.createAnalyser(); analizador.fftSize = 512; analizador.smoothingTimeConstant = .55; songG.connect(analizador);
   // viento: ruido en bucle, filtrado; su nivel lo mueve la escena
   const n = ctx.sampleRate * 4, b = ctx.createBuffer(2, n, ctx.sampleRate);
   for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); let br = 0; for (let i = 0; i < n; i++) { br = br * .985 + (Math.random() * 2 - 1) * .015; d[i] = br * 6 + (Math.random() * 2 - 1) * .05; } }
@@ -109,6 +111,17 @@ export async function intentarActivar() {
   return true;
 }
 export const contexto = () => ctx;
+// energía de graves de la canción (0..1, relativa a su propio máximo reciente): late con el bombo y el bajo
+export function pulso() {
+  if (!analizador) return 0;
+  graves ||= new Uint8Array(analizador.frequencyBinCount);
+  analizador.getByteFrequencyData(graves);
+  const e = (graves[1] + graves[2] + graves[3] + graves[4]) / 1020;
+  // solo lo que sobresale de la media lenta: los golpes, no el bajo sostenido
+  mediaGraves += (e - mediaGraves) * .04;
+  picoGraves = Math.max(e - mediaGraves, picoGraves * .997, .03);
+  return Math.min(1, Math.max(0, (e - mediaGraves) / picoGraves));
+}
 // estado de la mezcla (para verificación)
 export const niveles = () => ctx && ({
   master: master.gain.value, cancion: volG.gain.value,   // sin redondeo: el silencio debe ser 0 exacto
