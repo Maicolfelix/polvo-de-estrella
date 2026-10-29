@@ -7,6 +7,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { CANCIONES } from './datos.js';
 import { crearPrimerPlano } from './primer-plano.js';
 import { crearCuervos } from './cuervos.js';
+import { FOCO } from './habitaciones.js';
 
 const V2 = THREE.Vector2, V3 = THREE.Vector3;
 const cl = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -261,6 +262,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   const loader = new THREE.TextureLoader(manager);
   const ANISO = Math.min(8, renderer.capabilities.getMaxAnisotropy());
   const cache = {};
+  const cargaHab = new THREE.TextureLoader();
   function tex(n, color = false, ext = 'jpg') {
     if (cache[n]) return cache[n];
     const t = loader.load(`tex/${n}.${ext}`);
@@ -714,14 +716,22 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
     {
       const Wv = dim.w * 2 + .24, Hv = altoHab + .25, z0 = -.12, z1 = -1.9, Dv = z0 - z1;
       const piezas = [
-        new THREE.PlaneGeometry(Wv, Hv).translate(0, Hv / 2, z1),
         new THREE.PlaneGeometry(Dv, Hv).rotateY(Math.PI / 2).translate(-Wv / 2, Hv / 2, (z0 + z1) / 2),
         new THREE.PlaneGeometry(Dv, Hv).rotateY(-Math.PI / 2).translate(Wv / 2, Hv / 2, (z0 + z1) / 2),
         new THREE.PlaneGeometry(Wv, Dv).rotateX(-Math.PI / 2).translate(0, .001, (z0 + z1) / 2),
         new THREE.PlaneGeometry(Wv, Dv).rotateX(Math.PI / 2).translate(0, Hv, (z0 + z1) / 2),
       ];
-      matVest = new THREE.MeshStandardMaterial({ map: tex('piedra_col', true), normalMap: tex('piedra_nor'), color: 0x8a817a, roughness: .95, emissive: luz, emissiveIntensity: .03 });
+      // piedra oscura teñida del color de la habitación (antes, gris claro: por la rendija se veía una franja beige)
+      matVest = new THREE.MeshStandardMaterial({ map: tex('piedra_col', true), normalMap: tex('piedra_nor'), color: 0x4a4240, roughness: .95, emissive: luz, emissiveIntensity: .03 });
       marco.add(new THREE.Mesh(uvMundo(mergeGeometries(piezas), 1.4), matVest));
+      // al fondo, la propia imagen de la habitación: por la rendija y al abrir se ve lo mismo que dentro.
+      // Cargador aparte, sin el gestor de carga: no retrasa la entrada a la web.
+      const img = cargaHab.load(`img/hab/${String(d.i + 1).padStart(2, '0')}.webp`);
+      img.colorSpace = THREE.SRGBColorSpace;
+      const rx = Math.min(1, (Wv / Hv) / (1672 / 941));   // recorte tipo «cover» centrado en el foco de la imagen
+      img.repeat.set(rx, 1); img.offset.set(cl(FOCO[d.i] - rx / 2, 0, 1 - rx), 0);
+      const pared = new THREE.Mesh(new THREE.PlaneGeometry(Wv, Hv).translate(0, Hv / 2, z1), new THREE.MeshBasicMaterial({ map: img, color: 0x000000, fog: false }));
+      marco.add(pared); matVest.userData.pared = pared.material;
       // al fondo del pasillo, el resplandor de la habitación
       fondo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: luz, transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
       fondo.position.set(0, altoHab * .45, z1 + .1); fondo.scale.set(Wv * 1.1, Hv * .9, 1); marco.add(fondo);
@@ -1284,7 +1294,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       const ang = cl(d.abierto) * 1.8;
       // todas se abren hacia la nave, hasta quedar contra el derrame del muro: el hueco queda libre para la cámara
       d.hojas.forEach(({ piv, s }) => piv.rotation.y = s * Math.min(ang, 1.52));
-      if (d.fondo) { d.fondo.material.opacity = .12 + d.brillo * .5; d.matVest.emissiveIntensity = .03 + d.brillo * .12 + d.abierto * .08; }
+      if (d.fondo) { d.fondo.material.opacity = .12 + d.brillo * .5; d.matVest.emissiveIntensity = .05 + d.brillo * .16 + d.abierto * .12; d.matVest.userData.pared.color.setScalar(.38 + d.brillo * .3 + d.abierto * .32); }
       d.charco.material.opacity = .16 + d.brillo * .35 + d.abierto * .3;
       // la luz de cada puerta está dentro de su pasillo: sale por el hueco al abrirse
       d.foco.p.copy(mundo(d, 0, 1.5, -.9)); d.foco.i = dentro ? .8 + d.brillo * 3 + d.abierto * 2.5 : 0;

@@ -33,7 +33,7 @@ const ZONAS = [
    [CIELO, .74, .14, .96, .4, .8], [BRILLO, .5, .58, .86, .79, .7], [BRILLO, .83, .73, .89, .84, 1.2], [TELA, .89, 0, 1, 1, .7]],
 ];
 // punto horizontal (0..1) que sigue a la vista cuando la pantalla es más estrecha que la imagen (teléfono de pie)
-const FOCO = [.72, .76, .8, .76, .66, .74, .72, .78, .72];
+export const FOCO = [.72, .76, .8, .76, .66, .74, .72, .78, .72];
 const N = 10;
 
 const VERT = 'attribute vec2 p; varying vec2 vS; void main(){ vS = p * .5 + .5; gl_Position = vec4(p, 0., 1.); }';
