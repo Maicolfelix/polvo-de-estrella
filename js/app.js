@@ -189,7 +189,9 @@ function recortarHueco() {
   const h = escena.huecoPantalla(huecoDe, innerWidth, innerHeight);
   if (!h) { hab.style.clipPath = ''; hab.style.opacity = 1; return; }   // la cámara ya cruza el hueco
   hab.style.clipPath = `polygon(${h.pts.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(',')})`;
-  const ve = Math.min(1, Math.max(0, (h.abierto - .04) / .4)) * Math.min(1, Math.max(0, (h.alin - .55) / .3));
+  // solo cuando las hojas ya están contra el muro: antes taparía las hojas (se veían transparentes) y doblaría
+  // la imagen del fondo del pasillo, que ya muestra la habitación
+  const ve = Math.min(1, Math.max(0, (h.abierto - .8) / .18)) * Math.min(1, Math.max(0, (h.alin - .55) / .3));
   hab.style.opacity = ve.toFixed(3);
 }
 function abrirHabitacion(i) {

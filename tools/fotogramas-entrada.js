@@ -16,7 +16,7 @@ export async function fotogramas(i, prefijo, instantes = [0, .3, .6, .9, 1.2, 1.
   const componer = () => {
     g.drawImage(lienzo, 0, 0, comp.width, comp.height);
     const h = escena.huecoPantalla(i, innerWidth, innerHeight);
-    const op = !h ? 1 : Math.min(1, Math.max(0, (h.abierto - .04) / .4)) * Math.min(1, Math.max(0, (h.alin - .55) / .3));
+    const op = !h ? 1 : Math.min(1, Math.max(0, (h.abierto - .8) / .18)) * Math.min(1, Math.max(0, (h.alin - .55) / .3));
     g.save(); g.globalAlpha = op;
     if (h) { g.beginPath(); h.pts.forEach(([x, y], k) => k ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.clip(); }
     g.drawImage(hab, 0, 0, comp.width, comp.height); g.restore();

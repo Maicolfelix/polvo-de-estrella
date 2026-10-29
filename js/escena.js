@@ -676,7 +676,6 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
   M.maderaFondo = M.madera.clone(); Object.assign(M.maderaFondo, { emissive: new THREE.Color(0xff8a40), emissiveMap: tex('puerta_col', true), emissiveIntensity: .12 });
   M.piedraFondo = M.piedra.clone(); Object.assign(M.piedraFondo, { emissive: new THREE.Color(0xff9050), emissiveMap: tex('piedra_col', true), emissiveIntensity: .08 });
   envejecer(M.piedraFondo, { base: B, alto: 1.1, fuerza: .22, vetas: .14, musgo: 0, macro: .25 });
-  const glowTex = texturaRadial([[0, 'rgba(255,255,255,1)'], [.35, 'rgba(255,255,255,.45)'], [1, 'rgba(255,255,255,0)']]);
   const charcoTex = texturaRadial([[0, 'rgba(255,255,255,.9)'], [.5, 'rgba(255,255,255,.25)'], [1, 'rgba(255,255,255,0)']]);
   const puertas = puertasDef.map(d => {
     const c = CANCIONES[d.i], luz = new THREE.Color(c.luz), dim = d.dim;
@@ -708,34 +707,17 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       marco.add(piv);
       return { piv, s };
     });
-    // tras la puerta: un pasillo corto de piedra iluminado desde dentro con el color de la canción
-    // (lo que se ve al entreabrirla; su luz sale por la puerta al suelo de la nave). Al entrar, el hueco
-    // pasa a mostrar la habitación preparada (recortada en la página, ver `huecoPantalla`).
+    // tras la puerta, pegada a las hojas, la propia imagen de la habitación llenando el hueco: por la rendija, al
+    // entreabrir y al abrir se ve lo mismo que dentro (antes, un pasillo de piedra con paredes de color plano).
+    // Al entrar, el hueco pasa a mostrar la habitación viva (recortada en la página, ver `huecoPantalla`).
+    // Cargador aparte, sin el gestor de carga: no retrasa la entrada a la web.
     const altoHab = dim.s + ap;
-    let matVest = null, fondo = null;
-    {
-      const Wv = dim.w * 2 + .24, Hv = altoHab + .25, z0 = -.12, z1 = -1.9, Dv = z0 - z1;
-      const piezas = [
-        new THREE.PlaneGeometry(Dv, Hv).rotateY(Math.PI / 2).translate(-Wv / 2, Hv / 2, (z0 + z1) / 2),
-        new THREE.PlaneGeometry(Dv, Hv).rotateY(-Math.PI / 2).translate(Wv / 2, Hv / 2, (z0 + z1) / 2),
-        new THREE.PlaneGeometry(Wv, Dv).rotateX(-Math.PI / 2).translate(0, .001, (z0 + z1) / 2),
-        new THREE.PlaneGeometry(Wv, Dv).rotateX(Math.PI / 2).translate(0, Hv, (z0 + z1) / 2),
-      ];
-      // piedra oscura teñida del color de la habitación (antes, gris claro: por la rendija se veía una franja beige)
-      matVest = new THREE.MeshStandardMaterial({ map: tex('piedra_col', true), normalMap: tex('piedra_nor'), color: 0x4a4240, roughness: .95, emissive: luz, emissiveIntensity: .03 });
-      marco.add(new THREE.Mesh(uvMundo(mergeGeometries(piezas), 1.4), matVest));
-      // al fondo, la propia imagen de la habitación: por la rendija y al abrir se ve lo mismo que dentro.
-      // Cargador aparte, sin el gestor de carga: no retrasa la entrada a la web.
-      const img = cargaHab.load(`img/hab/${String(d.i + 1).padStart(2, '0')}.webp`);
-      img.colorSpace = THREE.SRGBColorSpace;
-      const rx = Math.min(1, (Wv / Hv) / (1672 / 941));   // recorte tipo «cover» centrado en el foco de la imagen
-      img.repeat.set(rx, 1); img.offset.set(cl(FOCO[d.i] - rx / 2, 0, 1 - rx), 0);
-      const pared = new THREE.Mesh(new THREE.PlaneGeometry(Wv, Hv).translate(0, Hv / 2, z1), new THREE.MeshBasicMaterial({ map: img, color: 0x000000, fog: false }));
-      marco.add(pared); matVest.userData.pared = pared.material;
-      // al fondo del pasillo, el resplandor de la habitación
-      fondo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: luz, transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
-      fondo.position.set(0, altoHab * .45, z1 + .1); fondo.scale.set(Wv * 1.1, Hv * .9, 1); marco.add(fondo);
-    }
+    const img = cargaHab.load(`img/hab/${String(d.i + 1).padStart(2, '0')}.webp`);
+    img.colorSpace = THREE.SRGBColorSpace;
+    const Wv = dim.w * 2 + .1, Hv = altoHab + .1, rx = Math.min(1, (Wv / Hv) / (1672 / 941));   // «cover» centrado en el foco
+    img.repeat.set(rx, 1); img.offset.set(cl(FOCO[d.i] - rx / 2, 0, 1 - rx), 0);
+    const matPared = new THREE.MeshBasicMaterial({ map: img, color: 0x000000, fog: false });
+    marco.add(new THREE.Mesh(new THREE.PlaneGeometry(Wv, Hv).translate(0, Hv / 2, -.14), matPared));
     // luz que se escapa por debajo y su reflejo en el mármol
     const rendija = new THREE.Mesh(new THREE.BoxGeometry(dim.w * 2 - .04, .012, .02), new THREE.MeshBasicMaterial({ color: luz }));
     rendija.position.set(0, .006, .03); marco.add(rendija);
@@ -766,7 +748,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       const l = marco.localToWorld(new V3(-1.1, 2.3, 1.1)); foco(l.x, l.y, l.z, 0xffa860, 4.5, 1.8);   // llama del farol
       const hl = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color: 0xffa860, transparent: true, opacity: .5, blending: THREE.AdditiveBlending, depthWrite: false, fog: false })); hl.position.set(-1.1, 2.3, 1.02); hl.scale.setScalar(.7); marco.add(hl);
     }
-    return { ...d, c, luz, marco, hojas, fondo, matVest, rendija, charco, ap, abierto: 0, objetivo: 0, brillo: 0, objetivoBrillo: 0, foco: foco(0, 0, 0, luz, 6) };
+    return { ...d, c, luz, marco, hojas, matPared, rendija, charco, ap, abierto: 0, objetivo: 0, brillo: 0, objetivoBrillo: 0, foco: foco(0, 0, 0, luz, 6) };
   });
 
   destino = ext;
@@ -1294,7 +1276,7 @@ export function crearEscena({ canvas, rm, adaptar = true, alProgreso, alCargar, 
       const ang = cl(d.abierto) * 1.8;
       // todas se abren hacia la nave, hasta quedar contra el derrame del muro: el hueco queda libre para la cámara
       d.hojas.forEach(({ piv, s }) => piv.rotation.y = s * Math.min(ang, 1.52));
-      if (d.fondo) { d.fondo.material.opacity = .12 + d.brillo * .5; d.matVest.emissiveIntensity = .05 + d.brillo * .16 + d.abierto * .12; d.matVest.userData.pared.color.setScalar(.38 + d.brillo * .3 + d.abierto * .32); }
+      d.matPared.color.setScalar(.3 + d.brillo * .3 + d.abierto * .4);   // la habitación se enciende al abrir
       d.charco.material.opacity = .16 + d.brillo * .35 + d.abierto * .3;
       // la luz de cada puerta está dentro de su pasillo: sale por el hueco al abrirse
       d.foco.p.copy(mundo(d, 0, 1.5, -.9)); d.foco.i = dentro ? .8 + d.brillo * 3 + d.abierto * 2.5 : 0;
