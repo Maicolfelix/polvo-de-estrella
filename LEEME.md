@@ -16,8 +16,9 @@ Luego abrir http://localhost:8765. Parámetros de revisión: `?rm` fuerza movimi
 | `js/datos.js` | Títulos y letras **exactamente como las entregó el artista**; inicios provisionales de fragmentos |
 | `js/escena.js` | Mundo 3D (Three.js): paisaje, capilla, portal, nave, nueve puertas, tormenta, cámara, transiciones |
 | `js/primer-plano.js` | Llegada: corona, rosas, pétalos, ataduras, destellos minerales, tumbas y cruces |
-| `js/audio.js` | Preescucha "tras la puerta", canción, viento y trueno (sin música de fondo) |
-| `js/habitaciones.js` | Las nueve atmósferas (canvas 2D) |
+| `js/audio.js` | Preescucha "tras la puerta", canción, ambiente de lluvia (`audio/ambiente.m4a`), viento y trueno; pulso de graves para el fondo |
+| `js/habitaciones.js` | Fondo vivo de las nueve habitaciones: la imagen del artista (`img/hab/`) animada por zonas con un sombreador WebGL |
+| `js/cuervos.js` | Cuervos que vuelan en círculo sobre la torre (una malla instanciada) |
 | `js/app.js` | Recorrido por desplazamiento, estados, puertas accesibles, teclado, índice |
 | `audio/` | Copias web AAC 160 kbps de los nueve masters (`01`…`09`), fragmentos de 30 s (`NN-pre`); `instrumental.m4a` se conserva pero la página ya no la carga |
 | `tex/` | Texturas PBR generadas por `tools/texturas.py` |

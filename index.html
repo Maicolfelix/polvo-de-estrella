@@ -7,12 +7,12 @@
 <meta name="description" content="MAVO — Polvo de estrella. Nueve puertas, nueve canciones.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,300;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,300;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="estilos.css">
 <!-- todos los módulos se piden a la vez (sin esto se descubrían uno tras otro: varias idas y vueltas en el teléfono) -->
 <link rel="modulepreload" href="vendor/three/three.module.min.js">
 <link rel="modulepreload" href="js/app.js"><link rel="modulepreload" href="js/escena.js"><link rel="modulepreload" href="js/audio.js">
-<link rel="modulepreload" href="js/primer-plano.js"><link rel="modulepreload" href="js/sala-mar.js"><link rel="modulepreload" href="js/habitaciones.js">
+<link rel="modulepreload" href="js/primer-plano.js"><link rel="modulepreload" href="js/cuervos.js"><link rel="modulepreload" href="js/habitaciones.js">
 <link rel="modulepreload" href="js/datos.js"><link rel="modulepreload" href="js/letras.js"><link rel="modulepreload" href="js/tiempos.js">
 <link rel="modulepreload" href="vendor/three/addons/postprocessing/EffectComposer.js"><link rel="modulepreload" href="vendor/three/addons/postprocessing/RenderPass.js">
 <link rel="modulepreload" href="vendor/three/addons/postprocessing/OutputPass.js"><link rel="modulepreload" href="vendor/three/addons/utils/BufferGeometryUtils.js">
@@ -47,7 +47,8 @@
 </section>
 
 <main id="habitacion" hidden aria-labelledby="hab-titulo">
-  <canvas id="atmos" aria-hidden="true"></canvas>
+  <canvas id="fondo" class="hab-fondo" aria-hidden="true"></canvas>
+  <div class="hab-velo" aria-hidden="true"></div>
   <div class="hab-scroll" id="habScroll" tabindex="0" aria-label="Letra">
     <article class="hab-contenido">
       <p class="hab-num"><span id="habNum">01</span> · MAVO · Polvo de estrella</p>

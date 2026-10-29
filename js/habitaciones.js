@@ -1,234 +1,199 @@
-// Atmósferas de las nueve habitaciones. Cada una se dibuja entera (fondo incluido) para poder fundirse
-// con la siguiente; `p` es el progreso de la canción (0..1) y hace que la escena cambie con ella.
-const TAU = Math.PI * 2;
-const rnd = (a, b) => a + Math.random() * (b - a);
-function radial(g, x, y, r, stops) {
-  const gr = g.createRadialGradient(x, y, 0, x, y, r);
-  stops.forEach(([o, c]) => gr.addColorStop(o, c));
-  g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
-}
-function vertical(g, w, h, stops) {
-  const gr = g.createLinearGradient(0, 0, 0, h);
-  stops.forEach(([o, c]) => gr.addColorStop(o, c));
-  g.fillStyle = gr; g.fillRect(0, 0, w, h);
-}
-const mezclar = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
-const rgb = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
-const lado = w => w > 900 ? .74 : .5; // en pantallas anchas el foco de luz se aparta de la columna de texto
-
-export const ATMOSFERAS = [
-  // 01 · el sol se esfuma sobre un mar celeste; las ataduras se tensan con la canción
-  { iniciar: () => ({}), dibujar(g, w, h, t, p) {
-    const hy = h * .66;
-    vertical(g, w, h, [[0, '#03060a'], [.45, '#0a1520'], [.66, '#23435a'], [1, '#03060a']]);
-    const sx = w * lado(w), sy = hy - h * .05 + p * h * .14, r = Math.min(w, h) * .26;
-    g.globalAlpha = 1 - p * .9;
-    radial(g, sx, sy, r, [[0, 'rgba(255,236,196,.95)'], [.16, 'rgba(255,214,150,.55)'], [.45, 'rgba(255,170,110,.12)'], [1, 'rgba(255,160,100,0)']]);
-    g.globalAlpha = 1;
-    const mar = g.createLinearGradient(0, hy, 0, h);
-    mar.addColorStop(0, 'rgba(110,172,206,.75)'); mar.addColorStop(.12, 'rgba(48,98,130,.9)'); mar.addColorStop(.6, '#081621'); mar.addColorStop(1, '#03060a');
-    g.fillStyle = mar; g.fillRect(0, hy, w, h - hy);
-    g.globalAlpha = (1 - p) * .55;
-    for (let k = 0; k < 26; k++) { const y = hy + 4 + k * k * .55, a = (Math.sin(t * 1.3 + k * 1.7) * .5 + .5); g.fillStyle = `rgba(255,220,170,${a * .5})`; const lw = (60 - k * 1.6) * (.6 + a * .5); g.fillRect(sx - lw / 2 + Math.sin(t + k) * 4, y, lw, 1.2); }
-    g.globalAlpha = 1;
-    g.fillStyle = 'rgba(200,232,246,.55)'; g.fillRect(0, hy, w, 1);
-    g.lineWidth = 1;
-    for (let k = 0; k < 7; k++) {
-      const y = h * (.14 + k * .09), amp = h * .045 * (1 - p * .85) * (k % 2 ? -1 : 1), osc = Math.sin(t * .35 + k) * h * .008;
-      g.strokeStyle = k === 2 || k === 5 ? 'rgba(179,32,42,.42)' : 'rgba(236,230,220,.14)';
-      g.beginPath(); g.moveTo(-20, y + osc); g.bezierCurveTo(w * .3, y - amp + osc, w * .7, y + amp - osc, w + 20, y - osc); g.stroke();
-    }
-  } },
-  // 02 · la luna a un lado, el sol al otro; las nubes cubren el sol ("se está nublando mi corazón")
-  { iniciar: () => ({ nubes: Array.from({ length: 14 }, (_, i) => ({ x: Math.random(), y: rnd(.42, .78), r: rnd(.12, .28), v: rnd(.004, .012), u: i / 14 })) }),
-    dibujar(g, w, h, t, p, s) {
-    vertical(g, w, h, [[0, '#06050f'], [.55, '#151026'], [.78, '#2a1720'], [1, '#07050a']]);
-    const m = Math.min(w, h);
-    radial(g, w * .2, h * .24, m * .22, [[0, 'rgba(210,220,255,.35)'], [1, 'rgba(160,170,220,0)']]);
-    g.fillStyle = 'rgba(232,236,250,.92)'; g.beginPath(); g.arc(w * .2, h * .24, m * .045, 0, TAU); g.fill();
-    g.fillStyle = 'rgba(6,5,15,.9)'; g.beginPath(); g.arc(w * .2 + m * .018, h * .24 - m * .008, m * .04, 0, TAU); g.fill();
-    const sx = w * (w > 900 ? .78 : .62), sy = h * .64;
-    radial(g, sx, sy, m * .3, [[0, 'rgba(255,214,170,.85)'], [.2, 'rgba(255,170,120,.35)'], [1, 'rgba(255,140,100,0)']]);
-    g.fillStyle = 'rgba(179,36,42,.55)'; g.fillRect(0, h * .74, w, 1.2);
-    radial(g, w * .5, h * .74, w * .45, [[0, 'rgba(179,36,42,.16)'], [1, 'rgba(179,36,42,0)']]);
-    const cubre = .2 + p * .8;
-    for (const n of s.nubes) {
-      if (n.u > cubre) continue;
-      n.x -= n.v * .016; if (n.x < -.3) n.x = 1.3;
-      const cx = n.x * w, cy = n.y * h, r = n.r * m * 1.6;
-      g.globalAlpha = .55 * Math.min(1, (cubre - n.u) * 6);
-      radial(g, cx, cy, r, [[0, 'rgba(46,38,58,.95)'], [.6, 'rgba(30,24,40,.5)'], [1, 'rgba(20,16,28,0)']]);
-    }
-    g.globalAlpha = 1;
-  } },
-  // 03 · brasas: las cartas que se queman, rabia contenida en rojo
-  { iniciar: () => ({ e: Array.from({ length: 160 }, () => ({ x: Math.random(), y: Math.random(), v: rnd(.03, .1), r: rnd(.6, 2.6), f: rnd(0, TAU) })), c: Array.from({ length: 30 }, () => ({ x: Math.random(), y: Math.random(), v: rnd(.01, .03), r: rnd(1, 3) })) }),
-    dibujar(g, w, h, t, p, s) {
-    vertical(g, w, h, [[0, '#050102'], [.6, '#1a0405'], [1, '#3c0907']]);
-    radial(g, w * .5, h * 1.05, Math.max(w, h) * .7, [[0, `rgba(210,60,30,${.42 + .08 * Math.sin(t * .9)})`], [.5, 'rgba(120,20,15,.18)'], [1, 'rgba(60,8,8,0)']]);
-    g.globalCompositeOperation = 'lighter';
-    for (const e of s.e) {
-      e.y -= e.v * .016 * (1 + p); e.f += .05; if (e.y < -.05) { e.y = 1.05; e.x = Math.random(); }
-      const x = e.x * w + Math.sin(e.f) * 14, y = e.y * h, a = (.4 + .6 * Math.abs(Math.sin(e.f * .7))) * Math.min(1, e.y * 1.4);
-      radial(g, x, y, e.r * 5, [[0, `rgba(255,170,90,${a})`], [.3, `rgba(255,80,40,${a * .4})`], [1, 'rgba(255,40,20,0)']]);
-    }
-    g.globalCompositeOperation = 'source-over';
-    for (const c of s.c) { c.y += c.v * .016; if (c.y > 1.05) { c.y = -.05; c.x = Math.random(); } g.fillStyle = 'rgba(120,110,110,.35)'; g.fillRect(c.x * w + Math.sin(t + c.y * 9) * 20, c.y * h, c.r, c.r); }
-    const v = g.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .3, w / 2, h / 2, Math.max(w, h) * .75);
-    v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.65)'); g.fillStyle = v; g.fillRect(0, 0, w, h);
-  } },
-  // 04 · el verano se apaga en lluvia de diciembre, gotas sobre el cristal
-  { iniciar: () => ({ gotas: [], l: Array.from({ length: 320 }, () => ({ x: Math.random(), y: Math.random(), v: rnd(.6, 1.2), k: Math.random() })) }),
-    dibujar(g, w, h, t, p, s) {
-    const top = mezclar([58, 30, 16], [5, 8, 13], p), mid = mezclar([200, 120, 60], [26, 42, 56], p), bot = mezclar([40, 18, 10], [3, 5, 8], p);
-    vertical(g, w, h, [[0, rgb(top)], [.62, rgb(mid)], [1, rgb(bot)]]);
-    radial(g, w * lado(w), h * .6, Math.min(w, h) * .45, [[0, `rgba(255,200,140,${.7 * (1 - p)})`], [1, 'rgba(255,160,100,0)']]);
-    const lluvia = Math.max(0, p - .08) / .92;
-    g.strokeStyle = `rgba(205,220,235,${.18 + .32 * lluvia})`; g.lineWidth = 1.3;
-    g.beginPath();
-    for (const r of s.l) {
-      if (r.k > lluvia) continue;
-      r.y += r.v * .016 * 1.4; if (r.y > 1) { r.y = 0; r.x = Math.random(); }
-      const x = r.x * w, y = r.y * h; g.moveTo(x, y); g.lineTo(x - 6, y + 34);
-    }
-    g.stroke();
-    if (s.gotas.length < 140 * lluvia && Math.random() < .5) s.gotas.push({ x: Math.random() * w, y: Math.random() * h, r: rnd(2, 6), v: rnd(0, 8) });
-    for (const d of s.gotas) {
-      d.y += d.v * .016 * (d.r > 4.5 ? 3 : .2);
-      radial(g, d.x, d.y, d.r * 1.6, [[0, 'rgba(0,0,0,0)'], [.55, 'rgba(255,255,255,.04)'], [.8, 'rgba(255,255,255,.22)'], [1, 'rgba(255,255,255,0)']]);
-      g.fillStyle = 'rgba(255,255,255,.5)'; g.fillRect(d.x - d.r * .35, d.y - d.r * .45, 1.4, 1.4);
-    }
-    s.gotas = s.gotas.filter(d => d.y < h + 10);
-  } },
-  // 05 · TODOLOLO: la habitación más abierta y cálida; luz que flota como una invitación
-  { iniciar: () => ({ b: Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), r: rnd(.02, .09), v: rnd(.004, .014), a: rnd(.05, .16), f: rnd(0, TAU), c: Math.random() < .5 })) }),
-    dibujar(g, w, h, t, p, s) {
-    vertical(g, w, h, [[0, '#1e0e0b'], [.5, '#4a2418'], [1, '#a3593a']]);
-    radial(g, w * .15, -h * .1, Math.max(w, h) * .9, [[0, 'rgba(255,214,170,.35)'], [1, 'rgba(255,190,140,0)']]);
-    g.globalCompositeOperation = 'lighter';
-    for (let k = 0; k < 3; k++) {
-      const a = .045 + .02 * Math.sin(t * .3 + k);
-      g.fillStyle = `rgba(255,220,180,${a})`; g.beginPath();
-      g.moveTo(w * (.05 + k * .12), 0); g.lineTo(w * (.12 + k * .12), 0); g.lineTo(w * (.6 + k * .2), h); g.lineTo(w * (.4 + k * .2), h); g.fill();
-    }
-    const m = Math.min(w, h);
-    for (const b of s.b) {
-      b.y -= b.v * .016; b.f += .01; if (b.y < -.15) { b.y = 1.15; b.x = Math.random(); }
-      const r = b.r * m * (1 + .08 * Math.sin(b.f * 3));
-      radial(g, b.x * w + Math.sin(b.f) * 20, b.y * h, r, [[0, b.c ? `rgba(255,205,140,${b.a})` : `rgba(255,170,160,${b.a})`], [.7, b.c ? `rgba(255,205,140,${b.a * .6})` : `rgba(255,170,160,${b.a * .6})`], [1, 'rgba(255,200,150,0)']]);
-    }
-    g.globalCompositeOperation = 'source-over';
-  } },
-  // 06 · la jaula de oro: barrotes de luz que convergen arriba y se derriten con la canción
-  { iniciar: () => ({}), dibujar(g, w, h, t, p) {
-    vertical(g, w, h, [[0, '#090706'], [.6, '#18110a'], [1, '#0a0705']]);
-    radial(g, w * (.4 + .1 * Math.sin(t * .1)), h * .45, Math.max(w, h) * .6, [[0, 'rgba(190,150,220,.10)'], [1, 'rgba(120,90,160,0)']]);
-    const cx = w / 2, n = 15, top = h * .06;
-    g.lineWidth = 1.6; g.shadowColor = 'rgba(226,181,83,.9)'; g.shadowBlur = 14;
-    for (let i = 0; i < n; i++) {
-      const fx = (i + .5) / n, x0 = fx * w * 1.1 - w * .05;
-      g.strokeStyle = `rgba(226,181,83,${.35 + .25 * Math.sin(t * .6 + i)})`;
-      g.beginPath();
-      for (let k = 0; k <= 40; k++) {
-        const v = k / 40, y = top + v * (h - top);
-        const conv = 1 - Math.pow(1 - v, 3) * .8;           // los barrotes se juntan arriba (cúpula)
-        let x = cx + (x0 - cx) * conv;
-        x += Math.sin(v * 7 + t * .5 + i) * p * 22 * v;      // ondulan
-        const caida = Math.pow(v, 4) * p * h * .08;          // y se derriten hacia abajo
-        k ? g.lineTo(x, y + caida) : g.moveTo(x, y);
-      }
-      g.stroke();
-    }
-    g.shadowBlur = 0;
-    g.strokeStyle = 'rgba(226,181,83,.45)'; g.lineWidth = 2;
-    g.beginPath(); g.ellipse(cx, h * .985, w * .58, h * .03, 0, 0, TAU); g.stroke();
-    const bruma = g.createLinearGradient(0, 0, 0, h); bruma.addColorStop(0, 'rgba(10,7,5,.4)'); bruma.addColorStop(.5, 'rgba(10,7,5,0)'); bruma.addColorStop(1, 'rgba(10,7,5,.5)');
-    g.fillStyle = bruma; g.fillRect(0, 0, w, h);
-  } },
-  // 07 · una puerta que se abre poco a poco y vuelve a cerrarse
-  { iniciar: () => ({}), dibujar(g, w, h, t, p) {
-    vertical(g, w, h, [[0, '#06050b'], [.7, '#110e1b'], [1, '#07060b']]);
-    const dw = Math.min(w * .2, h * .26), dh = dw * 2.1, dx = w * (w > 900 ? .72 : .5) - dw / 2, dy = h * .62 - dh;
-    const abre = .04 + .42 * (.5 - .5 * Math.cos(t * .32));
-    const gap = dw * abre;
-    g.strokeStyle = 'rgba(182,169,234,.18)'; g.lineWidth = 1; g.strokeRect(dx, dy, dw, dh);
-    const luz = g.createLinearGradient(dx, 0, dx + gap, 0); luz.addColorStop(0, 'rgba(240,232,255,.95)'); luz.addColorStop(1, 'rgba(182,169,234,.6)');
-    g.fillStyle = luz; g.fillRect(dx, dy, gap, dh);
-    g.globalCompositeOperation = 'lighter';
-    g.fillStyle = 'rgba(182,169,234,.12)';
-    g.beginPath(); g.moveTo(dx, dy + dh); g.lineTo(dx + gap, dy + dh); g.lineTo(dx + gap * 3.2 + w * .1, h); g.lineTo(dx - w * .12, h); g.fill();
-    radial(g, dx + gap / 2, dy + dh * .5, dh * .9, [[0, `rgba(182,169,234,${.18 * abre * 2})`], [1, 'rgba(182,169,234,0)']]);
-    g.globalCompositeOperation = 'source-over';
-    g.fillStyle = 'rgba(182,169,234,.25)'; g.fillRect(0, dy + dh, w, 1);
-  } },
-  // 08 · ESTO ES REAL: amanece; lo contrario del sol que se iba en la primera habitación
-  { iniciar: () => ({}), dibujar(g, w, h, t, p) {
-    const e = Math.min(1, p * 1.25);
-    const top = mezclar([5, 8, 21], [44, 62, 104], e), mid = mezclar([16, 18, 36], [230, 170, 150], e), hor = mezclar([30, 22, 32], [255, 196, 150], e);
-    vertical(g, w, h, [[0, rgb(top)], [.55, rgb(mid)], [.7, rgb(hor)], [1, rgb(mezclar([8, 8, 12], [60, 40, 44], e))]]);
-    const hy = h * .7, sy = hy + h * .1 - e * h * .2;
-    radial(g, w * lado(w), sy, Math.min(w, h) * .5, [[0, `rgba(255,248,232,${.3 + .65 * e})`], [.12, `rgba(255,226,190,${.2 + .4 * e})`], [1, 'rgba(255,200,170,0)']]);
-    g.fillStyle = rgb(mezclar([6, 6, 10], [40, 28, 34], e)); g.fillRect(0, hy, w, h - hy);
-    for (let k = 0; k < 4; k++) {
-      const y = h * (.32 + k * .08), x = ((t * 6 * (k + 1) + k * 300) % (w + 600)) - 300;
-      g.fillStyle = `rgba(255,${200 + k * 10},${180 + k * 10},${.06 + .12 * e})`;
-      g.beginPath(); g.ellipse(x, y, 260 + k * 40, 7 + k * 2, 0, 0, TAU); g.fill();
-    }
-  } },
-  // 09 · polvo que sube y se vuelve estrella; las del norte se encienden y se unen
-  { iniciar: () => ({
-      est: Array.from({ length: 420 }, () => ({ x: Math.random(), y: Math.pow(Math.random(), 1.6), r: rnd(.8, 2.2), u: Math.random(), f: rnd(0, TAU) })),
-      norte: [[.38, .12], [.44, .08], [.5, .1], [.56, .07], [.62, .11], [.47, .17], [.55, .16]],
-      polvo: Array.from({ length: 80 }, () => ({ x: Math.random(), y: rnd(.6, 1.1), v: rnd(.006, .018), f: rnd(0, TAU) })) }),
-    dibujar(g, w, h, t, p, s) {
-    vertical(g, w, h, [[0, '#02030a'], [.7, '#0a1024'], [1, '#05060c']]);
-    for (const e of s.est) {
-      if (e.u > .4 + p * .6) continue;
-      const a = (.45 + .55 * Math.abs(Math.sin(t * .6 + e.f))) * Math.min(1, (.4 + p * .6 - e.u) * 5);
-      g.fillStyle = `rgba(225,234,255,${a})`; g.fillRect(e.x * w, e.y * h, e.r, e.r);
-    }
-    const prog = Math.min(1, p * 1.4);
-    g.strokeStyle = `rgba(207,224,255,${.25 * prog})`; g.lineWidth = .8; g.beginPath();
-    s.norte.forEach(([x, y], k) => { if (k < s.norte.length * prog) k ? g.lineTo(x * w, y * h) : g.moveTo(x * w, y * h); }); g.stroke();
-    s.norte.forEach(([x, y], k) => radial(g, x * w, y * h, 10 + 6 * Math.sin(t + k), [[0, `rgba(235,242,255,${.55 + .4 * prog})`], [.3, 'rgba(207,224,255,.25)'], [1, 'rgba(207,224,255,0)']]));
-    g.globalCompositeOperation = 'lighter';
-    for (const d of s.polvo) {
-      d.y -= d.v * .016; d.f += .02; if (d.y < .05) { d.y = rnd(.95, 1.1); d.x = Math.random(); }
-      const a = Math.min(1, (1 - d.y) * 2) * Math.min(1, d.y * 3), oro = d.y > .4;
-      g.fillStyle = oro ? `rgba(230,190,120,${a * .5})` : `rgba(225,234,255,${a * .7})`;
-      g.fillRect(d.x * w + Math.sin(d.f) * 10, d.y * h, 2.4, 2.4);
-    }
-    g.globalCompositeOperation = 'source-over';
-  } },
+// Fondo vivo de cada habitación: la imagen del artista (img/hab/NN.webp) animada por zonas con un sombreador.
+// Cada zona anima lo que hay en ese sitio de la imagen (el agua ondula, el cielo se mueve, las velas titilan,
+// la cortina se mece…); las velas y los brillos laten además con los graves de la canción.
+// Zonas: [tipo, x0, y0, x1, y1, fuerza] en fracciones de la imagen (x a la derecha, y hacia abajo).
+const AGUA = 1, TELA = 2, LLAMA = 3, CIELO = 4, MAR = 5, BRILLO = 6, LLUVIA = 7, CHISPAS = 8, ESTRELLAS = 9, RAYO = 10, NIEBLA = 11, PARED = 12, PASO = 13, POLVO = 14;
+const ZONAS = [
+  // 01 · la habitación inundada: el mar tras la ventana, la tela roja al viento, el agua alrededor de ella
+  [[CIELO, .65, 0, .85, .24, 1], [RAYO, .7, 0, .85, .26, 1], [MAR, .64, .22, .86, .34, 1], [TELA, .44, .24, .93, .46, 1],
+   [AGUA, .3, .44, 1, 1, 1.2], [NIEBLA, 0, .36, .65, .62, 1]],
+  // 02 · el espejo y la luna: nubes, luna que respira, camino de luz en el mar, cortina, lluvia en el cristal
+  [[CIELO, .85, .17, .96, .4, 1], [BRILLO, .87, .02, .95, .18, 1.2], [MAR, .85, .38, .97, .6, 1.2], [TELA, .92, 0, 1, .68, 1],
+   [LLAMA, .585, .42, .635, .52, 1.2], [LLUVIA, .79, 0, .86, .62, 1], [LLUVIA, .58, .05, .75, .75, .5], [AGUA, .5, .8, 1, 1, .8]],
+  // 03 · las cartas quemadas: velas, brasas que suben, el mar por la ventana, el charco
+  [[LLAMA, .8, .24, .87, .34, 1.3], [LLAMA, .89, .34, 1, .56, 1.1], [CHISPAS, .76, .6, .9, .86, 1], [LLAMA, .77, .7, .9, .84, 1],
+   [CIELO, .39, 0, .49, .26, 1], [MAR, .39, .26, .49, .39, 1], [BRILLO, .65, .18, .73, .32, .9], [AGUA, .37, .58, .47, 1, 1], [TELA, .45, .62, .54, 1, .6]],
+  // 04 · fin del verano: nubes, sol, mar, gotas que caen de la ventana y el charco que las recibe
+  [[CIELO, .71, 0, .91, .31, 1], [BRILLO, .8, .28, .92, .37, 1.2], [MAR, .69, .37, .91, .6, 1.1], [LLUVIA, .6, 0, .73, .8, 1.2],
+   [AGUA, .52, .76, .92, 1, 1.3], [TELA, .34, 0, .5, .72, .6]],
+  // 05 · la rosa: la vela invisible hace temblar la sombra de la rosa en la pared; luna y mar por la ventana
+  [[PARED, .44, 0, .72, .72, 1], [BRILLO, .87, .08, .94, .17, 1.2], [MAR, .86, .37, 1, .55, 1], [LLAMA, .95, .52, 1, .72, 1.2],
+   [LLAMA, .66, .58, .78, .7, .5], [CIELO, .86, 0, 1, .3, .7]],
+  // 06 · la reja de luz: cielo, sol, rayo de polvo, velas, la luz en el suelo que cambia con las nubes, cortina
+  [[CIELO, .71, 0, .88, .26, 1], [BRILLO, .79, .21, .85, .29, 1.2], [POLVO, .54, 0, .7, .62, 1], [LLAMA, .42, .25, .51, .34, 1.3],
+   [PASO, .48, .68, .87, .97, 1], [TELA, .85, 0, 1, .8, .8]],
+  // 07 · la puerta abierta: el fuego del pasillo, la tormenta y su rayo en la ventana, el suelo mojado, la tela
+  [[LLAMA, .67, .1, .81, .74, 1], [CIELO, .93, .04, 1, .56, 1], [RAYO, .92, .02, 1, .6, 1.2], [AGUA, .58, .74, .82, 1, 1],
+   [TELA, .66, .68, 1, 1, .8], [NIEBLA, .45, .58, 1, .82, .8]],
+  // 08 · el atardecer: nubes, sol, mar con oleaje, vasos que brillan, el reflejo dorado en el suelo, cortinas
+  [[CIELO, .66, 0, .96, .31, 1], [BRILLO, .77, .24, .83, .34, 1.4], [MAR, .66, .32, .96, .49, 1.3], [BRILLO, .7, .45, .75, .54, .8],
+   [BRILLO, .83, .45, .88, .54, .8], [AGUA, .58, .64, .96, 1, 1.3], [TELA, .47, 0, .57, .62, .7], [TELA, .94, 0, 1, .72, .7]],
+  // 09 · el libro: estrellas que titilan, polvo mágico que sube del libro, luna y su reflejo, la brújula
+  [[ESTRELLAS, .64, 0, .92, .44, 1], [CHISPAS, .6, .08, .76, .64, 1.3], [BRILLO, .84, .29, .89, .35, 1.3], [MAR, .83, .42, .9, .62, 1.2],
+   [CIELO, .74, .14, .96, .4, .8], [BRILLO, .5, .58, .86, .79, .7], [BRILLO, .83, .73, .89, .84, 1.2], [TELA, .89, 0, 1, 1, .7]],
 ];
+// punto horizontal (0..1) que sigue a la vista cuando la pantalla es más estrecha que la imagen (teléfono de pie)
+export const FOCO = [.72, .76, .8, .76, .66, .74, .72, .78, .72];
+const N = 10;
 
-export function crearAtmosfera(canvas) {
-  const g = canvas.getContext('2d');
-  let actual = -1, anterior = -1, mezcla = 1, t = 0, w = 0, h = 0;
-  const estados = [];
-  const off = document.createElement('canvas'), og = off.getContext('2d');
-  function medir() {
-    const k = Math.min(devicePixelRatio || 1, 1);   // atmósfera suave: más resolución no se nota y cuesta en cada fotograma
-    w = canvas.width = off.width = Math.round(innerWidth * k);
-    h = canvas.height = off.height = Math.round(innerHeight * k);
+const VERT = 'attribute vec2 p; varying vec2 vS; void main(){ vS = p * .5 + .5; gl_Position = vec4(p, 0., 1.); }';
+const FRAG = `precision highp float;
+varying vec2 vS;
+uniform sampler2D uImg; uniform vec4 uCover; uniform float uT, uPulso, uRayo, uN;
+uniform vec4 uR[${N}]; uniform vec2 uP[${N}];
+float h1(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float ruido(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
+  return mix(mix(h1(i), h1(i + vec2(1, 0)), f.x), mix(h1(i + vec2(0, 1)), h1(i + vec2(1, 1)), f.x), f.y); }
+float fbm(vec2 p){ float v = 0., a = .5; for (int i = 0; i < 4; i++) { v += a * ruido(p); p *= 2.03; a *= .5; } return v; }
+float zona(vec2 q, vec4 r){ vec2 f = max((r.zw - r.xy) * .2, vec2(.012));
+  vec2 a = smoothstep(r.xy, r.xy + f, q) * (1. - smoothstep(r.zw - f, r.zw, q)); return a.x * a.y; }
+// puntos de luz que suben por una rejilla (brasas, polvo mágico, motas en el rayo de luz)
+float subir(vec2 q, float dens, float vel, float t, float tam){
+  vec2 g = vec2(q.x * dens * 1.78, q.y * dens + t * vel); vec2 id = floor(g), f = fract(g) - .5;
+  float r = h1(id); if (r < .62) return 0.;
+  vec2 o = vec2(h1(id + 3.1), h1(id + 7.7)) - .5; o.x += sin(t * 1.3 + r * 20.) * .18;
+  float d = length(f - o * .7); return smoothstep(tam, 0., d) * (.5 + .5 * sin(t * (2. + r * 4.) + r * 40.));
+}
+void main(){
+  vec2 q = vS * uCover.xy + uCover.zw; q.y = 1. - q.y;   // q: coordenadas de la imagen, y hacia abajo
+  float t = uT; vec2 d = vec2(0.); float mul = 1., brillo = 0.; vec3 suma = vec3(0.);
+  for (int i = 0; i < ${N}; i++) {
+    if (float(i) >= uN) break;
+    vec4 r = uR[i]; float tipo = uP[i].x, k = uP[i].y, m = zona(q, r) * k;
+    if (m <= 0.) continue;
+    float s = float(i) * 1.7;
+    if (tipo == 1.) {          // agua: reflejo que ondula y destella
+      d += m * vec2(sin(q.y * 150. + t * 1.7 + sin(q.x * 26. + t * .7) * 2.5) * .0016, sin(q.x * 70. - t * 1.3 + q.y * 40.) * .0022);
+      brillo += m * pow(ruido(q * vec2(90., 260.) + vec2(t * .3, -t * .9)), 5.) * 1.6;
+    } else if (tipo == 2.) {   // tela al viento
+      float fa = q.x * 11. + q.y * 4. - t * 1.2 + s;
+      d += m * vec2(sin(q.y * 7. + t * .9 + s) * .0035, sin(fa) * .005);
+      mul *= 1. + m * cos(fa) * .1;
+    } else if (tipo == 3.) {   // llama: titila (y late con la música)
+      float fl = ruido(vec2(t * 9., s)) * .6 + ruido(vec2(t * 23., s + 4.)) * .4;
+      mul *= 1. + m * ((fl - .45) * .9 + uPulso * .45);
+      d.x += m * sin(q.y * 500. + t * 16.) * .0006;
+      suma += m * fl * vec3(1., .5, .2) * .035;
+    } else if (tipo == 4.) {   // cielo: las nubes se deforman y avanzan
+      vec2 w = vec2(fbm(q * 7. + vec2(t * .05, 0.)), fbm(q * 7. + vec2(3., t * .04))) - .5;
+      d += m * w * .014;
+      mul *= 1. + m * (fbm(q * 4. + vec2(t * .035, t * .01)) - .5) * .45;
+    } else if (tipo == 5.) {   // mar: oleaje y destellos
+      d += m * vec2(sin(q.y * 320. - t * 2.4 + sin(q.x * 50.) * 2.) * .0011, sin(q.x * 90. + t * 1.6) * .0018);
+      brillo += m * pow(ruido(q * vec2(160., 420.) + vec2(t * .7, 0.)), 6.) * 2.2;
+    } else if (tipo == 6.) {   // brillo que respira (luna, sol, vidrio)
+      mul *= 1. + m * (.13 * sin(t * 1.1 + s * 3.) + .07 * sin(t * 2.9 + s) + uPulso * .3);
+    } else if (tipo == 7.) {   // gotas que caen
+      vec2 g = vec2(q.x * 90., q.y * 5. - t * 1.6); float col = floor(g.x), hc = h1(vec2(col, s));
+      float c = fract(g.y + hc * 7.), fx = abs(fract(g.x) - .5) * 2.;
+      float gota = step(.7, hc) * smoothstep(.0, .03, c) * smoothstep(.16, .03, c) * pow(1. - fx, 3.);
+      suma += m * gota * vec3(.85, .88, .95) * .4;
+    } else if (tipo == 8.) {   // brasas o polvo mágico que sube
+      float p1 = subir(q, 34., 1.1, t, .16), p2 = subir(q + .37, 60., 1.7, t, .2);
+      suma += m * (p1 + p2 * .6) * mix(vec3(1., .45, .15), vec3(1., .86, .6), step(.5, fract(s * .37))) * .9;
+    } else if (tipo == 9.) {   // estrellas que titilan
+      brillo += m * (.5 + .5 * sin(t * 3. + h1(floor(q * 260.)) * 60.)) * .9;
+    } else if (tipo == 10.) {  // relámpago
+      mul *= 1. + m * uRayo * 1.6; suma += m * uRayo * vec3(.55, .6, .75) * .12;
+    } else if (tipo == 11.) {  // niebla que pasa
+      suma += m * fbm(q * vec2(3., 9.) + vec2(t * .04, 0.)) * vec3(.42, .36, .4) * .16;
+    } else if (tipo == 12.) {  // pared con la sombra de la rosa: la luz de la vela tiembla y la sombra se mece
+      float fl = ruido(vec2(t * 6., s)) * .7 + ruido(vec2(t * 17., s)) * .3;
+      d.x += m * (sin(t * .9) * .003 + (fl - .5) * .002) * (1. - q.y);
+      mul *= 1. + m * ((fl - .5) * .5 + uPulso * .25);
+    } else if (tipo == 13.) {  // luz en el suelo: sube y baja al pasar las nubes
+      mul *= 1. + m * (fbm(q * 2.5 + vec2(t * .06, t * .02)) - .5) * .9;
+    } else if (tipo == 14.) {  // rayo de luz con motas suspendidas
+      mul *= 1. + m * (fbm(q * vec2(2., 6.) + vec2(0., t * .05)) - .5) * .35;
+      suma += m * subir(q, 70., .25, t, .14) * vec3(1., .85, .7) * .55;
+    }
   }
+  vec3 c = texture2D(uImg, q + d).rgb;   // la imagen se sube sin voltear: fila 0 = arriba
+  float lum = dot(c, vec3(.299, .587, .114));
+  c = c * mul + c * brillo * smoothstep(.15, .7, lum) + suma;
+  c += (h1(vS * 913. + fract(t) * 17.) - .5) * .018;   // grano fino: la imagen nunca queda quieta del todo
+  gl_FragColor = vec4(c, 1.);
+}`;
+
+const ruta = i => `img/hab/${String(i + 1).padStart(2, '0')}.webp`;
+// Imagen de cada habitación decodificada fuera del hilo principal (createImageBitmap) y compartida con la escena
+// (la imagen tras cada puerta). Antes se decodificaba y volteaba al subirla, justo al abrir la puerta: tirón.
+// En el teléfono, a 1280 px de ancho (cabe de sobra en su pantalla y ocupa la mitad de memoria).
+const ANCHO = Math.min(1672, innerWidth < 760 ? 1280 : 1672), imagenes = [];
+export function imagenHab(i) {
+  return imagenes[i] ||= self.createImageBitmap
+    ? fetch(ruta(i)).then(r => r.blob()).then(b => createImageBitmap(b, { resizeWidth: ANCHO, resizeHeight: Math.round(ANCHO * 941 / 1672), resizeQuality: 'high' }))
+    : new Promise((ok, mal) => { const im = new Image(); im.onload = () => im.decode().then(() => ok(im), () => ok(im)); im.onerror = mal; im.src = ruta(i); });
+}
+
+export function crearFondo(lienzo, rm) {
+  const gl = lienzo.getContext('webgl', { antialias: false, alpha: true, powerPreference: 'low-power' });
+  let mx = 0, my = 0, actual = -1, activo = false, t = 0, rayo = 0, proximoRayo = 3, pulso = 0, aspecto = 1672 / 941;
+  const medir = () => {
+    const k = Math.min(devicePixelRatio || 1, innerWidth < 760 ? 1.25 : 1);
+    lienzo.width = Math.round(innerWidth * k); lienzo.height = Math.round(innerHeight * k);
+    if (gl) gl.viewport(0, 0, lienzo.width, lienzo.height);
+  };
   addEventListener('resize', medir); medir();
+  // sin WebGL (o mientras sube la textura): la imagen quieta como fondo
+  const fondoCSS = i => { lienzo.style.background = `#050405 url(${ruta(i)}) ${FOCO[i] * 100}% 50% / cover no-repeat`; };
+  if (!gl) return { poner(i) { activo = true; fondoCSS(i); }, parar() { activo = false; }, dibujar() {} };
+
+  const sh = (tipo, src) => { const s = gl.createShader(tipo); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.warn(gl.getShaderInfoLog(s)); return s; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG)); gl.linkProgram(prog);
+  gl.useProgram(prog);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const aP = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(aP); gl.vertexAttribPointer(aP, 2, gl.FLOAT, false, 0, 0);
+  const U = n => gl.getUniformLocation(prog, n);
+  const uCover = U('uCover'), uT = U('uT'), uPulso = U('uPulso'), uRayo = U('uRayo'), uN = U('uN'), uR = U('uR'), uP = U('uP');
+  gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+  for (const [p, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, p, v);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 1, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, new Uint8Array([5, 4, 5]));
+  let texLista = false;
+  function subirImagen(i) {
+    texLista = false; fondoCSS(i);   // mientras la textura sube, la imagen quieta (nunca un hueco negro)
+    gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+    imagenHab(i).then(im => {
+      if (actual !== i) return;
+      aspecto = im.width / im.height;
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im);
+      texLista = true;
+    }, () => {});   // sin imagen: se queda la quieta de CSS
+  }
+
+  function zonas(i) {
+    const R = new Float32Array(N * 4), P = new Float32Array(N * 2);
+    ZONAS[i].forEach(([tipo, x0, y0, x1, y1, k], j) => { R.set([x0, y0, x1, y1], j * 4); P.set([tipo, k], j * 2); });
+    gl.uniform4fv(uR, R); gl.uniform2fv(uP, P); gl.uniform1f(uN, ZONAS[i].length);
+  }
   return {
-    // fundir solo al cambiar de canción dentro de una habitación; al entrar desde la nave no debe asomar la anterior
-    poner(i, fundir = false) {
+    poner(i) {
+      activo = true;
       if (i === actual) return;
-      anterior = actual; actual = i; mezcla = fundir && anterior >= 0 ? 0 : 1;
-      estados[i] = ATMOSFERAS[i].iniciar();
+      actual = i; zonas(i); subirImagen(i);
     },
-    dibujar(dt, p, rm) {
-      if (actual < 0) return;
-      t += rm ? 0 : dt;
-      mezcla = Math.min(1, mezcla + dt / 1.2);
-      ATMOSFERAS[actual].dibujar(g, w, h, t, p, estados[actual]);
-      if (mezcla < 1 && anterior >= 0) {
-        og.globalAlpha = 1; ATMOSFERAS[anterior].dibujar(og, w, h, t, 1, estados[anterior] ||= ATMOSFERAS[anterior].iniciar());
-        g.globalAlpha = 1 - mezcla; g.drawImage(off, 0, 0); g.globalAlpha = 1;
-      }
+    parar() { activo = false; },
+    // mx, my: hacia dónde mira la persona (ratón, −1..1): el fondo se desplaza un poco, como si tuviera fondo
+    dibujar(dt, golpe, ox = 0, oy = 0) {
+      if (!activo || actual < 0 || !texLista) return;
+      if (lienzo.style.background) lienzo.style.background = '';
+      if (!rm) t += dt;
+      pulso += (golpe - pulso) * Math.min(1, dt * (golpe > pulso ? 16 : 3.5));   // sube con el golpe, cae despacio
+      // relámpagos: cada 6–14 s, un destello doble que se apaga
+      proximoRayo -= dt;
+      if (proximoRayo <= 0 && !rm) { rayo = 1; proximoRayo = 6 + Math.random() * 8; setTimeout(() => { rayo = .8; }, 140); }
+      rayo = Math.max(0, rayo - dt * 3.2);
+      // encuadre «cover» con el foco de la habitación y una respiración lenta de cámara
+      const ap = lienzo.width / lienzo.height, z = rm ? 1 : 1.035 + .025 * Math.sin(t * .11);
+      let sx = 1 / z, sy = 1 / z;
+      if (ap < aspecto) sx *= ap / aspecto; else sy *= aspecto / ap;
+      mx += (ox - mx) * Math.min(1, dt * 2.5); my += (oy - my) * Math.min(1, dt * 2.5);
+      const fx = FOCO[actual] + (rm ? 0 : Math.sin(t * .07) * .01 + mx * .018), fy = .5 + (rm ? 0 : Math.sin(t * .09) * .008 + my * .012);
+      gl.uniform4f(uCover, sx, sy, Math.min(1 - sx, Math.max(0, fx - sx / 2)), Math.min(1 - sy, Math.max(0, fy - sy / 2)));
+      gl.uniform1f(uT, t); gl.uniform1f(uPulso, rm ? 0 : pulso); gl.uniform1f(uRayo, rayo);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
     },
   };
 }

@@ -27,7 +27,6 @@ export async function medir({ fotogramas = 60, escala } = {}) {
   while (performance.now() - t0 < 2700) xs.push(fot(u0));   // sin ceder: los temporizadores se frenan en pestañas ocultas
   res.apertura = { ...estad(xs), ...info() };
   escena.terminarEntrada(true);
-  res.habitacion1 = { ...punto(u0, () => escena.actualizarSala(1 / 60, .3)), ...info() };
   escena.salir(0);
   if (cal) { res.escala = cal.escala; cal.fija = false; }
   return res;
