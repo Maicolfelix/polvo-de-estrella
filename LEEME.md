@@ -27,7 +27,7 @@ Luego abrir http://localhost:8765. Parámetros de revisión: `?rm` fuerza movimi
 `tools/ffmpeg.exe` no está en el repositorio (87 MB). Para volver a codificar audio: `pip install imageio-ffmpeg` y copiar su binario a `tools/ffmpeg.exe`, o usar cualquier ffmpeg instalado.
 | `capturas/` | Capturas de la revisión |
 
-Los WAV originales en `Downloads/ALBUM MAVO POLVO DE ESTRELLA` no se modificaron. Los masters se copian sin procesar (solo codificación). Desde el 2026-10-21 no hay instrumental de fondo: el ambiente es solo viento y truenos sintetizados.
+Desde el 2026-11-04 las copias web salen de los masters «mono-safe» del artista (mismos temas, misma duración y alineación al milisegundo: la letra sincronizada no cambia); para recodificar: `D="<carpeta>" S=" mono-safe" sh tools/codificar.sh` (y lo mismo con `preescuchas.sh`). Los WAV no están en el repositorio y no se modifican: se copian sin procesar (solo codificación). Desde el 2026-10-21 no hay instrumental de fondo: el ambiente es solo viento y truenos sintetizados.
 
 ## Por qué 3D en tiempo real con texturas procedurales
 - Lo pedido —entrada profunda, escalones, perspectiva real, sombras de contacto, rayos que iluminan la arquitectura, puertas con espesor que se abren y una cámara que entra— necesita geometría y luz reales; imágenes planas en capas no permiten abrir una puerta ni cruzarla de forma creíble.
